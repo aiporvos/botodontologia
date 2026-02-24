@@ -1,0 +1,28 @@
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+alembic==1.13.1
+asyncpg==0.29.0
+
+# Bot
+aiogram==3.4.1
+python-dateutil==2.8.2
+
+# Admin
+sqladmin==0.2.0
+wtforms==3.1.1
+
+# HTTP Client
+httpx==0.26.0
+requests==2.31.0
+
+# Utilities
+pydantic==2.5.3
+pydantic-settings==2.1.0
+phonenumbers==8.13.27
+re2==20231101
