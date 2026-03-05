@@ -36,7 +36,6 @@ class PatientAdmin(ModelView, model=Patient):
         Patient.phone,
         Patient.dni,
     ]
-    column_filters = [Patient.obra_social, Patient.created_at]
     can_delete = True
     can_edit = True
     can_create = True
@@ -90,7 +89,6 @@ class AppointmentAdmin(ModelView, model=Appointment):
         Appointment.category,
     ]
     column_searchable = [Appointment.reason, Appointment.category]
-    column_filters = [Appointment.status, Appointment.category, Appointment.start_at]
     can_delete = True
     can_edit = True
     can_create = True
@@ -109,7 +107,6 @@ class DentalRecordAdmin(ModelView, model=DentalRecord):
         DentalRecord.record_status,
     ]
     column_searchable = [DentalRecord.tooth, DentalRecord.procedure_name]
-    column_filters = [DentalRecord.record_status, DentalRecord.record_date]
     can_delete = True
     can_edit = True
     can_create = True
@@ -128,7 +125,6 @@ class ConsentAdmin(ModelView, model=Consent):
         Consent.accepted_at,
     ]
     column_searchable = [Consent.consent_type]
-    column_filters = [Consent.accepted, Consent.consent_type]
     can_delete = True
     can_edit = True
     can_create = True
@@ -145,7 +141,6 @@ class ChatSessionAdmin(ModelView, model=ChatSession):
         ChatSession.step,
         ChatSession.updated_at,
     ]
-    column_filters = [ChatSession.channel, ChatSession.step]
     can_delete = True
     can_edit = False
     can_create = False
@@ -185,7 +180,6 @@ class DentalTreatmentAdmin(ModelView, model=DentalTreatment):
         DentalTreatment.treatment_date,
     ]
     column_searchable = [DentalTreatment.tooth, DentalTreatment.treatment_name]
-    column_filters = [DentalTreatment.status, DentalTreatment.treatment_date]
     can_delete = True
     can_edit = True
     can_create = True
@@ -204,7 +198,6 @@ class PaymentAdmin(ModelView, model=Payment):
         Payment.payment_date,
     ]
     column_searchable = [Payment.reference]
-    column_filters = [Payment.payment_method, Payment.payment_date]
     can_delete = True
     can_edit = True
     can_create = True
@@ -224,7 +217,6 @@ class DebtAdmin(ModelView, model=Debt):
         Debt.due_date,
     ]
     column_searchable = [Debt.description]
-    column_filters = [Debt.status, Debt.due_date]
     can_delete = True
     can_edit = True
     can_create = True
