@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from config import settings
-from app.database import engine, init_db
+from app.database import engine, init_db, SessionLocal
 from app.admin import setup_admin
 from app.handlers.conversation import handle_whatsapp_message
 from sqlalchemy.orm import Session
@@ -87,7 +87,7 @@ templates = Jinja2Templates(directory="templates")
 setup_admin(app, engine)
 
 # Importar después de crear app para evitar ciclos
-from sqlalchemy.orm import Session as SessionLocal
+from sqlalchemy.orm import Session
 
 
 # ==================== RUTAS ====================
