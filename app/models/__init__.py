@@ -10,9 +10,10 @@ from sqlalchemy import (
     Date,
     Index,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
-from app.models.base import Base
+
+Base = declarative_base()
 
 
 class Patient(Base):
