@@ -9,7 +9,31 @@ class Settings(BaseSettings):
     bot_secret: str = ""
 
     # Database
-    database_url: str = "postgresql://clinic:clinicpass@localhost:5432/clinic"
+    # Si DATABASE_URL no está definida, construirla desde componentes individuales
+    db_host: str = "postgres"
+    db_port: int = 5432
+    db_user: str = "clinic"
+    db_password: str = "clinicpass"
+    db_name: str = "clinic"
+
+    @property
+    def database_url(self) -> str:
+        if self._database_url:
+            return self._database_url
+        return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
+    _database_url: str = ""
+
+    def __init__(self, **kwargs):
+        # Capturar DATABASE_URL si se pasa como variable de entorno
+        database_url = kwargs.get("database_url") or kwargs.get("DATABASE_URL", "")
+        if database_url:
+            self._database_url = database_url
+        super().__init__(**kwargs)
+
+    class Config:
+        env_file = ".env"
+        extra = "allow"
 
     # Cal.com
     calcom_url: str = "https://odontologia.aiporvos.com"
