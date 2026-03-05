@@ -239,6 +239,7 @@ def setup_admin(app, engine):
         engine,
         title="Clínica Dental - Admin",
         base_url="/admin",
+        static_dir="static",
     )
 
     # Agregar modelos
