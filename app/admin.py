@@ -234,7 +234,12 @@ class DebtAdmin(ModelView, model=Debt):
 
 def setup_admin(app, engine):
     """Configura el panel de administración"""
-    admin = Admin(app, engine, title="Clínica Dental - Admin")
+    admin = Admin(
+        app,
+        engine,
+        title="Clínica Dental - Admin",
+        base_url="/admin",
+    )
 
     # Agregar modelos
     admin.add_view(PatientAdmin)
