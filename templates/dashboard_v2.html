@@ -288,11 +288,32 @@
             user-select: none;
         }
 
+        .odonto-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            overflow-x: auto;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .tooth-row-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: -10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
         .tooth-row {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 4px;
+            min-width: fit-content;
         }
 
         .tooth-container {
@@ -300,112 +321,175 @@
             flex-direction: column;
             align-items: center;
             gap: 5px;
+            position: relative;
         }
 
         .tooth-id {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            color: var(--text-light);
+            color: #64748b;
         }
 
         .tooth-map {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             position: relative;
             background: white;
             border: 1px solid #cbd5e1;
+            transition: all 0.2s;
         }
 
         .tooth-face {
             position: absolute;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.1s;
         }
 
         .tooth-face:hover {
-            background: #e2e8f0;
+            background: rgba(59, 130, 246, 0.2);
+            z-index: 5;
         }
 
-        /* Faces: Top, Bottom, Left, Right, Center */
+        /* Faces layout */
         .face-top {
             top: 0;
             left: 0;
             width: 100%;
-            height: 30%;
-            clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
-            border-bottom: 1px solid #cbd5e1;
+            height: 25%;
+            clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
         }
 
         .face-bottom {
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 30%;
-            clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
-            border-top: 1px solid #cbd5e1;
+            height: 25%;
+            clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
         }
 
         .face-left {
             top: 0;
             left: 0;
             height: 100%;
-            width: 30%;
-            clip-path: polygon(0 0, 100% 30%, 100% 70%, 0 100%);
-            border-right: 1px solid #cbd5e1;
+            width: 25%;
+            clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%);
         }
 
         .face-right {
             top: 0;
             right: 0;
             height: 100%;
-            width: 30%;
-            clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 70%);
-            border-left: 1px solid #cbd5e1;
+            width: 25%;
+            clip-path: polygon(0 25%, 100% 0, 100% 100%, 0 75%);
         }
 
         .face-center {
-            top: 30%;
-            left: 30%;
-            width: 40%;
-            height: 40%;
-            border: 1px solid #cbd5e1;
+            top: 25%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            border: 1px solid #e2e8f0;
         }
 
-        /* Legend Colors */
+        /* Symbol overlays */
+        .tooth-map.sym-extraction::after,
+        .tooth-map.sym-absent::after {
+            content: '\f00d';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: #ef4444;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .tooth-map.sym-extraction-req::after {
+            color: #3b82f6;
+        }
+
+        .tooth-map.sym-tc::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: #ef4444;
+            transform: translateX(-50%);
+            z-index: 15;
+        }
+
+        .tooth-map.sym-tc-req::before {
+            background: #3b82f6;
+        }
+
+        .tooth-map.sym-implant::after {
+            content: 'IM';
+            position: absolute;
+            top: -15px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            background: #ef4444;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Colors */
         .prest-existente {
             background: #ef4444 !important;
         }
 
-        /* Rojo */
         .prest-requerida {
             background: #3b82f6 !important;
         }
 
-        /* Azul */
-        .face-selected {
-            background: #8b5cf6 !important;
-        }
-
-        .legend {
+        /* Toolbox */
+        .odonto-toolbox {
             display: flex;
-            gap: 2rem;
-            justify-content: center;
-            margin-top: 2rem;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
             flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .legend-item {
+        .tool-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            gap: 6px;
+            transition: all 0.2s;
         }
 
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
+        .tool-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .tool-btn.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        .tool-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
         }
 
         /* SEARCH BAR */
@@ -651,32 +735,55 @@
 
             <!-- ODONTOGRAM SECTION -->
             <div id="sec-odontogram" class="section">
-                <div class="card">
-                    <div class="card-header" style="justify-content: flex-start; gap: 1rem;">
+                <div class="card" style="padding:0">
+                    <div class="card-header"
+                        style="padding: 1rem 1.5rem; justify-content: flex-start; gap: 1rem; border-bottom: 1px solid #e2e8f0;">
                         <div class="form-group" style="margin:0; flex:1; max-width: 300px;">
                             <select id="selectOdontoPatient" onchange="loadPatientOdontogram()">
                                 <option value="">Seleccione un paciente...</option>
                             </select>
                         </div>
-                        <button class="btn btn-outline" onclick="loadPatientOdontogram()">Actualizar</button>
+                        <button class="btn btn-outline" onclick="loadPatientOdontogram()"><i
+                                class="fas fa-sync"></i></button>
+                    </div>
+
+                    <div class="odonto-toolbox">
+                        <button class="tool-btn active" data-tool="caries-req" onclick="setTool(this)">
+                            <div class="tool-icon prest-requerida"></div> Caries (Azul)
+                        </button>
+                        <button class="tool-btn" data-tool="caries-done" onclick="setTool(this)">
+                            <div class="tool-icon prest-existente"></div> Caries (Rojo)
+                        </button>
+                        <button class="tool-btn" data-tool="extract-req" onclick="setTool(this)">
+                            <i class="fas fa-times" style="color:#3b82f6"></i> Extracción (Azul)
+                        </button>
+                        <button class="tool-btn" data-tool="extract-done" onclick="setTool(this)">
+                            <i class="fas fa-times" style="color:#ef4444"></i> Extracción (Rojo)
+                        </button>
+                        <button class="tool-btn" data-tool="tc-req" onclick="setTool(this)">
+                            <i class="fas fa-grip-lines-vertical" style="color:#3b82f6"></i> T.C. (Azul)
+                        </button>
+                        <button class="tool-btn" data-tool="tc-done" onclick="setTool(this)">
+                            <i class="fas fa-grip-lines-vertical" style="color:#ef4444"></i> T.C. (Rojo)
+                        </button>
+                        <button class="tool-btn" data-tool="implant" onclick="setTool(this)">
+                            <i class="fas fa-microchip"></i> Implante
+                        </button>
+                        <button class="tool-btn" data-tool="clear" onclick="setTool(this)">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
                     </div>
 
                     <div id="odontogramContainer">
                         <div class="odonto-grid">
+                            <div class="tooth-row-label">Dentición Adulta (Superior)</div>
                             <div class="tooth-row" id="row-up"></div>
+                            <div class="tooth-row-label">Dentición Pediátrica (Superior)</div>
+                            <div class="tooth-row" id="row-up-ped"></div>
+                            <div class="tooth-row-label">Dentición Pediátrica (Inferior)</div>
+                            <div class="tooth-row" id="row-down-ped"></div>
+                            <div class="tooth-row-label">Dentición Adulta (Inferior)</div>
                             <div class="tooth-row" id="row-down"></div>
-                        </div>
-                        <div class="legend">
-                            <div class="legend-item">
-                                <div class="legend-color prest-existente"></div> Existente (Rojo)
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color prest-requerida"></div> Requerido (Azul)
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color face-selected" style="border:1px solid #ddd"></div>
-                                Seleccionado
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1099,38 +1206,88 @@
         }
 
         // ODONTOGRAM LOGIC
+        let activeTool = 'caries-req';
+        function setTool(btn) {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTool = btn.dataset.tool;
+        }
+
         function initOdontogram() {
             const up = document.getElementById('row-up');
+            const upPed = document.getElementById('row-up-ped');
+            const downPed = document.getElementById('row-down-ped');
             const down = document.getElementById('row-down');
 
-            // Adult teeth IDs
-            const teethUp = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
-            const teethDown = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+            const adultUp = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+            const pedUp = [55, 54, 53, 52, 51, 61, 62, 63, 64, 65];
+            const pedDown = [85, 84, 83, 82, 81, 71, 72, 73, 74, 75];
+            const adultDown = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const renderRow = (row, ids) => {
                 row.innerHTML = ids.map(id => `
                     <div class="tooth-container">
                         <span class="tooth-id">${id}</span>
-                        <div class="tooth-map" data-tooth="${id}">
-                            <div class="tooth-face face-top" data-face="V" onclick="clickFace(${id}, 'V')"></div>
-                            <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(${id}, 'P')"></div>
-                            <div class="tooth-face face-left" data-face="M" onclick="clickFace(${id}, 'M')"></div>
-                            <div class="tooth-face face-right" data-face="D" onclick="clickFace(${id}, 'D')"></div>
-                            <div class="tooth-face face-center" data-face="O" onclick="clickFace(${id}, 'O')"></div>
+                        <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
+                            <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
+                            <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
+                            <div class="tooth-face face-left" data-face="M" onclick="clickFace(event, ${id}, 'M')"></div>
+                            <div class="tooth-face face-right" data-face="D" onclick="clickFace(event, ${id}, 'D')"></div>
+                            <div class="tooth-face face-center" data-face="O" onclick="clickFace(event, ${id}, 'O')"></div>
                         </div>
                     </div>
                 `).join('');
             };
-            renderRow(up, teethUp);
-            renderRow(down, teethDown);
+
+            renderRow(up, adultUp);
+            renderRow(upPed, pedUp);
+            renderRow(downPed, pedDown);
+            renderRow(down, adultDown);
         }
 
-        function clickFace(tooth, face) {
+        function clickTooth(id) {
+            // This handles tools that apply to the whole tooth (Extraction, TC, Implant)
+            if (['extract-req', 'extract-done', 'tc-req', 'tc-done', 'implant'].includes(activeTool)) {
+                applyTool(id, null);
+            }
+        }
+
+        function clickFace(event, tooth, face) {
+            event.stopPropagation(); // Prevent tooth click
+            if (['caries-req', 'caries-done'].includes(activeTool)) {
+                applyTool(tooth, face);
+            } else {
+                applyTool(tooth, null); // For other tools, face doesn't matter
+            }
+        }
+
+        function applyTool(tooth, face) {
             const pid = document.getElementById('selectOdontoPatient').value;
             if (!pid) { alert('Seleccione un paciente'); return; }
-            document.getElementById('t_title').innerText = `Tratamiento Diente ${tooth} - Cara ${face}`;
+
+            const mapping = {
+                'caries-req': { proc: 'Caries', status: 'planned' },
+                'caries-done': { proc: 'Caries', status: 'done' },
+                'extract-req': { proc: 'Extracción', status: 'planned' },
+                'extract-done': { proc: 'Extracción', status: 'done' },
+                'tc-req': { proc: 'T.C.', status: 'planned' },
+                'tc-done': { proc: 'T.C.', status: 'done' },
+                'implant': { proc: 'Implante', status: 'done' },
+                'clear': { proc: 'CLEAR', status: 'clear' }
+            };
+
+            const tool = mapping[activeTool];
+            if (tool.proc === 'CLEAR') {
+                alert('Limpieza manual no disponible aún via API directa. Registre un tratamiento correctivo.');
+                return;
+            }
+
             document.getElementById('t_tooth').value = tooth;
-            document.getElementById('t_face').value = face;
+            document.getElementById('t_face').value = face || '';
+            document.getElementById('t_proc').value = tool.proc;
+            document.getElementById('t_status').value = tool.status;
+            document.getElementById('t_title').innerText = `Registrar ${tool.proc} - Diente ${tooth} ${face ? '(Cara ' + face + ')' : ''}`;
+
             openModal('modalTreatment');
         }
 
@@ -1154,13 +1311,31 @@
             const pid = document.getElementById('selectOdontoPatient').value;
             if (!pid) return;
 
+            // Clear all symbol and prestation classes
+            document.querySelectorAll('.tooth-map').forEach(m => {
+                m.classList.remove('sym-extraction', 'sym-extraction-req', 'sym-tc', 'sym-tc-req', 'sym-implant', 'sym-absent');
+            });
             document.querySelectorAll('.tooth-face').forEach(f => f.className = f.className.split(' ').filter(c => !c.includes('prest-')).join(' '));
 
             try {
                 const data = await apiFetch(`/api/patients/${pid}/odontogram`);
                 data.records.forEach(r => {
-                    const face = document.querySelector(`.tooth-map[data-tooth="${r.tooth}"] .face-${getFaceClass(r.face)}`);
-                    if (face) face.classList.add(r.record_status === 'done' ? 'prest-existente' : 'prest-requerida');
+                    const toothEl = document.getElementById(`tooth-${r.tooth}`);
+                    if (!toothEl) return;
+
+                    const isDone = r.record_status === 'done' || r.record_status === 'completed';
+                    const proc = r.procedure_name.toLowerCase();
+
+                    if (proc.includes('caries') || proc.includes('obturación')) {
+                        const face = toothEl.querySelector(`.face-${getFaceClass(r.face)}`);
+                        if (face) face.classList.add(isDone ? 'prest-existente' : 'prest-requerida');
+                    } else if (proc.includes('extracción') || proc.includes('ausente')) {
+                        toothEl.classList.add(isDone ? 'sym-extraction' : 'sym-extraction-req');
+                    } else if (proc.includes('t.c.') || proc.includes('conducto')) {
+                        toothEl.classList.add(isDone ? 'sym-tc' : 'sym-tc-req');
+                    } else if (proc.includes('implante')) {
+                        toothEl.classList.add('sym-implant');
+                    }
                 });
             } catch (e) { console.error(e); }
         }
