@@ -2,6 +2,13 @@ from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime, date, time
 from typing import Optional, List
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
 class PatientBase(BaseModel):
     first_name: str
     last_name: str
