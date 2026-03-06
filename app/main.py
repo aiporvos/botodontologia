@@ -59,6 +59,12 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
 
+    # Iniciar Bot de Telegram en Segundo Plano (Polling)
+    from app.bot import start_bot
+    if settings.telegram_bot_token:
+        asyncio.create_task(start_bot())
+        print("🤖 Telegram Bot Polling task created")
+
     print("🚀 Dental Studio Pro iniciado")
     yield
 
@@ -468,6 +474,7 @@ async def list_prices(db: Session = Depends(get_db), current_user: AdminUser = D
 async def webhook_evolution(request: Request):
     try:
         data = await request.json()
+        print(f"📥 Received Webhook Evolution: {json.dumps(data, indent=2)}")
         messages = data.get("data", {}).get("messages", [])
         from app.services.multimedia import multimedia_service
         from app.services.evolution import evolution_service
