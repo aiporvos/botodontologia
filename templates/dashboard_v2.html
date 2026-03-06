@@ -307,31 +307,34 @@
         }
 
         /* ODONTOGRAM STYLES */
+        .odonto-wrapper-scroll {
+            width: 100%;
+            overflow-x: auto;
+            background: #f1f5f9;
+            padding: 30px;
+            border-radius: 16px;
+        }
+
         .odonto-grid {
             display: flex;
             flex-direction: column;
-            gap: 30px;
-            padding: 30px;
-            overflow-x: auto;
-            background: #f1f5f9;
-            border-radius: 16px;
+            gap: 40px;
             align-items: center;
-            user-select: none;
+            min-width: 950px;
+            margin: 0 auto;
         }
 
         .fdi-cross-container {
             display: grid;
-            grid-template-columns: minmax(400px, 1fr) 2px minmax(400px, 1fr);
+            grid-template-columns: auto 2px auto;
             grid-template-rows: auto 2px auto;
             gap: 0;
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
             position: relative;
-            margin-bottom: 2rem;
-            width: fit-content;
         }
 
         .fdi-line-v {
@@ -404,8 +407,8 @@
             align-items: center;
             gap: 4px;
             position: relative;
+            width: 42px;
             flex-shrink: 0;
-            width: 44px;
         }
 
         .tooth-id {
@@ -1038,325 +1041,320 @@
                     </div>
 
                     <div id="odontogramContainer">
-                        <div class="odonto-grid">
-                            <!-- SECTION PERMANENTE -->
-                            <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
-                            <div class="fdi-cross-container">
-                                <div class="fdi-line-v"></div>
-                                <div class="fdi-line-h"></div>
-                                <div class="fdi-quadrant q-upper-right" id="row-up-right" style="min-width: 400px;">
+                        <div class="odonto-wrapper-scroll">
+                            <div class="odonto-grid">
+                                <!-- SECTION PERMANENTE -->
+                                <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
+                                <div class="fdi-cross-container" style="width: 880px;">
+                                    <div class="fdi-line-v"></div>
+                                    <div class="fdi-line-h"></div>
+                                    <div class="fdi-quadrant q-upper-right" id="row-up-right"></div>
+                                    <div class="fdi-quadrant q-upper-left" id="row-up-left"></div>
+                                    <div class="fdi-quadrant q-lower-right" id="row-down-right"></div>
+                                    <div class="fdi-quadrant q-lower-left" id="row-down-left"></div>
                                 </div>
-                                <div class="fdi-quadrant q-upper-left" id="row-up-left" style="min-width: 400px;"></div>
-                                <div class="fdi-quadrant q-lower-right" id="row-down-right" style="min-width: 400px;">
-                                </div>
-                                <div class="fdi-quadrant q-lower-left" id="row-down-left" style="min-width: 400px;">
-                                </div>
-                            </div>
 
-                            <!-- SECTION TEMPORAL -->
-                            <div class="tooth-row-label" style="margin-top: 20px;">DENTICIÓN TEMPORAL (NIÑOS)</div>
-                            <div class="fdi-cross-container">
-                                <div class="fdi-line-v"></div>
-                                <div class="fdi-line-h"></div>
-                                <div class="fdi-quadrant q-upper-right" id="row-up-ped-right" style="min-width: 250px;">
-                                </div>
-                                <div class="fdi-quadrant q-upper-left" id="row-up-ped-left" style="min-width: 250px;">
-                                </div>
-                                <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"
-                                    style="min-width: 250px;"></div>
-                                <div class="fdi-quadrant q-lower-left" id="row-down-ped-left" style="min-width: 250px;">
+                                <!-- SECTION TEMPORAL -->
+                                <div class="tooth-row-label">DENTICIÓN TEMPORAL (NIÑOS)</div>
+                                <div class="fdi-cross-container" style="width: 580px;">
+                                    <div class="fdi-line-v"></div>
+                                    <div class="fdi-line-h"></div>
+                                    <div class="fdi-quadrant q-upper-right" id="row-up-ped-right"></div>
+                                    <div class="fdi-quadrant q-upper-left" id="row-up-ped-left"></div>
+                                    <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"></div>
+                                    <div class="fdi-quadrant q-lower-left" id="row-down-ped-left"></div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="odonto-legend">
-                            <div class="legend-item"><span style="font-weight:900; color:#ef4444">TC</span> Trat.
-                                Conducto</div>
-                            <div class="legend-item">
-                                <div class="legend-dot legend-blue" style="border-radius:50%"></div> Caries
-                            </div>
-                            <div class="legend-item"><i class="fas fa-times" style="color:#3b82f6"></i> Extracción</div>
-                            <div class="legend-item">
-                                <div class="legend-dot legend-red" style="border:1px solid #ef4444; border-radius:5px">
-                                </div> Obturación
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-dot legend-red" style="border:3px solid #ef4444; background:none">
-                                </div> Corona
-                            </div>
-                            <div class="legend-item"><span style="font-weight:900; color:#ef4444">IM</span> Implante
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-dot legend-blue"></div> Prest. Requerida
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-dot legend-red"></div> Prest. Existente
-                            </div>
+                    <div class="odonto-legend">
+                        <div class="legend-item"><span style="font-weight:900; color:#ef4444">TC</span> Trat.
+                            Conducto</div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-blue" style="border-radius:50%"></div> Caries
+                        </div>
+                        <div class="legend-item"><i class="fas fa-times" style="color:#3b82f6"></i> Extracción</div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-red" style="border:1px solid #ef4444; border-radius:5px">
+                            </div> Obturación
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-red" style="border:3px solid #ef4444; background:none">
+                            </div> Corona
+                        </div>
+                        <div class="legend-item"><span style="font-weight:900; color:#ef4444">IM</span> Implante
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-blue"></div> Prest. Requerida
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-red"></div> Prest. Existente
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- SECCIÓN COBROS -->
-            <div id="sec-payments" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 style="margin:0">Registro de Cobros</h4>
-                        <button class="btn btn-green" onclick="openPaymentModal()"><i
-                                class="fas fa-hand-holding-usd"></i> Registrar Pago</button>
+        <!-- SECCIÓN COBROS -->
+        <div id="sec-payments" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin:0">Registro de Cobros</h4>
+                    <button class="btn btn-green" onclick="openPaymentModal()"><i class="fas fa-hand-holding-usd"></i>
+                        Registrar Pago</button>
+                </div>
+                <table id="tablePayments">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Paciente</th>
+                            <th>Monto</th>
+                            <th>Método</th>
+                            <th>Referencia</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DEUDAS -->
+        <div id="sec-debts" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin:0">Deudas Pendientes</h4>
+                    <button class="btn btn-danger" onclick="openDebtModal()"><i class="fas fa-file-invoice"></i>
+                        Crear Deuda</button>
+                </div>
+                <table id="tableDebts">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Vencimiento</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MODAL PATIENT -->
+        <div id="modalPatient" class="modal-overlay">
+            <div class="modal">
+                <h3>Nuevo Paciente</h3><br>
+                <form id="formPatient" onsubmit="savePatient(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Nombre</label><input type="text" id="p_first" required>
+                        </div>
+                        <div class="form-group"><label>Apellido</label><input type="text" id="p_last" required>
+                        </div>
+                        <div class="form-group"><label>DNI</label><input type="text" id="p_dni"></div>
+                        <div class="form-group"><label>Teléfono</label><input type="text" id="p_phone" required>
+                        </div>
+                        <div class="form-group"><label>Email</label><input type="email" id="p_email"></div>
+                        <div class="form-group"><label>Obra Social</label><input type="text" id="p_obra"
+                                placeholder="Particular"></div>
                     </div>
-                    <table id="tablePayments">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Paciente</th>
-                                <th>Monto</th>
-                                <th>Método</th>
-                                <th>Referencia</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SECCIÓN DEUDAS -->
-            <div id="sec-debts" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 style="margin:0">Deudas Pendientes</h4>
-                        <button class="btn btn-danger" onclick="openDebtModal()"><i class="fas fa-file-invoice"></i>
-                            Crear Deuda</button>
+                    <div class="form-group"><label>Notas</label><textarea id="p_notes" rows="2"></textarea>
                     </div>
-                    <table id="tableDebts">
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Descripción</th>
-                                <th>Monto</th>
-                                <th>Vencimiento</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline"
+                            onclick="closeModal('modalPatient')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Paciente</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!-- MODAL PATIENT -->
-            <div id="modalPatient" class="modal-overlay">
-                <div class="modal">
-                    <h3>Nuevo Paciente</h3><br>
-                    <form id="formPatient" onsubmit="savePatient(event)">
-                        <div class="form-grid">
-                            <div class="form-group"><label>Nombre</label><input type="text" id="p_first" required>
-                            </div>
-                            <div class="form-group"><label>Apellido</label><input type="text" id="p_last" required>
-                            </div>
-                            <div class="form-group"><label>DNI</label><input type="text" id="p_dni"></div>
-                            <div class="form-group"><label>Teléfono</label><input type="text" id="p_phone" required>
-                            </div>
-                            <div class="form-group"><label>Email</label><input type="email" id="p_email"></div>
-                            <div class="form-group"><label>Obra Social</label><input type="text" id="p_obra"
-                                    placeholder="Particular"></div>
-                        </div>
-                        <div class="form-group"><label>Notas</label><textarea id="p_notes" rows="2"></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline"
-                                onclick="closeModal('modalPatient')">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar Paciente</button>
-                        </div>
-                    </form>
-                </div>
+        <!-- MODAL APPOINTMENT -->
+        <div id="modalAppt" class="modal-overlay">
+            <div class="modal">
+                <h3>Agendar Turno</h3><br>
+                <form id="formAppt" onsubmit="saveAppt(event)">
+                    <div class="form-group"><label>Paciente</label><select id="a_patient" required></select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Fecha y Hora</label><input type="datetime-local" id="a_datetime"
+                                required></div>
+                        <div class="form-group"><label>Profesional</label><select id="a_prof"></select></div>
+                    </div>
+                    <div class="form-group"><label>Motivo</label><input type="text" id="a_reason"
+                            placeholder="Consulta Gral" required></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline"
+                            onclick="closeModal('modalAppt')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Turno</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!-- MODAL APPOINTMENT -->
-            <div id="modalAppt" class="modal-overlay">
-                <div class="modal">
-                    <h3>Agendar Turno</h3><br>
-                    <form id="formAppt" onsubmit="saveAppt(event)">
-                        <div class="form-group"><label>Paciente</label><select id="a_patient" required></select>
+        <!-- MODAL PAYMENT -->
+        <div id="modalPayment" class="modal-overlay">
+            <div class="modal">
+                <h3>Registrar Pago</h3><br>
+                <form id="formPayment" onsubmit="savePayment(event)">
+                    <div class="form-group"><label>Paciente</label><select id="py_patient" required></select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Monto ($)</label><input type="number" id="py_amount" required>
                         </div>
-                        <div class="form-grid">
-                            <div class="form-group"><label>Fecha y Hora</label><input type="datetime-local"
-                                    id="a_datetime" required></div>
-                            <div class="form-group"><label>Profesional</label><select id="a_prof"></select></div>
-                        </div>
-                        <div class="form-group"><label>Motivo</label><input type="text" id="a_reason"
-                                placeholder="Consulta Gral" required></div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline"
-                                onclick="closeModal('modalAppt')">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Crear Turno</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- MODAL PAYMENT -->
-            <div id="modalPayment" class="modal-overlay">
-                <div class="modal">
-                    <h3>Registrar Pago</h3><br>
-                    <form id="formPayment" onsubmit="savePayment(event)">
-                        <div class="form-group"><label>Paciente</label><select id="py_patient" required></select>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group"><label>Monto ($)</label><input type="number" id="py_amount"
-                                    required></div>
-                            <div class="form-group"><label>Método</label>
-                                <select id="py_method">
-                                    <option value="cash">Efectivo</option>
-                                    <option value="card">Tarjeta</option>
-                                    <option value="transfer">Transferencia</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group"><label>Referencia / Notas</label><input type="text" id="py_ref">
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline"
-                                onclick="closeModal('modalPayment')">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" style="background:var(--green)">Registrar
-                                Cobro</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- MODAL TRATAMIENTO (Odontograma Click) -->
-            <div id="modalTreatment" class="modal-overlay">
-                <div class="modal">
-                    <h3 id="t_title">Tratamiento Diente</h3><br>
-                    <form id="formTreatment" onsubmit="saveTreatment(event)">
-                        <input type="hidden" id="t_pid"><input type="hidden" id="t_tooth"><input type="hidden"
-                            id="t_face">
-                        <div class="form-group"><label>Procedimiento</label>
-                            <select id="t_proc" required>
-                                <option value="Caries">Caries</option>
-                                <option value="Obturación">Obturación</option>
-                                <option value="Conducto">Tratamiento de Conducto</option>
-                                <option value="Extracción">Extracción</option>
-                                <option value="Corona">Corona</option>
-                                <option value="Implante">Implante</option>
-                                <option value="Diente Ausente">Diente Ausente</option>
+                        <div class="form-group"><label>Método</label>
+                            <select id="py_method">
+                                <option value="cash">Efectivo</option>
+                                <option value="card">Tarjeta</option>
+                                <option value="transfer">Transferencia</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Tipo de Prestación</label>
-                            <select id="t_status">
-                                <option value="planned">Requerida (Azul)</option>
-                                <option value="done">Existente (Rojo)</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label>Notas adicionales</label><input type="text" id="t_notes">
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline"
-                                onclick="closeModal('modalTreatment')">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Registrar</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="form-group"><label>Referencia / Notas</label><input type="text" id="py_ref">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline"
+                            onclick="closeModal('modalPayment')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--green)">Registrar
+                            Cobro</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!-- MODAL DEBT -->
-            <div id="modalDebt" class="modal-overlay">
-                <div class="modal">
-                    <h3>Registrar Deuda</h3><br>
-                    <form id="formDebt" onsubmit="saveDebt(event)">
-                        <div class="form-group"><label>Paciente</label><select id="d_patient" required></select>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group"><label>Monto ($)</label><input type="number" id="d_amount" required>
-                            </div>
-                            <div class="form-group"><label>Vencimiento</label><input type="date" id="d_due"></div>
-                        </div>
-                        <div class="form-group"><label>Descripción</label><input type="text" id="d_desc"
-                                placeholder="Tratamiento pendiente" required></div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline"
-                                onclick="closeModal('modalDebt')">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" style="background:var(--red)">Crear
-                                Deuda</button>
-                        </div>
-                    </form>
-                </div>
+        <!-- MODAL TRATAMIENTO (Odontograma Click) -->
+        <div id="modalTreatment" class="modal-overlay">
+            <div class="modal">
+                <h3 id="t_title">Tratamiento Diente</h3><br>
+                <form id="formTreatment" onsubmit="saveTreatment(event)">
+                    <input type="hidden" id="t_pid"><input type="hidden" id="t_tooth"><input type="hidden" id="t_face">
+                    <div class="form-group"><label>Procedimiento</label>
+                        <select id="t_proc" required>
+                            <option value="Caries">Caries</option>
+                            <option value="Obturación">Obturación</option>
+                            <option value="Conducto">Tratamiento de Conducto</option>
+                            <option value="Extracción">Extracción</option>
+                            <option value="Corona">Corona</option>
+                            <option value="Implante">Implante</option>
+                            <option value="Diente Ausente">Diente Ausente</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Tipo de Prestación</label>
+                        <select id="t_status">
+                            <option value="planned">Requerida (Azul)</option>
+                            <option value="done">Existente (Rojo)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Notas adicionales</label><input type="text" id="t_notes">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline"
+                            onclick="closeModal('modalTreatment')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <script>
-                const TOKEN = localStorage.getItem('token');
-                if (!TOKEN) window.location.href = '/login';
+        <!-- MODAL DEBT -->
+        <div id="modalDebt" class="modal-overlay">
+            <div class="modal">
+                <h3>Registrar Deuda</h3><br>
+                <form id="formDebt" onsubmit="saveDebt(event)">
+                    <div class="form-group"><label>Paciente</label><select id="d_patient" required></select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Monto ($)</label><input type="number" id="d_amount" required>
+                        </div>
+                        <div class="form-group"><label>Vencimiento</label><input type="date" id="d_due"></div>
+                    </div>
+                    <div class="form-group"><label>Descripción</label><input type="text" id="d_desc"
+                            placeholder="Tratamiento pendiente" required></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline"
+                            onclick="closeModal('modalDebt')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--red)">Crear
+                            Deuda</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-                const headers = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+        <script>
+            const TOKEN = localStorage.getItem('token');
+            if (!TOKEN) window.location.href = '/login';
 
-                // UTILS
-                async function apiFetch(url, opts = {}) {
-                    const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
-                    if (res.status === 401) logout();
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.detail || 'Error en la petición');
-                    return data;
+            const headers = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+
+            // UTILS
+            async function apiFetch(url, opts = {}) {
+                const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
+                if (res.status === 401) logout();
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Error en la petición');
+                return data;
+            }
+
+            // NAVIGATION
+            function showSection(id, el) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('sec-' + id).classList.add('active');
+                if (el) el.classList.add('active');
+                else {
+                    const nav = document.querySelector(`.nav-item[onclick*="${id}"]`);
+                    if (nav) nav.classList.add('active');
                 }
+                document.getElementById('sectionTitle').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+                loadSectionData(id);
+            }
 
-                // NAVIGATION
-                function showSection(id, el) {
-                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                    document.getElementById('sec-' + id).classList.add('active');
-                    if (el) el.classList.add('active');
-                    else {
-                        const nav = document.querySelector(`.nav-item[onclick*="${id}"]`);
-                        if (nav) nav.classList.add('active');
-                    }
-                    document.getElementById('sectionTitle').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-                    loadSectionData(id);
-                }
+            function loadSectionData(sec) {
+                if (sec === 'dashboard') loadStats();
+                if (sec === 'patients') loadPatients();
+                if (sec === 'appointments') loadAppointments();
+                if (sec === 'payments') loadPayments();
+                if (sec === 'debts') loadDebts();
+                if (sec === 'odontogram') loadPatientSelectors();
+            }
 
-                function loadSectionData(sec) {
-                    if (sec === 'dashboard') loadStats();
-                    if (sec === 'patients') loadPatients();
-                    if (sec === 'appointments') loadAppointments();
-                    if (sec === 'payments') loadPayments();
-                    if (sec === 'debts') loadDebts();
-                    if (sec === 'odontogram') loadPatientSelectors();
-                }
+            function logout() { localStorage.removeItem('token'); window.location.href = '/login'; }
+            function openModal(id) {
+                loadPatientSelectors(); // Refresh selectors
+                document.getElementById(id).classList.add('show');
+            }
+            function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-                function logout() { localStorage.removeItem('token'); window.location.href = '/login'; }
-                function openModal(id) {
-                    loadPatientSelectors(); // Refresh selectors
-                    document.getElementById(id).classList.add('show');
-                }
-                function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+            // DASHBOARD / STATS
+            async function loadStats() {
+                try {
+                    const res = await fetch('/api/stats', { headers });
+                    const d = await res.json();
+                    document.getElementById('statPatients').innerText = d.total_patients;
+                    document.getElementById('statToday').innerText = d.appointments_today;
+                    document.getElementById('statRevenue').innerText = `$${(d.total_revenue / 100).toLocaleString()}`;
+                    document.getElementById('statDebt').innerText = `$${(d.total_debt / 100).toLocaleString()}`;
 
-                // DASHBOARD / STATS
-                async function loadStats() {
-                    try {
-                        const res = await fetch('/api/stats', { headers });
-                        const d = await res.json();
-                        document.getElementById('statPatients').innerText = d.total_patients;
-                        document.getElementById('statToday').innerText = d.appointments_today;
-                        document.getElementById('statRevenue').innerText = `$${(d.total_revenue / 100).toLocaleString()}`;
-                        document.getElementById('statDebt').innerText = `$${(d.total_debt / 100).toLocaleString()}`;
+                    const apptsRes = await fetch('/api/appointments/today', { headers });
+                    const appts = await apptsRes.json();
+                    const body = document.querySelector('#tableTodayAppts tbody');
+                    body.innerHTML = appts.length ? appts.map(a => `<tr><td><b>${a.time}</b></td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-${a.status === 'confirmed' ? 'green' : 'amber'}">${a.status}</span></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center">No hay turnos hoy</td></tr>';
+                } catch (e) { console.error(e); }
+            }
 
-                        const apptsRes = await fetch('/api/appointments/today', { headers });
-                        const appts = await apptsRes.json();
-                        const body = document.querySelector('#tableTodayAppts tbody');
-                        body.innerHTML = appts.length ? appts.map(a => `<tr><td><b>${a.time}</b></td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-${a.status === 'confirmed' ? 'green' : 'amber'}">${a.status}</span></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center">No hay turnos hoy</td></tr>';
-                    } catch (e) { console.error(e); }
-                }
-
-                // PATIENTS
-                let patientsList = [];
-                async function loadPatients() {
-                    try {
-                        patientsList = await apiFetch('/api/patients');
-                        renderPatientsTable(patientsList);
-                    } catch (e) { console.error(e); }
-                }
-                function renderPatientsTable(list) {
-                    const body = document.querySelector('#tablePatients tbody');
-                    body.innerHTML = list.map(p => `
+            // PATIENTS
+            let patientsList = [];
+            async function loadPatients() {
+                try {
+                    patientsList = await apiFetch('/api/patients');
+                    renderPatientsTable(patientsList);
+                } catch (e) { console.error(e); }
+            }
+            function renderPatientsTable(list) {
+                const body = document.querySelector('#tablePatients tbody');
+                body.innerHTML = list.map(p => `
                 <tr>
                     <td><b>${p.first_name} ${p.last_name}</b></td>
                     <td>${p.dni || '-'}</td>
@@ -1367,51 +1365,21 @@
                         <button class="btn btn-sm btn-danger" onclick="deletePatient(${p.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`).join('');
-                }
+            }
 
-                async function editPatient(id) {
-                    const p = patientsList.find(x => x.id === id);
-                    if (!p) return;
-                    document.getElementById('p_first').value = p.first_name;
-                    document.getElementById('p_last').value = p.last_name;
-                    document.getElementById('p_dni').value = p.dni || '';
-                    document.getElementById('p_phone').value = p.phone || '';
-                    document.getElementById('p_email').value = p.email || '';
-                    document.getElementById('p_obra').value = p.obra_social || '';
-                    document.getElementById('p_notes').value = p.notes || '';
+            async function editPatient(id) {
+                const p = patientsList.find(x => x.id === id);
+                if (!p) return;
+                document.getElementById('p_first').value = p.first_name;
+                document.getElementById('p_last').value = p.last_name;
+                document.getElementById('p_dni').value = p.dni || '';
+                document.getElementById('p_phone').value = p.phone || '';
+                document.getElementById('p_email').value = p.email || '';
+                document.getElementById('p_obra').value = p.obra_social || '';
+                document.getElementById('p_notes').value = p.notes || '';
 
-                    const form = document.getElementById('formPatient');
-                    form.onsubmit = async (e) => {
-                        e.preventDefault();
-                        const data = {
-                            first_name: document.getElementById('p_first').value,
-                            last_name: document.getElementById('p_last').value,
-                            dni: document.getElementById('p_dni').value || null,
-                            phone: document.getElementById('p_phone').value,
-                            email: document.getElementById('p_email').value || null,
-                            obra_social: document.getElementById('p_obra').value || "Particular",
-                            notes: document.getElementById('p_notes').value || null
-                        };
-                        try {
-                            await apiFetch(`/api/patients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-                            closeModal('modalPatient');
-                            loadPatients();
-                            form.onsubmit = savePatient;
-                        } catch (err) { alert(err.message); }
-                    };
-                    openModal('modalPatient');
-                }
-
-                async function deletePatient(id) {
-                    if (confirm('¿Eliminar paciente y todos sus registros permanentes?')) {
-                        try {
-                            await apiFetch(`/api/patients/${id}`, { method: 'DELETE' });
-                            loadPatients();
-                        } catch (e) { alert(e.message); }
-                    }
-                }
-
-                async function savePatient(e) {
+                const form = document.getElementById('formPatient');
+                form.onsubmit = async (e) => {
                     e.preventDefault();
                     const data = {
                         first_name: document.getElementById('p_first').value,
@@ -1423,22 +1391,52 @@
                         notes: document.getElementById('p_notes').value || null
                     };
                     try {
-                        await apiFetch('/api/patients', { method: 'POST', body: JSON.stringify(data) });
+                        await apiFetch(`/api/patients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
                         closeModal('modalPatient');
-                        e.target.reset();
                         loadPatients();
+                        form.onsubmit = savePatient;
                     } catch (err) { alert(err.message); }
-                }
+                };
+                openModal('modalPatient');
+            }
 
-                // APPOINTMENTS
-                async function loadAppointments() {
+            async function deletePatient(id) {
+                if (confirm('¿Eliminar paciente y todos sus registros permanentes?')) {
                     try {
-                        const data = await apiFetch('/api/appointments');
-                        const body = document.querySelector('#tableAppointments tbody');
-                        body.innerHTML = data.map(a => {
-                            const d = new Date(a.start_at);
-                            const isCancelled = a.status === 'cancelled';
-                            return `
+                        await apiFetch(`/api/patients/${id}`, { method: 'DELETE' });
+                        loadPatients();
+                    } catch (e) { alert(e.message); }
+                }
+            }
+
+            async function savePatient(e) {
+                e.preventDefault();
+                const data = {
+                    first_name: document.getElementById('p_first').value,
+                    last_name: document.getElementById('p_last').value,
+                    dni: document.getElementById('p_dni').value || null,
+                    phone: document.getElementById('p_phone').value,
+                    email: document.getElementById('p_email').value || null,
+                    obra_social: document.getElementById('p_obra').value || "Particular",
+                    notes: document.getElementById('p_notes').value || null
+                };
+                try {
+                    await apiFetch('/api/patients', { method: 'POST', body: JSON.stringify(data) });
+                    closeModal('modalPatient');
+                    e.target.reset();
+                    loadPatients();
+                } catch (err) { alert(err.message); }
+            }
+
+            // APPOINTMENTS
+            async function loadAppointments() {
+                try {
+                    const data = await apiFetch('/api/appointments');
+                    const body = document.querySelector('#tableAppointments tbody');
+                    body.innerHTML = data.map(a => {
+                        const d = new Date(a.start_at);
+                        const isCancelled = a.status === 'cancelled';
+                        return `
                     <tr>
                         <td><b>${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b></td>
                         <td>${a.patient_name}</td>
@@ -1448,102 +1446,102 @@
                             ${!isCancelled ? `<button class="btn btn-sm btn-danger" onclick="cancelAppt(${a.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
                         </td>
                     </tr>`;
-                        }).join('');
-                    } catch (e) { console.error(e); }
-                }
-                async function cancelAppt(id) {
-                    if (confirm('¿Cancelar este turno?')) {
-                        try {
-                            await apiFetch(`/api/appointments/${id}/cancel`, { method: 'PUT' });
-                            loadAppointments(); loadStats();
-                        } catch (e) { alert(e.message); }
-                    }
-                }
-                async function saveAppt(e) {
-                    e.preventDefault();
-                    const data = {
-                        patient_id: parseInt(document.getElementById('a_patient').value),
-                        professional_id: parseInt(document.getElementById('a_prof').value),
-                        start_at: document.getElementById('a_datetime').value,
-                        reason: document.getElementById('a_reason').value,
-                        category: "consulta"
-                    };
+                    }).join('');
+                } catch (e) { console.error(e); }
+            }
+            async function cancelAppt(id) {
+                if (confirm('¿Cancelar este turno?')) {
                     try {
-                        await apiFetch('/api/appointments', { method: 'POST', body: JSON.stringify(data) });
-                        closeModal('modalAppt');
+                        await apiFetch(`/api/appointments/${id}/cancel`, { method: 'PUT' });
                         loadAppointments(); loadStats();
-                    } catch (err) { alert(err.message); }
+                    } catch (e) { alert(e.message); }
                 }
+            }
+            async function saveAppt(e) {
+                e.preventDefault();
+                const data = {
+                    patient_id: parseInt(document.getElementById('a_patient').value),
+                    professional_id: parseInt(document.getElementById('a_prof').value),
+                    start_at: document.getElementById('a_datetime').value,
+                    reason: document.getElementById('a_reason').value,
+                    category: "consulta"
+                };
+                try {
+                    await apiFetch('/api/appointments', { method: 'POST', body: JSON.stringify(data) });
+                    closeModal('modalAppt');
+                    loadAppointments(); loadStats();
+                } catch (err) { alert(err.message); }
+            }
 
-                // PAYMENTS
-                async function loadPayments() {
+            // PAYMENTS
+            async function loadPayments() {
+                try {
+                    const data = await apiFetch('/api/payments');
+                    document.querySelector('#tablePayments tbody').innerHTML = data.map(p => `<tr><td>${new Date(p.payment_date).toLocaleDateString()}</td><td>${p.patient_name}</td><td><b>$${(p.amount / 100).toLocaleString()}</b></td><td>${p.payment_method}</td><td>${p.reference || '-'}</td></tr>`).join('');
+                } catch (e) { console.error(e); }
+            }
+            function openPaymentModal() { openModal('modalPayment'); }
+            async function savePayment(e) {
+                e.preventDefault();
+                const data = {
+                    patient_id: parseInt(document.getElementById('py_patient').value),
+                    amount: parseInt(document.getElementById('py_amount').value) * 100,
+                    payment_method: document.getElementById('py_method').value,
+                    reference: document.getElementById('py_ref').value
+                };
+                try {
+                    await apiFetch('/api/payments', { method: 'POST', body: JSON.stringify(data) });
+                    closeModal('modalPayment'); e.target.reset(); loadPayments(); loadStats();
+                } catch (err) { alert(err.message); }
+            }
+
+            // DEBTS
+            async function loadDebts() {
+                try {
+                    const data = await apiFetch('/api/debts');
+                    document.querySelector('#tableDebts tbody').innerHTML = data.map(d => `<tr><td>${d.patient_name}</td><td>${d.description}</td><td><b>$${(d.amount / 100).toLocaleString()}</b></td><td>${d.due_date || '-'}</td><td><span class="badge badge-red">${d.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="payDebt(${d.id})">Cobrar</button></td></tr>`).join('');
+                } catch (e) { console.error(e); }
+            }
+            function openDebtModal() { openModal('modalDebt'); }
+            async function saveDebt(e) {
+                e.preventDefault();
+                const data = {
+                    patient_id: parseInt(document.getElementById('d_patient').value),
+                    amount: parseInt(document.getElementById('d_amount').value) * 100,
+                    description: document.getElementById('d_desc').value,
+                    due_date: document.getElementById('d_due').value || null
+                };
+                try {
+                    await apiFetch('/api/debts', { method: 'POST', body: JSON.stringify(data) });
+                    closeModal('modalDebt'); e.target.reset(); loadDebts(); loadStats();
+                } catch (err) { alert(err.message); }
+            }
+            async function payDebt(id) {
+                if (confirm('¿Marcar como pagada?')) {
                     try {
-                        const data = await apiFetch('/api/payments');
-                        document.querySelector('#tablePayments tbody').innerHTML = data.map(p => `<tr><td>${new Date(p.payment_date).toLocaleDateString()}</td><td>${p.patient_name}</td><td><b>$${(p.amount / 100).toLocaleString()}</b></td><td>${p.payment_method}</td><td>${p.reference || '-'}</td></tr>`).join('');
-                    } catch (e) { console.error(e); }
+                        await apiFetch(`/api/debts/${id}/pay`, { method: 'PUT' });
+                        loadDebts(); loadStats();
+                    } catch (e) { alert(e.message); }
                 }
-                function openPaymentModal() { openModal('modalPayment'); }
-                async function savePayment(e) {
-                    e.preventDefault();
-                    const data = {
-                        patient_id: parseInt(document.getElementById('py_patient').value),
-                        amount: parseInt(document.getElementById('py_amount').value) * 100,
-                        payment_method: document.getElementById('py_method').value,
-                        reference: document.getElementById('py_ref').value
-                    };
-                    try {
-                        await apiFetch('/api/payments', { method: 'POST', body: JSON.stringify(data) });
-                        closeModal('modalPayment'); e.target.reset(); loadPayments(); loadStats();
-                    } catch (err) { alert(err.message); }
-                }
+            }
 
-                // DEBTS
-                async function loadDebts() {
-                    try {
-                        const data = await apiFetch('/api/debts');
-                        document.querySelector('#tableDebts tbody').innerHTML = data.map(d => `<tr><td>${d.patient_name}</td><td>${d.description}</td><td><b>$${(d.amount / 100).toLocaleString()}</b></td><td>${d.due_date || '-'}</td><td><span class="badge badge-red">${d.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="payDebt(${d.id})">Cobrar</button></td></tr>`).join('');
-                    } catch (e) { console.error(e); }
-                }
-                function openDebtModal() { openModal('modalDebt'); }
-                async function saveDebt(e) {
-                    e.preventDefault();
-                    const data = {
-                        patient_id: parseInt(document.getElementById('d_patient').value),
-                        amount: parseInt(document.getElementById('d_amount').value) * 100,
-                        description: document.getElementById('d_desc').value,
-                        due_date: document.getElementById('d_due').value || null
-                    };
-                    try {
-                        await apiFetch('/api/debts', { method: 'POST', body: JSON.stringify(data) });
-                        closeModal('modalDebt'); e.target.reset(); loadDebts(); loadStats();
-                    } catch (err) { alert(err.message); }
-                }
-                async function payDebt(id) {
-                    if (confirm('¿Marcar como pagada?')) {
-                        try {
-                            await apiFetch(`/api/debts/${id}/pay`, { method: 'PUT' });
-                            loadDebts(); loadStats();
-                        } catch (e) { alert(e.message); }
-                    }
-                }
+            // ODONTOGRAM LOGIC
+            let activeTool = 'caries-req';
+            function setTool(btn) {
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeTool = btn.dataset.tool;
+            }
 
-                // ODONTOGRAM LOGIC
-                let activeTool = 'caries-req';
-                function setTool(btn) {
-                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    activeTool = btn.dataset.tool;
-                }
+            function initOdontogram() {
+                const renderQuadrant = (containerId, ids, isLower = false) => {
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+                    container.innerHTML = ids.map(id => {
+                        let icon = '<i class="fas fa-tooth"></i>';
+                        if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="fas fa-grip-lines-vertical"></i>';
 
-                function initOdontogram() {
-                    const renderQuadrant = (containerId, ids, isLower = false) => {
-                        const container = document.getElementById(containerId);
-                        if (!container) return;
-                        container.innerHTML = ids.map(id => {
-                            let icon = '<i class="fas fa-tooth"></i>';
-                            if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="f/i>';
-
-                            const toothHTML = `
+                        const toothHTML = `
                                 <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
                                     <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
                                     <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
@@ -1553,206 +1551,206 @@
                                 </div>
                             `;
 
-                            return `
+                        return `
                                 <div class="tooth-container">
                                     ${!isLower ? `<span class="tooth-id">${id}</span><div class="tooth-icon-box">${icon}</div>${toothHTML}` : `${toothHTML}<div class="tooth-icon-box">${icon}</div><span class="tooth-id">${id}</span>`}
                                 </div>
                             `;
-                        }).join('');
-                    };
-
-                    // Adultos
-                    renderQuadrant('row-up-right', [18, 17, 16, 15, 14, 13, 12, 11]);
-                    renderQuadrant('row-up-left', [21, 22, 23, 24, 25, 26, 27, 28]);
-                    renderQuadrant('row-down-right', [48, 47, 46, 45, 44, 43, 42, 41], true);
-                    renderQuadrant('row-down-left', [31, 32, 33, 34, 35, 36, 37, 38], true);
-
-                    // Niños
-                    renderQuadrant('row-up-ped-right', [55, 54, 53, 52, 51]);
-                    renderQuadrant('row-up-ped-left', [61, 62, 63, 64, 65]);
-                    renderQuadrant('row-down-ped-right', [85, 84, 83, 82, 81], true);
-                    renderQuadrant('row-down-ped-left', [71, 72, 73, 74, 75], true);
-                }
-
-                function clickTooth(id) {
-                    // This handles tools that apply to the whole tooth (Extraction, TC, Implant)
-                    if (['extract-req', 'extract-done', 'tc-req', 'tc-done', 'implant'].includes(activeTool)) {
-                        applyTool(id, null);
-                    }
-                }
-
-                function clickFace(event, tooth, face) {
-                    event.stopPropagation(); // Prevent tooth click
-                    if (['caries-req', 'caries-done'].includes(activeTool)) {
-                        applyTool(tooth, face);
-                    } else {
-                        applyTool(tooth, null); // For other tools, face doesn't matter
-                    }
-                }
-
-                function applyTool(tooth, face) {
-                    const pid = document.getElementById('selectOdontoPatient').value;
-                    if (!pid) { alert('Seleccione un paciente'); return; }
-
-                    const mapping = {
-                        'caries-req': { proc: 'Caries', status: 'planned' },
-                        'caries-done': { proc: 'Caries', status: 'done' },
-                        'obtur-req': { proc: 'Obturación', status: 'planned' },
-                        'obtur-done': { proc: 'Obturación', status: 'done' },
-                        'extract-req': { proc: 'Extracción', status: 'planned' },
-                        'extract-done': { proc: 'Diente Ausente', status: 'done' },
-                        'tc-req': { proc: 'T.C.', status: 'planned' },
-                        'tc-done': { proc: 'T.C.', status: 'done' },
-                        'corona-req': { proc: 'Corona', status: 'planned' },
-                        'corona-done': { proc: 'Corona', status: 'done' },
-                        'implant': { proc: 'Implante', status: 'done' },
-                        'orto': { proc: 'Ortodoncia', status: 'done' },
-                        'clear': { proc: 'CLEAR', status: 'clear' }
-                    };
-
-                    const tool = mapping[activeTool];
-                    if (tool.proc === 'CLEAR') {
-                        if (confirm(`¿Desea limpiar todos los registros del diente ${tooth}?`)) {
-                            clearToothRecords(pid, tooth);
-                        }
-                        return;
-                    }
-
-                    document.getElementById('t_pid').value = pid;
-                    document.getElementById('t_tooth').value = tooth;
-                    document.getElementById('t_face').value = face || '';
-                    document.getElementById('t_proc').value = tool.proc;
-                    document.getElementById('t_status').value = tool.status;
-                    document.getElementById('t_title').innerText = `Registrar ${tool.proc} - Diente ${tooth} ${face ? '(Cara ' + face + ')' : ''}`;
-
-                    saveTreatmentDirect();
-                }
-
-                async function saveTreatmentDirect() {
-                    const pid = document.getElementById('t_pid').value;
-                    const data = {
-                        patient_id: parseInt(pid),
-                        tooth: document.getElementById('t_tooth').value,
-                        face: document.getElementById('t_face').value,
-                        procedure_name: document.getElementById('t_proc').value,
-                        status: document.getElementById('t_status').value
-                    };
-                    try {
-                        await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
-                        loadPatientOdontogram();
-                    } catch (e) { alert(e.message); }
-                }
-
-                async function clearToothRecords(pid, tooth) {
-                    try {
-                        const data = await apiFetch(`/api/patients/${pid}/odontogram`);
-                        const toDelete = data.records.filter(r => r.tooth == tooth);
-                        for (let r of toDelete) {
-                            await apiFetch(`/api/odontogram/${r.id}`, { method: 'DELETE' });
-                        }
-                        loadPatientOdontogram();
-                    } catch (e) { alert(e.message); }
-                }
-
-                async function saveTreatment(e) {
-                    e.preventDefault();
-                    const pid = document.getElementById('t_pid').value || document.getElementById('selectOdontoPatient').value;
-                    if (!pid) { alert("Error: No hay paciente seleccionado"); return; }
-
-                    const data = {
-                        patient_id: parseInt(pid),
-                        tooth: document.getElementById('t_tooth').value,
-                        face: document.getElementById('t_face').value,
-                        procedure_name: document.getElementById('t_proc').value,
-                        status: document.getElementById('t_status').value
-                    };
-                    try {
-                        await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
-                        closeModal('modalTreatment'); loadPatientOdontogram();
-                    } catch (e) { alert(e.message); }
-                }
-
-                async function loadPatientOdontogram() {
-                    const pid = document.getElementById('selectOdontoPatient').value;
-                    if (!pid) return;
-
-                    // Clear ALL
-                    document.querySelectorAll('.tooth-map').forEach(m => {
-                        m.classList.remove('sym-extraction', 'sym-extraction-req', 'sym-tc', 'sym-tc-req', 'sym-implant', 'sym-absent', 'sym-corona', 'sym-corona-req', 'sym-orto');
-                    });
-                    document.querySelectorAll('.tooth-face').forEach(f => {
-                        f.style.background = 'transparent';
-                        f.style.opacity = '1';
-                    });
-
-                    try {
-                        const data = await apiFetch(`/api/patients/${pid}/odontogram`);
-                        data.records.forEach(r => {
-                            const toothEl = document.getElementById(`tooth-${r.tooth}`);
-                            if (!toothEl) return;
-
-                            const isDone = r.record_status === 'done' || r.record_status === 'completed';
-                            const proc = r.procedure_name.toLowerCase();
-
-                            if (proc.includes('caries') || proc.includes('obturación')) {
-                                const face = toothEl.querySelector(`.face-${getFaceClass(r.face)}`);
-                                if (face) {
-                                    face.style.background = isDone ? '#ef4444' : '#3b82f6';
-                                    if (proc.includes('caries')) face.style.opacity = "0.7";
-                                }
-                            } else if (proc.includes('extracción') || proc.includes('ausente')) {
-                                toothEl.classList.add(proc.includes('ausente') ? 'sym-absent' : (isDone ? 'sym-extraction' : 'sym-extraction-req'));
-                            } else if (proc.includes('t.c.') || proc.includes('conducto')) {
-                                toothEl.classList.add(isDone ? 'sym-tc' : 'sym-tc-req');
-                            } else if (proc.includes('implante')) {
-                                toothEl.classList.add(isDone ? 'sym-implant' : 'sym-implant-req');
-                            } else if (proc.includes('corona')) {
-                                toothEl.classList.add(isDone ? 'sym-corona' : 'sym-corona-req');
-                            } else if (proc.includes('ortodoncia')) {
-                                toothEl.classList.add('sym-orto');
-                            }
-                        });
-                    } catch (e) { console.error(e); }
-                }
-
-                function getFaceClass(f) {
-                    return { 'V': 'top', 'P': 'bottom', 'M': 'left', 'D': 'right', 'O': 'center' }[f] || 'center';
-                }
-
-                // SELECTORS
-                async function loadPatientSelectors() {
-                    try {
-                        const pts = await apiFetch('/api/patients');
-                        const opts = '<option value="">Seleccione...</option>' + pts.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
-                        ['a_patient', 'py_patient', 'selectOdontoPatient', 'd_patient'].forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el) el.innerHTML = opts;
-                        });
-                        const profs = await apiFetch('/api/professionals');
-                        document.getElementById('a_prof').innerHTML = profs.map(p => `<option value="${p.id}">${p.full_name}</option>`).join('');
-                    } catch (e) { console.error(e); }
-                }
-
-                // INIT
-                window.onload = () => {
-                    showSection('dashboard');
-                    initOdontogram();
-                    apiFetch('/api/auth/me').then(u => {
-                        document.getElementById('headerName').innerText = u.username;
-                        document.getElementById('headerAvatar').innerText = u.username[0].toUpperCase();
-
-                        // Role handling
-                        const role = u.role || 'admin';
-                        document.querySelectorAll('.nav-item, .nav-sep').forEach(el => {
-                            const allowed = el.dataset.role;
-                            if (allowed && allowed !== 'all') {
-                                const roles = allowed.split(',');
-                                if (!roles.includes(role)) el.style.display = 'none';
-                            }
-                        });
-                    }).catch(() => logout());
+                    }).join('');
                 };
-            </script>
+
+                // Adultos
+                renderQuadrant('row-up-right', [18, 17, 16, 15, 14, 13, 12, 11]);
+                renderQuadrant('row-up-left', [21, 22, 23, 24, 25, 26, 27, 28]);
+                renderQuadrant('row-down-right', [48, 47, 46, 45, 44, 43, 42, 41], true);
+                renderQuadrant('row-down-left', [31, 32, 33, 34, 35, 36, 37, 38], true);
+
+                // Niños
+                renderQuadrant('row-up-ped-right', [55, 54, 53, 52, 51]);
+                renderQuadrant('row-up-ped-left', [61, 62, 63, 64, 65]);
+                renderQuadrant('row-down-ped-right', [85, 84, 83, 82, 81], true);
+                renderQuadrant('row-down-ped-left', [71, 72, 73, 74, 75], true);
+            }
+
+            function clickTooth(id) {
+                // This handles tools that apply to the whole tooth (Extraction, TC, Implant)
+                if (['extract-req', 'extract-done', 'tc-req', 'tc-done', 'implant'].includes(activeTool)) {
+                    applyTool(id, null);
+                }
+            }
+
+            function clickFace(event, tooth, face) {
+                event.stopPropagation(); // Prevent tooth click
+                if (['caries-req', 'caries-done'].includes(activeTool)) {
+                    applyTool(tooth, face);
+                } else {
+                    applyTool(tooth, null); // For other tools, face doesn't matter
+                }
+            }
+
+            function applyTool(tooth, face) {
+                const pid = document.getElementById('selectOdontoPatient').value;
+                if (!pid) { alert('Seleccione un paciente'); return; }
+
+                const mapping = {
+                    'caries-req': { proc: 'Caries', status: 'planned' },
+                    'caries-done': { proc: 'Caries', status: 'done' },
+                    'obtur-req': { proc: 'Obturación', status: 'planned' },
+                    'obtur-done': { proc: 'Obturación', status: 'done' },
+                    'extract-req': { proc: 'Extracción', status: 'planned' },
+                    'extract-done': { proc: 'Diente Ausente', status: 'done' },
+                    'tc-req': { proc: 'T.C.', status: 'planned' },
+                    'tc-done': { proc: 'T.C.', status: 'done' },
+                    'corona-req': { proc: 'Corona', status: 'planned' },
+                    'corona-done': { proc: 'Corona', status: 'done' },
+                    'implant': { proc: 'Implante', status: 'done' },
+                    'orto': { proc: 'Ortodoncia', status: 'done' },
+                    'clear': { proc: 'CLEAR', status: 'clear' }
+                };
+
+                const tool = mapping[activeTool];
+                if (tool.proc === 'CLEAR') {
+                    if (confirm(`¿Desea limpiar todos los registros del diente ${tooth}?`)) {
+                        clearToothRecords(pid, tooth);
+                    }
+                    return;
+                }
+
+                document.getElementById('t_pid').value = pid;
+                document.getElementById('t_tooth').value = tooth;
+                document.getElementById('t_face').value = face || '';
+                document.getElementById('t_proc').value = tool.proc;
+                document.getElementById('t_status').value = tool.status;
+                document.getElementById('t_title').innerText = `Registrar ${tool.proc} - Diente ${tooth} ${face ? '(Cara ' + face + ')' : ''}`;
+
+                saveTreatmentDirect();
+            }
+
+            async function saveTreatmentDirect() {
+                const pid = document.getElementById('t_pid').value;
+                const data = {
+                    patient_id: parseInt(pid),
+                    tooth: document.getElementById('t_tooth').value,
+                    face: document.getElementById('t_face').value,
+                    procedure_name: document.getElementById('t_proc').value,
+                    status: document.getElementById('t_status').value
+                };
+                try {
+                    await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
+                    loadPatientOdontogram();
+                } catch (e) { alert(e.message); }
+            }
+
+            async function clearToothRecords(pid, tooth) {
+                try {
+                    const data = await apiFetch(`/api/patients/${pid}/odontogram`);
+                    const toDelete = data.records.filter(r => r.tooth == tooth);
+                    for (let r of toDelete) {
+                        await apiFetch(`/api/odontogram/${r.id}`, { method: 'DELETE' });
+                    }
+                    loadPatientOdontogram();
+                } catch (e) { alert(e.message); }
+            }
+
+            async function saveTreatment(e) {
+                e.preventDefault();
+                const pid = document.getElementById('t_pid').value || document.getElementById('selectOdontoPatient').value;
+                if (!pid) { alert("Error: No hay paciente seleccionado"); return; }
+
+                const data = {
+                    patient_id: parseInt(pid),
+                    tooth: document.getElementById('t_tooth').value,
+                    face: document.getElementById('t_face').value,
+                    procedure_name: document.getElementById('t_proc').value,
+                    status: document.getElementById('t_status').value
+                };
+                try {
+                    await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
+                    closeModal('modalTreatment'); loadPatientOdontogram();
+                } catch (e) { alert(e.message); }
+            }
+
+            async function loadPatientOdontogram() {
+                const pid = document.getElementById('selectOdontoPatient').value;
+                if (!pid) return;
+
+                // Clear ALL
+                document.querySelectorAll('.tooth-map').forEach(m => {
+                    m.classList.remove('sym-extraction', 'sym-extraction-req', 'sym-tc', 'sym-tc-req', 'sym-implant', 'sym-absent', 'sym-corona', 'sym-corona-req', 'sym-orto');
+                });
+                document.querySelectorAll('.tooth-face').forEach(f => {
+                    f.style.background = 'transparent';
+                    f.style.opacity = '1';
+                });
+
+                try {
+                    const data = await apiFetch(`/api/patients/${pid}/odontogram`);
+                    data.records.forEach(r => {
+                        const toothEl = document.getElementById(`tooth-${r.tooth}`);
+                        if (!toothEl) return;
+
+                        const isDone = r.record_status === 'done' || r.record_status === 'completed';
+                        const proc = r.procedure_name.toLowerCase();
+
+                        if (proc.includes('caries') || proc.includes('obturación')) {
+                            const face = toothEl.querySelector(`.face-${getFaceClass(r.face)}`);
+                            if (face) {
+                                face.style.background = isDone ? '#ef4444' : '#3b82f6';
+                                if (proc.includes('caries')) face.style.opacity = "0.7";
+                            }
+                        } else if (proc.includes('extracción') || proc.includes('ausente')) {
+                            toothEl.classList.add(proc.includes('ausente') ? 'sym-absent' : (isDone ? 'sym-extraction' : 'sym-extraction-req'));
+                        } else if (proc.includes('t.c.') || proc.includes('conducto')) {
+                            toothEl.classList.add(isDone ? 'sym-tc' : 'sym-tc-req');
+                        } else if (proc.includes('implante')) {
+                            toothEl.classList.add(isDone ? 'sym-implant' : 'sym-implant-req');
+                        } else if (proc.includes('corona')) {
+                            toothEl.classList.add(isDone ? 'sym-corona' : 'sym-corona-req');
+                        } else if (proc.includes('ortodoncia')) {
+                            toothEl.classList.add('sym-orto');
+                        }
+                    });
+                } catch (e) { console.error(e); }
+            }
+
+            function getFaceClass(f) {
+                return { 'V': 'top', 'P': 'bottom', 'M': 'left', 'D': 'right', 'O': 'center' }[f] || 'center';
+            }
+
+            // SELECTORS
+            async function loadPatientSelectors() {
+                try {
+                    const pts = await apiFetch('/api/patients');
+                    const opts = '<option value="">Seleccione...</option>' + pts.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+                    ['a_patient', 'py_patient', 'selectOdontoPatient', 'd_patient'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerHTML = opts;
+                    });
+                    const profs = await apiFetch('/api/professionals');
+                    document.getElementById('a_prof').innerHTML = profs.map(p => `<option value="${p.id}">${p.full_name}</option>`).join('');
+                } catch (e) { console.error(e); }
+            }
+
+            // INIT
+            window.onload = () => {
+                showSection('dashboard');
+                initOdontogram();
+                apiFetch('/api/auth/me').then(u => {
+                    document.getElementById('headerName').innerText = u.username;
+                    document.getElementById('headerAvatar').innerText = u.username[0].toUpperCase();
+
+                    // Role handling
+                    const role = u.role || 'admin';
+                    document.querySelectorAll('.nav-item, .nav-sep').forEach(el => {
+                        const allowed = el.dataset.role;
+                        if (allowed && allowed !== 'all') {
+                            const roles = allowed.split(',');
+                            if (!roles.includes(role)) el.style.display = 'none';
+                        }
+                    });
+                }).catch(() => logout());
+            };
+        </script>
 </body>
 
 </html>
