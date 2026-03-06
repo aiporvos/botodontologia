@@ -835,11 +835,40 @@
         </div>
     </div>
 
+    <!-- MODAL DEBT -->
+    <div id="modalDebt" class="modal-overlay">
+        <div class="modal">
+            <h3>Registrar Deuda</h3><br>
+            <form id="formDebt" onsubmit="saveDebt(event)">
+                <div class="form-group"><label>Paciente</label><select id="d_patient" required></select></div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Monto ($)</label><input type="number" id="d_amount" required></div>
+                    <div class="form-group"><label>Vencimiento</label><input type="date" id="d_due"></div>
+                </div>
+                <div class="form-group"><label>Descripción</label><input type="text" id="d_desc"
+                        placeholder="Tratamiento pendiente" required></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modalDebt')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="background:var(--red)">Crear Deuda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const TOKEN = localStorage.getItem('token');
         if (!TOKEN) window.location.href = '/login';
 
         const headers = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+
+        // UTILS
+        async function apiFetch(url, opts = {}) {
+            const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
+            if (res.status === 401) logout();
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Error en la petición');
+            return data;
+        }
 
         // NAVIGATION
         function showSection(id, el) {
@@ -847,6 +876,10 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('sec-' + id).classList.add('active');
             if (el) el.classList.add('active');
+            else {
+                const nav = document.querySelector(`.nav-item[onclick*="${id}"]`);
+                if (nav) nav.classList.add('active');
+            }
             document.getElementById('sectionTitle').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             loadSectionData(id);
         }
@@ -861,7 +894,10 @@
         }
 
         function logout() { localStorage.removeItem('token'); window.location.href = '/login'; }
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function openModal(id) {
+            loadPatientSelectors(); // Refresh selectors
+            document.getElementById(id).classList.add('show');
+        }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
         // DASHBOARD / STATS
@@ -884,20 +920,68 @@
         // PATIENTS
         let patientsList = [];
         async function loadPatients() {
-            const res = await fetch('/api/patients', { headers });
-            patientsList = await res.json();
-            renderPatientsTable(patientsList);
-            loadPatientSelectors();
+            try {
+                patientsList = await apiFetch('/api/patients');
+                renderPatientsTable(patientsList);
+            } catch (e) { console.error(e); }
         }
         function renderPatientsTable(list) {
             const body = document.querySelector('#tablePatients tbody');
-            body.innerHTML = list.map(p => `<tr><td><b>${p.first_name} ${p.last_name}</b></td><td>${p.dni || '-'}</td><td>${p.phone}</td><td>${p.obra_social || 'Particular'}</td><td><button class="btn btn-sm btn-outline" onclick="alert('Historial de ${p.first_name}')"><i class="fas fa-file-medical"></i></button></td></tr>`).join('');
+            body.innerHTML = list.map(p => `
+                <tr>
+                    <td><b>${p.first_name} ${p.last_name}</b></td>
+                    <td>${p.dni || '-'}</td>
+                    <td>${p.phone}</td>
+                    <td>${p.obra_social || 'Particular'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editPatient(${p.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePatient(${p.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
         }
-        function searchPatients() {
-            const q = document.getElementById('patientSearch').value.toLowerCase();
-            const filtered = patientsList.filter(p => `${p.first_name} ${p.last_name} ${p.dni} ${p.phone}`.toLowerCase().includes(q));
-            renderPatientsTable(filtered);
+
+        async function editPatient(id) {
+            const p = patientsList.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('p_first').value = p.first_name;
+            document.getElementById('p_last').value = p.last_name;
+            document.getElementById('p_dni').value = p.dni || '';
+            document.getElementById('p_phone').value = p.phone || '';
+            document.getElementById('p_email').value = p.email || '';
+            document.getElementById('p_obra').value = p.obra_social || '';
+            document.getElementById('p_notes').value = p.notes || '';
+
+            const form = document.getElementById('formPatient');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const data = {
+                    first_name: document.getElementById('p_first').value,
+                    last_name: document.getElementById('p_last').value,
+                    dni: document.getElementById('p_dni').value || null,
+                    phone: document.getElementById('p_phone').value,
+                    email: document.getElementById('p_email').value || null,
+                    obra_social: document.getElementById('p_obra').value || "Particular",
+                    notes: document.getElementById('p_notes').value || null
+                };
+                try {
+                    await apiFetch(`/api/patients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+                    closeModal('modalPatient');
+                    loadPatients();
+                    form.onsubmit = savePatient;
+                } catch (err) { alert(err.message); }
+            };
+            openModal('modalPatient');
         }
+
+        async function deletePatient(id) {
+            if (confirm('¿Eliminar paciente y todos sus registros permanentes?')) {
+                try {
+                    await apiFetch(`/api/patients/${id}`, { method: 'DELETE' });
+                    loadPatients();
+                } catch (e) { alert(e.message); }
+            }
+        }
+
         async function savePatient(e) {
             e.preventDefault();
             const data = {
@@ -909,23 +993,42 @@
                 obra_social: document.getElementById('p_obra').value || "Particular",
                 notes: document.getElementById('p_notes').value || null
             };
-            const res = await fetch('/api/patients', { method: 'POST', headers, body: JSON.stringify(data) });
-            if (res.ok) { closeModal('modalPatient'); e.target.reset(); loadPatients(); } else { alert("Error al crear paciente"); }
+            try {
+                await apiFetch('/api/patients', { method: 'POST', body: JSON.stringify(data) });
+                closeModal('modalPatient');
+                e.target.reset();
+                loadPatients();
+            } catch (err) { alert(err.message); }
         }
 
         // APPOINTMENTS
         async function loadAppointments() {
-            const res = await fetch('/api/appointments', { headers });
-            const data = await res.json();
-            const body = document.querySelector('#tableAppointments tbody');
-            body.innerHTML = data.map(a => {
-                const d = new Date(a.start_at);
-                return `<tr><td><b>${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b></td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-amber">${a.status}</span></td><td><button class="btn btn-sm btn-danger" onclick="cancelAppt(${a.id})"><i class="fas fa-times"></i></button></td></tr>`;
-            }).join('');
+            try {
+                const data = await apiFetch('/api/appointments');
+                const body = document.querySelector('#tableAppointments tbody');
+                body.innerHTML = data.map(a => {
+                    const d = new Date(a.start_at);
+                    const isCancelled = a.status === 'cancelled';
+                    return `
+                    <tr>
+                        <td><b>${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b></td>
+                        <td>${a.patient_name}</td>
+                        <td>${a.reason}</td>
+                        <td><span class="badge badge-${isCancelled ? 'red' : 'amber'}">${a.status}</span></td>
+                        <td>
+                            ${!isCancelled ? `<button class="btn btn-sm btn-danger" onclick="cancelAppt(${a.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) { console.error(e); }
         }
-        async function openApptModal() {
-            await loadPatientSelectors();
-            openModal('modalAppt');
+        async function cancelAppt(id) {
+            if (confirm('¿Cancelar este turno?')) {
+                try {
+                    await apiFetch(`/api/appointments/${id}/cancel`, { method: 'PUT' });
+                    loadAppointments(); loadStats();
+                } catch (e) { alert(e.message); }
+            }
         }
         async function saveAppt(e) {
             e.preventDefault();
@@ -936,17 +1039,21 @@
                 reason: document.getElementById('a_reason').value,
                 category: "consulta"
             };
-            const res = await fetch('/api/appointments', { method: 'POST', headers, body: JSON.stringify(data) });
-            if (res.ok) { closeModal('modalAppt'); loadAppointments(); } else { alert("Error al agendar"); }
+            try {
+                await apiFetch('/api/appointments', { method: 'POST', body: JSON.stringify(data) });
+                closeModal('modalAppt');
+                loadAppointments(); loadStats();
+            } catch (err) { alert(err.message); }
         }
 
         // PAYMENTS
         async function loadPayments() {
-            const res = await fetch('/api/payments', { headers });
-            const data = await res.json();
-            document.querySelector('#tablePayments tbody').innerHTML = data.map(p => `<tr><td>${new Date(p.payment_date).toLocaleDateString()}</td><td>${p.patient_name}</td><td><b>$${(p.amount / 100).toLocaleString()}</b></td><td>${p.payment_method}</td><td>${p.reference || '-'}</td></tr>`).join('');
+            try {
+                const data = await apiFetch('/api/payments');
+                document.querySelector('#tablePayments tbody').innerHTML = data.map(p => `<tr><td>${new Date(p.payment_date).toLocaleDateString()}</td><td>${p.patient_name}</td><td><b>$${(p.amount / 100).toLocaleString()}</b></td><td>${p.payment_method}</td><td>${p.reference || '-'}</td></tr>`).join('');
+            } catch (e) { console.error(e); }
         }
-        function openPaymentModal() { loadPatientSelectors(); openModal('modalPayment'); }
+        function openPaymentModal() { openModal('modalPayment'); }
         async function savePayment(e) {
             e.preventDefault();
             const data = {
@@ -955,17 +1062,41 @@
                 payment_method: document.getElementById('py_method').value,
                 reference: document.getElementById('py_ref').value
             };
-            await fetch('/api/payments', { method: 'POST', headers, body: JSON.stringify(data) });
-            closeModal('modalPayment'); loadPayments();
+            try {
+                await apiFetch('/api/payments', { method: 'POST', body: JSON.stringify(data) });
+                closeModal('modalPayment'); e.target.reset(); loadPayments(); loadStats();
+            } catch (err) { alert(err.message); }
         }
 
         // DEBTS
         async function loadDebts() {
-            const res = await fetch('/api/debts', { headers });
-            const data = await res.json();
-            document.querySelector('#tableDebts tbody').innerHTML = data.map(d => `<tr><td>${d.patient_name}</td><td>${d.description}</td><td><b>$${(d.amount / 100).toLocaleString()}</b></td><td>${d.due_date || '-'}</td><td><span class="badge badge-red">${d.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="payDebt(${d.id})">Cobrar</button></td></tr>`).join('');
+            try {
+                const data = await apiFetch('/api/debts');
+                document.querySelector('#tableDebts tbody').innerHTML = data.map(d => `<tr><td>${d.patient_name}</td><td>${d.description}</td><td><b>$${(d.amount / 100).toLocaleString()}</b></td><td>${d.due_date || '-'}</td><td><span class="badge badge-red">${d.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="payDebt(${d.id})">Cobrar</button></td></tr>`).join('');
+            } catch (e) { console.error(e); }
         }
-        async function payDebt(id) { if (confirm('Marcar como pagada?')) { await fetch(`/api/debts/${id}/pay`, { method: 'PUT', headers }); loadDebts(); } }
+        function openDebtModal() { openModal('modalDebt'); }
+        async function saveDebt(e) {
+            e.preventDefault();
+            const data = {
+                patient_id: parseInt(document.getElementById('d_patient').value),
+                amount: parseInt(document.getElementById('d_amount').value) * 100,
+                description: document.getElementById('d_desc').value,
+                due_date: document.getElementById('d_due').value || null
+            };
+            try {
+                await apiFetch('/api/debts', { method: 'POST', body: JSON.stringify(data) });
+                closeModal('modalDebt'); e.target.reset(); loadDebts(); loadStats();
+            } catch (err) { alert(err.message); }
+        }
+        async function payDebt(id) {
+            if (confirm('¿Marcar como pagada?')) {
+                try {
+                    await apiFetch(`/api/debts/${id}/pay`, { method: 'PUT' });
+                    loadDebts(); loadStats();
+                } catch (e) { alert(e.message); }
+            }
+        }
 
         // ODONTOGRAM LOGIC
         function initOdontogram() {
@@ -1013,24 +1144,25 @@
                 procedure_name: document.getElementById('t_proc').value,
                 status: document.getElementById('t_status').value
             };
-            const res = await fetch('/api/odontogram', { method: 'POST', headers, body: JSON.stringify(data) });
-            if (res.ok) { closeModal('modalTreatment'); loadPatientOdontogram(); }
+            try {
+                await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
+                closeModal('modalTreatment'); loadPatientOdontogram();
+            } catch (e) { alert(e.message); }
         }
 
         async function loadPatientOdontogram() {
             const pid = document.getElementById('selectOdontoPatient').value;
             if (!pid) return;
 
-            // Clear current styles
             document.querySelectorAll('.tooth-face').forEach(f => f.className = f.className.split(' ').filter(c => !c.includes('prest-')).join(' '));
 
-            const res = await fetch(`/api/patients/${pid}/odontogram`, { headers });
-            const data = await res.json();
-
-            data.records.forEach(r => {
-                const face = document.querySelector(`.tooth-map[data-tooth="${r.tooth}"] .face-${getFaceClass(r.face)}`);
-                if (face) face.classList.add(r.record_status === 'done' ? 'prest-existente' : 'prest-requerida');
-            });
+            try {
+                const data = await apiFetch(`/api/patients/${pid}/odontogram`);
+                data.records.forEach(r => {
+                    const face = document.querySelector(`.tooth-map[data-tooth="${r.tooth}"] .face-${getFaceClass(r.face)}`);
+                    if (face) face.classList.add(r.record_status === 'done' ? 'prest-existente' : 'prest-requerida');
+                });
+            } catch (e) { console.error(e); }
         }
 
         function getFaceClass(f) {
@@ -1039,27 +1171,26 @@
 
         // SELECTORS
         async function loadPatientSelectors() {
-            const res = await fetch('/api/patients', { headers });
-            const pts = await res.json();
-            const opts = '<option value="">Seleccione...</option>' + pts.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
-            ['a_patient', 'py_patient', 'selectOdontoPatient'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el && !el.children.length || el.id === 'selectOdontoPatient') el.innerHTML = opts;
-            });
-            const pRes = await fetch('/api/professionals', { headers });
-            const profs = await pRes.json();
-            document.getElementById('a_prof').innerHTML = profs.map(p => `<option value="${p.id}">${p.full_name}</option>`).join('');
+            try {
+                const pts = await apiFetch('/api/patients');
+                const opts = '<option value="">Seleccione...</option>' + pts.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+                ['a_patient', 'py_patient', 'selectOdontoPatient', 'd_patient'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = opts;
+                });
+                const profs = await apiFetch('/api/professionals');
+                document.getElementById('a_prof').innerHTML = profs.map(p => `<option value="${p.id}">${p.full_name}</option>`).join('');
+            } catch (e) { console.error(e); }
         }
 
         // INIT
         window.onload = () => {
-            loadStats();
+            showSection('dashboard');
             initOdontogram();
-            // Header info
-            fetch('/api/auth/me', { headers }).then(r => r.json()).then(u => {
+            apiFetch('/api/auth/me').then(u => {
                 document.getElementById('headerName').innerText = u.username;
                 document.getElementById('headerAvatar').innerText = u.username[0].toUpperCase();
-            });
+            }).catch(() => logout());
         };
     </script>
 </body>
