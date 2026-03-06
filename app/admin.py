@@ -239,14 +239,41 @@ class AdminUserAdmin(ModelView, model=AdminUser):
 
 def setup_admin(app, engine):
     """Configura el panel de administración"""
+    from sqladmin.authentication import AuthenticationBackend
+    from starlette.requests import Request
+    from starlette.responses import RedirectResponse
+    from config import settings
+
+    class AdminAuth(AuthenticationBackend):
+        async def login(self, request: Request) -> bool:
+            form = await request.form()
+            username = form.get("username")
+            password = form.get("password")
+            if username == settings.admin_username and password == settings.admin_password:
+                request.session.update({"token": "authenticated"})
+                return True
+            return False
+
+        async def logout(self, request: Request) -> bool:
+            request.session.clear()
+            return True
+
+        async def authenticate(self, request: Request) -> bool:
+            token = request.session.get("token")
+            if not token:
+                return False
+            return True
+
+    auth_backend = AdminAuth(secret_key=settings.admin_password[:32] if len(settings.admin_password) > 32 else settings.admin_password + "x" * (32 - len(settings.admin_password)))
+
     admin = Admin(
         app,
         engine,
-        title="Clínica Dental - Admin",
+        title="Dental Studio Pro - Admin",
         base_url="/admin",
+        authentication_backend=auth_backend,
     )
 
-    # Agregar modelos
     admin.add_view(PatientAdmin)
     admin.add_view(ProfessionalAdmin)
     admin.add_view(AvailabilityAdmin)
@@ -261,3 +288,4 @@ def setup_admin(app, engine):
     admin.add_view(DebtAdmin)
 
     return admin
+

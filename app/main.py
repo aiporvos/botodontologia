@@ -67,6 +67,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from starlette.middleware.sessions import SessionMiddleware
+app.add_middleware(SessionMiddleware, secret_key=settings.admin_password or "dental-studio-secret-key")
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 setup_admin(app, engine)

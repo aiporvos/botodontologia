@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, validator
 from datetime import datetime, date, time
 from typing import Optional, List
 
@@ -14,17 +14,29 @@ class PatientBase(BaseModel):
     last_name: str
     dni: Optional[str] = None
     obra_social: Optional[str] = "Particular"
-    phone: str
-    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
     notes: Optional[str] = None
+
+    @validator('email', pre=True)
+    def empty_str_to_none(cls, v):
+        if v == '':
+            return None
+        return v
+
+    @validator('phone', 'dni', 'obra_social', 'notes', pre=True)
+    def clean_empty(cls, v):
+        if v == '':
+            return None
+        return v
 
 class PatientCreate(PatientBase):
     pass
 
 class Patient(PatientBase):
     id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -52,16 +64,9 @@ class AppointmentBase(BaseModel):
     channel: str = "telegram"
     notes: Optional[str] = None
 
-class AppointmentCreate(BaseModel):
-    patient_id: int
-    professional_id: int
-    reason: str
-    start_at: datetime
-    end_at: datetime
-
 class Appointment(AppointmentBase):
     id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -70,7 +75,7 @@ class TreatmentPriceBase(BaseModel):
     code: str
     name: str
     description: Optional[str] = None
-    price: int # en centavos
+    price: int
 
 class TreatmentPrice(TreatmentPriceBase):
     id: int
@@ -84,40 +89,35 @@ class DentalTreatmentBase(BaseModel):
     professional_id: Optional[int] = None
     tooth: Optional[str] = None
     face: Optional[str] = None
-    treatment_code: Optional[str] = None
     treatment_name: str
-    treatment_price_id: Optional[int] = None
     status: str = "planned"
-    treatment_date: date
+    treatment_date: Optional[date] = None
     notes: Optional[str] = None
-    cost: int = 0
+    cost: Optional[int] = 0
 
 class DentalTreatment(DentalTreatmentBase):
     id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 class PaymentBase(BaseModel):
     patient_id: int
-    appointment_id: Optional[int] = None
     amount: int
-    payment_method: str
+    payment_method: Optional[str] = "cash"
     reference: Optional[str] = None
     notes: Optional[str] = None
 
 class Payment(PaymentBase):
     id: int
-    payment_date: datetime
+    payment_date: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 class DebtBase(BaseModel):
     patient_id: int
-    appointment_id: Optional[int] = None
-    dental_treatment_id: Optional[int] = None
     description: str
     amount: int
     status: str = "pending"
@@ -125,8 +125,8 @@ class DebtBase(BaseModel):
 
 class Debt(DebtBase):
     id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
