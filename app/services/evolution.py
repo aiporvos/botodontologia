@@ -90,5 +90,21 @@ class EvolutionService:
         }
         return await self._post("message/sendList", payload)
 
+    async def get_media_base64(self, message_id: str) -> Optional[str]:
+        """Obtiene el base64 de un mensaje multimedia"""
+        url = f"{self.base_url}/chat/getBase64FromMediaMessage/{self.instance_name}"
+        params = {"instanceToken": self.instance_token}
+        payload = {"message": {"key": {"id": message_id}}, "convertToMp4": False}
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=self.headers, json=payload, params=params)
+                if response.status_code == 200:
+                    return response.json().get("base64")
+                return None
+            except Exception as e:
+                print(f"Error fetching media base64: {e}")
+                return None
+
 
 evolution_service = EvolutionService()

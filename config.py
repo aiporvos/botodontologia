@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     # Bot
     telegram_bot_token: str = ""
     bot_secret: str = ""
+    openai_api_key: str = ""
 
     # Database
     db_host: str = "postgres"

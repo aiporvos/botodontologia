@@ -469,12 +469,35 @@ async def webhook_evolution(request: Request):
     try:
         data = await request.json()
         messages = data.get("data", {}).get("messages", [])
+        from app.services.multimedia import multimedia_service
+        from app.services.evolution import evolution_service
+        
         for msg in messages:
-            if msg.get("type") in ["conversation", "text"]:
-                text = msg.get("body", {}).get("text", {}).get("text", "")
-                from_num = msg.get("key", {}).get("remoteJid", "").split("@")[0]
-                if text and from_num:
-                    await handle_whatsapp_message(from_num, text)
+            msg_id = msg.get("key", {}).get("id")
+            type = msg.get("type")
+            from_num = msg.get("key", {}).get("remoteJid", "").split("@")[0]
+            if not from_num: continue
+            
+            text = ""
+            if type in ["conversation", "extendedTextMessage"]:
+                text = msg.get("body", {}).get("text", {}).get("text", "") or msg.get("message", {}).get("conversation", "")
+            
+            elif type == "audioMessage":
+                b64 = await evolution_service.get_media_base64(msg_id)
+                if b64:
+                    text = await multimedia_service.transcribe_audio(b64)
+                    print(f"🎙 Audio Transcribed: {text}")
+            
+            elif type == "imageMessage":
+                b64 = await evolution_service.get_media_base64(msg_id)
+                if b64:
+                    desc = await multimedia_service.describe_image(b64)
+                    text = f"[Imagen enviada por el paciente: {desc}]"
+                    print(f"👁 Image Analyzed: {desc}")
+
+            if text:
+                await handle_whatsapp_message(from_num, text)
+                
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "message": str(e)}

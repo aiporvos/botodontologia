@@ -30,3 +30,10 @@ email-validator==2.1.0.post1
 python-jose[cryptography]==3.3.0
 itsdangerous==2.1.2
 python-multipart==0.0.6
+
+# AI and Agents
+langchain==0.1.1
+openai==1.10.0
+langchain-openai==0.0.5
+langchain-community==0.0.15
+tiktoken==0.5.2
