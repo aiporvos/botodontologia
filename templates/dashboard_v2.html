@@ -419,52 +419,185 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* Symbol overlays */
-        .tooth-map.sym-extraction::after,
-        .tooth-map.sym-absent::after {
+        .tooth-map.sym-extraction::after {
             content: '\f00d';
-            font-family: 'Font Awesome 5 Free';
+            font-family: 'Font Awesome 6 Free';
             font-weight: 900;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 32px;
+            font-size: 30px;
             color: #ef4444;
             z-index: 20;
             pointer-events: none;
         }
 
         .tooth-map.sym-extraction-req::after {
+            content: '\f00d';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
             color: #3b82f6;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .tooth-map.sym-absent::after {
+            content: '\f00d';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: #ef4444;
+            z-index: 20;
+            pointer-events: none;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.1);
         }
 
         .tooth-map.sym-tc::before {
-            content: '';
+            content: 'TC';
             position: absolute;
-            top: 0;
+            top: -18px;
             left: 50%;
-            width: 4px;
-            height: 100%;
-            background: #ef4444;
             transform: translateX(-50%);
-            z-index: 15;
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #ef4444;
+            z-index: 30;
         }
 
         .tooth-map.sym-tc-req::before {
-            background: #3b82f6;
+            content: 'TC';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #3b82f6;
+            z-index: 30;
         }
 
         .tooth-map.sym-implant::after {
             content: 'IM';
             position: absolute;
-            top: -15px;
-            font-size: 0.6rem;
-            font-weight: 800;
-            background: #ef4444;
-            color: white;
-            padding: 2px 4px;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #ef4444;
+            z-index: 30;
+        }
+
+        .tooth-map.sym-implant-req::after {
+            content: 'IM';
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #3b82f6;
+            z-index: 30;
+        }
+
+        .tooth-map.sym-corona::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #ef4444;
             border-radius: 4px;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        .tooth-map.sym-corona-req::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #3b82f6;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        .tooth-map.sym-orto::after {
+            content: '\f555';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #6366f1;
+            font-size: 20px;
+            z-index: 26;
+            opacity: 0.5;
+        }
+
+        .tooth-icon-box {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 2px;
+        }
+
+        .tooth-container.active-tooth .tooth-icon-box {
+            color: #94a3b8;
+        }
+
+        /* Reference Styles */
+        .odonto-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-blue {
+            background: #3b82f6;
+        }
+
+        .legend-red {
+            background: #ef4444;
         }
 
         /* Colors */
@@ -803,30 +936,48 @@
                                 class="fas fa-sync"></i></button>
                     </div>
 
-                    <div class="odonto-toolbox">
+                    <div class="odonto-toolbox" id="odontoToolbox">
                         <button class="tool-btn active" data-tool="caries-req" onclick="setTool(this)">
-                            <div class="tool-icon prest-requerida"></div> Caries (Azul)
+                            <div class="tool-icon legend-blue" style="border-radius:50%"></div> Caries (Azul)
                         </button>
                         <button class="tool-btn" data-tool="caries-done" onclick="setTool(this)">
-                            <div class="tool-icon prest-existente"></div> Caries (Rojo)
+                            <div class="tool-icon legend-red" style="border-radius:50%"></div> Caries (Rojo)
+                        </button>
+                        <button class="tool-btn" data-tool="obtur-req" onclick="setTool(this)">
+                            <div class="tool-icon legend-blue"></div> Obturación (Azul)
+                        </button>
+                        <button class="tool-btn" data-tool="obtur-done" onclick="setTool(this)">
+                            <div class="tool-icon legend-red"></div> Obturación (Rojo)
                         </button>
                         <button class="tool-btn" data-tool="extract-req" onclick="setTool(this)">
-                            <i class="fas fa-times" style="color:#3b82f6"></i> Extracción (Azul)
+                            <i class="fas fa-times" style="color:#3b82f6; font-size:1.1rem"></i> Extracción (Azul)
                         </button>
                         <button class="tool-btn" data-tool="extract-done" onclick="setTool(this)">
-                            <i class="fas fa-times" style="color:#ef4444"></i> Extracción (Rojo)
+                            <i class="fas fa-times" style="color:#ef4444; font-size:1.1rem"></i> Ausente (Rojo)
                         </button>
                         <button class="tool-btn" data-tool="tc-req" onclick="setTool(this)">
-                            <i class="fas fa-grip-lines-vertical" style="color:#3b82f6"></i> T.C. (Azul)
+                            <span style="color:#3b82f6; font-weight:900">TC</span> Conducto (Azul)
                         </button>
                         <button class="tool-btn" data-tool="tc-done" onclick="setTool(this)">
-                            <i class="fas fa-grip-lines-vertical" style="color:#ef4444"></i> T.C. (Rojo)
+                            <span style="color:#ef4444; font-weight:900">TC</span> Conducto (Rojo)
+                        </button>
+                        <button class="tool-btn" data-tool="corona-req" onclick="setTool(this)">
+                            <i class="far fa-square"
+                                style="color:#3b82f6; font-size:1.1rem; border:2px solid #3b82f6"></i> Corona (Azul)
+                        </button>
+                        <button class="tool-btn" data-tool="corona-done" onclick="setTool(this)">
+                            <i class="far fa-square"
+                                style="color:#ef4444; font-size:1.1rem; border:2px solid #ef4444"></i> Corona (Rojo)
                         </button>
                         <button class="tool-btn" data-tool="implant" onclick="setTool(this)">
-                            <i class="fas fa-microchip"></i> Implante
+                            <span style="color:#ef4444; font-weight:900">IM</span> Implante
                         </button>
-                        <button class="tool-btn" data-tool="clear" onclick="setTool(this)">
-                            <i class="fas fa-eraser"></i> Limpiar
+                        <button class="tool-btn" data-tool="orto" onclick="setTool(this)">
+                            <i class="fas fa-grip-lines" style="color:#6366f1"></i> Ortodoncia
+                        </button>
+                        <button class="tool-btn" data-tool="clear" onclick="setTool(this)"
+                            style="margin-left:auto; background:#fee2e2">
+                            <i class="fas fa-trash-alt"></i> Limpiar Todo
                         </button>
                     </div>
 
@@ -840,6 +991,31 @@
                             <div class="tooth-row" id="row-down-ped"></div>
                             <div class="tooth-row-label">Dentición Adulta (Inferior)</div>
                             <div class="tooth-row" id="row-down"></div>
+                        </div>
+
+                        <div class="odonto-legend">
+                            <div class="legend-item"><span style="font-weight:900; color:#ef4444">TC</span> Trat.
+                                Conducto</div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-blue" style="border-radius:50%"></div> Caries
+                            </div>
+                            <div class="legend-item"><i class="fas fa-times" style="color:#3b82f6"></i> Extracción</div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-red" style="border:1px solid #ef4444; border-radius:5px">
+                                </div> Obturación
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-red" style="border:3px solid #ef4444; background:none">
+                                </div> Corona
+                            </div>
+                            <div class="legend-item"><span style="font-weight:900; color:#ef4444">IM</span> Implante
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-blue"></div> Prest. Requerida
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot legend-red"></div> Prest. Existente
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1295,18 +1471,23 @@
                     const adultDown = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
                     const renderRow = (row, ids) => {
-                        row.innerHTML = ids.map(id => `
-                    <div class="tooth-container">
-                        <span class="tooth-id">${id}</span>
-                        <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
-                            <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
-                            <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
-                            <div class="tooth-face face-left" data-face="M" onclick="clickFace(event, ${id}, 'M')"></div>
-                            <div class="tooth-face face-right" data-face="D" onclick="clickFace(event, ${id}, 'D')"></div>
-                            <div class="tooth-face face-center" data-face="O" onclick="clickFace(event, ${id}, 'O')"></div>
-                        </div>
-                    </div>
-                `).join('');
+                        row.innerHTML = ids.map(id => {
+                            let icon = '<i class="fas fa-tooth"></i>';
+                            if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="fas fa-grip-lines-vertical"></i>';
+                            return `
+                                <div class="tooth-container">
+                                    <div class="tooth-icon-box">${icon}</div>
+                                    <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
+                                        <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
+                                        <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
+                                        <div class="tooth-face face-left" data-face="M" onclick="clickFace(event, ${id}, 'M')"></div>
+                                        <div class="tooth-face face-right" data-face="D" onclick="clickFace(event, ${id}, 'D')"></div>
+                                        <div class="tooth-face face-center" data-face="O" onclick="clickFace(event, ${id}, 'O')"></div>
+                                    </div>
+                                    <span class="tooth-id">${id}</span>
+                                </div>
+                            `;
+                        }).join('');
                     };
 
                     renderRow(up, adultUp);
@@ -1338,11 +1519,16 @@
                     const mapping = {
                         'caries-req': { proc: 'Caries', status: 'planned' },
                         'caries-done': { proc: 'Caries', status: 'done' },
+                        'obtur-req': { proc: 'Obturación', status: 'planned' },
+                        'obtur-done': { proc: 'Obturación', status: 'done' },
                         'extract-req': { proc: 'Extracción', status: 'planned' },
-                        'extract-done': { proc: 'Extracción', status: 'done' },
+                        'extract-done': { proc: 'Diente Ausente', status: 'done' },
                         'tc-req': { proc: 'T.C.', status: 'planned' },
                         'tc-done': { proc: 'T.C.', status: 'done' },
+                        'corona-req': { proc: 'Corona', status: 'planned' },
+                        'corona-done': { proc: 'Corona', status: 'done' },
                         'implant': { proc: 'Implante', status: 'done' },
+                        'orto': { proc: 'Ortodoncia', status: 'done' },
                         'clear': { proc: 'CLEAR', status: 'clear' }
                     };
 
@@ -1361,7 +1547,22 @@
                     document.getElementById('t_status').value = tool.status;
                     document.getElementById('t_title').innerText = `Registrar ${tool.proc} - Diente ${tooth} ${face ? '(Cara ' + face + ')' : ''}`;
 
-                    openModal('modalTreatment');
+                    saveTreatmentDirect();
+                }
+
+                async function saveTreatmentDirect() {
+                    const pid = document.getElementById('t_pid').value;
+                    const data = {
+                        patient_id: parseInt(pid),
+                        tooth: document.getElementById('t_tooth').value,
+                        face: document.getElementById('t_face').value,
+                        procedure_name: document.getElementById('t_proc').value,
+                        status: document.getElementById('t_status').value
+                    };
+                    try {
+                        await apiFetch('/api/odontogram', { method: 'POST', body: JSON.stringify(data) });
+                        loadPatientOdontogram();
+                    } catch (e) { alert(e.message); }
                 }
 
                 async function clearToothRecords(pid, tooth) {
@@ -1397,11 +1598,14 @@
                     const pid = document.getElementById('selectOdontoPatient').value;
                     if (!pid) return;
 
-                    // Clear all symbol and prestation classes
+                    // Clear ALL
                     document.querySelectorAll('.tooth-map').forEach(m => {
-                        m.classList.remove('sym-extraction', 'sym-extraction-req', 'sym-tc', 'sym-tc-req', 'sym-implant', 'sym-absent');
+                        m.classList.remove('sym-extraction', 'sym-extraction-req', 'sym-tc', 'sym-tc-req', 'sym-implant', 'sym-absent', 'sym-corona', 'sym-corona-req', 'sym-orto');
                     });
-                    document.querySelectorAll('.tooth-face').forEach(f => f.className = f.className.split(' ').filter(c => !c.includes('prest-')).join(' '));
+                    document.querySelectorAll('.tooth-face').forEach(f => {
+                        f.style.background = 'transparent';
+                        f.style.opacity = '1';
+                    });
 
                     try {
                         const data = await apiFetch(`/api/patients/${pid}/odontogram`);
@@ -1414,13 +1618,20 @@
 
                             if (proc.includes('caries') || proc.includes('obturación')) {
                                 const face = toothEl.querySelector(`.face-${getFaceClass(r.face)}`);
-                                if (face) face.classList.add(isDone ? 'prest-existente' : 'prest-requerida');
+                                if (face) {
+                                    face.style.background = isDone ? '#ef4444' : '#3b82f6';
+                                    if (proc.includes('caries')) face.style.opacity = "0.7";
+                                }
                             } else if (proc.includes('extracción') || proc.includes('ausente')) {
-                                toothEl.classList.add(isDone ? 'sym-extraction' : 'sym-extraction-req');
+                                toothEl.classList.add(proc.includes('ausente') ? 'sym-absent' : (isDone ? 'sym-extraction' : 'sym-extraction-req'));
                             } else if (proc.includes('t.c.') || proc.includes('conducto')) {
                                 toothEl.classList.add(isDone ? 'sym-tc' : 'sym-tc-req');
                             } else if (proc.includes('implante')) {
-                                toothEl.classList.add('sym-implant');
+                                toothEl.classList.add(isDone ? 'sym-implant' : 'sym-implant-req');
+                            } else if (proc.includes('corona')) {
+                                toothEl.classList.add(isDone ? 'sym-corona' : 'sym-corona-req');
+                            } else if (proc.includes('ortodoncia')) {
+                                toothEl.classList.add('sym-orto');
                             }
                         });
                     } catch (e) { console.error(e); }
