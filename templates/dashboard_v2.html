@@ -4,299 +4,961 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dental Studio Pro - Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Dental Studio Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --bg: #f8fafc;
-            --sidebar: #ffffff;
-            --primary: #3498db;
-            --text-main: #1e293b;
-            --accent: #6366f1;
-            --glass: rgba(255, 255, 255, 0.7);
+            --bg: #f0f4f8;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #94a3b8;
+            --sidebar-active: #3b82f6;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --purple: #8b5cf6;
         }
 
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Outfit', sans-serif;
             background: var(--bg);
-            color: var(--text-main);
+            color: var(--text);
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Sidebar */
+        /* SIDEBAR */
         .sidebar {
-            width: 260px;
-            background: var(--sidebar);
-            border-right: 1px solid #e2e8f0;
+            width: 250px;
+            background: var(--sidebar-bg);
             display: flex;
             flex-direction: column;
-            padding: 2rem 1rem;
-            transition: all 0.3s;
+            padding: 1.5rem 0;
+            flex-shrink: 0;
         }
 
-        .logo-area {
+        .sidebar .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 0 1rem;
-            margin-bottom: 3rem;
-        }
-
-        .logo-area h2 {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
             font-size: 1.2rem;
-            margin: 0;
-            color: var(--primary);
+            font-weight: 700;
         }
 
-        .nav-link {
+        .sidebar .logo i {
+            color: var(--blue);
+            font-size: 1.5rem;
+        }
+
+        .nav-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0.8rem 1rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--sidebar-text);
             text-decoration: none;
-            color: #64748b;
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
             transition: all 0.2s;
-            font-weight: 500;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
         }
 
-        .nav-link:hover,
-        .nav-link.active {
-            background: rgba(52, 152, 219, 0.1);
-            color: var(--primary);
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-left-color: var(--blue);
         }
 
-        .nav-link i {
-            font-size: 1.1rem;
+        .nav-item i {
+            width: 20px;
+            text-align: center;
         }
 
-        /* Main Content */
-        .main-content {
+        .nav-sep {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1rem 1.5rem;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 0 1.5rem;
+        }
+
+        /* MAIN */
+        .main {
             flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        header {
+        .topbar {
+            background: var(--card);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .user-profile {
+        .topbar h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .topbar .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .avatar {
-            width: 35px;
-            height: 35px;
-            background: var(--primary);
+        .topbar .avatar {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
+            background: var(--blue);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
+            font-weight: 600;
         }
 
-        /* Stats Cards */
-        .stats-grid {
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* STATS */
+        .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: white;
+            background: var(--card);
             padding: 1.5rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
         }
 
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
+        .stat-card .icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
         }
 
-        .stat-info h3 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--text-main);
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
         }
 
-        .stat-info p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.9rem;
+        .stat-card p {
+            color: var(--text-light);
+            font-size: 0.85rem;
         }
 
-        /* Grid Charts */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-
+        /* CARDS */
         .card {
-            background: white;
+            background: var(--card);
+            border-radius: 16px;
             padding: 1.5rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .card-header h4 {
-            margin: 0;
+            font-weight: 600;
+        }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
         }
 
         .btn-sm {
-            padding: 5px 15px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            cursor: pointer;
+            padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        /* BADGE */
+        .badge {
+            padding: 0.25rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* FORMS */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--blue);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal h3 {
+            margin-bottom: 1.5rem;
+        }
+
+        /* ODONTOGRAM */
+        .odontogram {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .dental-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tooth {
+            width: 40px;
+            height: 50px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tooth:hover {
+            border-color: var(--blue);
+            background: #eff6ff;
+        }
+
+        .tooth.treated {
+            background: #dcfce7;
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .tooth.planned {
+            background: #fef3c7;
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .tooth.problem {
+            background: #fee2e2;
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* SEARCH */
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--blue);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .grid-2,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="sidebar">
-        <div class="logo-area">
-            <i class="fas fa-tooth" style="font-size: 2rem; color: #3498db;"></i>
-            <h2>Dental Studio</h2>
-        </div>
-
-        <nav>
-            <a href="#" class="nav-link active"><i class="fas fa-th-large"></i> Dashboard</a>
-            <a href="#" class="nav-link"><i class="fas fa-calendar-alt"></i> Agenda</a>
-            <a href="#" class="nav-link"><i class="fas fa-user-friends"></i> Pacientes</a>
-            <a href="#" class="nav-link"><i class="fas fa-tooth"></i> Odontograma</a>
-            <a href="#" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Finanzas</a>
-            <a href="#" class="nav-link"><i class="fas fa-cog"></i> Configuración</a>
-        </nav>
-
-        <div style="margin-top: auto;">
-            <a href="/login" class="nav-link" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</a>
+        <div class="logo"><i class="fas fa-tooth"></i> Dental Studio</div>
+        <div class="nav-item active" data-section="dashboard"><i class="fas fa-th-large"></i> Dashboard</div>
+        <div class="nav-item" data-section="patients"><i class="fas fa-user-friends"></i> Pacientes</div>
+        <div class="nav-item" data-section="appointments"><i class="fas fa-calendar-alt"></i> Agenda</div>
+        <div class="nav-item" data-section="odontogram"><i class="fas fa-tooth"></i> Odontograma</div>
+        <div class="nav-sep"></div>
+        <div class="nav-item" data-section="payments"><i class="fas fa-dollar-sign"></i> Cobros</div>
+        <div class="nav-item" data-section="debts"><i class="fas fa-file-invoice"></i> Deudas</div>
+        <div class="nav-sep"></div>
+        <a href="/admin" class="nav-item"><i class="fas fa-cog"></i> Admin Panel</a>
+        <div class="sidebar-footer">
+            <div class="nav-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
         </div>
     </div>
 
-    <div class="main-content">
-        <header>
-            <div>
-                <h2 style="margin:0;">Dashboard Overview</h2>
-                <p style="color:#64748b; margin:0;">Bienvenido, Dr. Silvestro</p>
-            </div>
-
-            <div class="user-profile">
-                <div class="avatar">S</div>
-                <span style="font-weight: 600; font-size: 0.9rem;">Dr. Silvestro</span>
-                <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
-            </div>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#e0f2fe; color:#0369a1;"><i class="fas fa-users"></i></div>
-                <div class="stat-info">
-                    <h3 id="patientCount">124</h3>
-                    <p>Pacientes Totales</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#fef3c7; color:#b45309;"><i class="fas fa-clock"></i></div>
-                <div class="stat-info">
-                    <h3 id="todayAppts">8</h3>
-                    <p>Turnos Hoy</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#dcfce7; color:#15803d;"><i class="fas fa-dollar-sign"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="monthlyRevenue">$45k</h3>
-                    <p>Ingresos Mes</p>
-                </div>
+    <div class="main">
+        <div class="topbar">
+            <h2 id="pageTitle">Dashboard</h2>
+            <div class="user-info">
+                <span id="userName" style="font-size:0.9rem;">Admin</span>
+                <div class="avatar" id="userAvatar">A</div>
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Próximos Turnos</h4>
-                    <button class="btn-sm">Ver Todo</button>
-                </div>
-                <div id="appointmentsList">
-                    <p style="color:#64748b; font-size:0.9rem;">Cargando turnos...</p>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h4>Actividad Reciente</h4>
-                </div>
-                <div style="font-size:0.85rem;">
-                    <div style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
-                        <strong>Juan Pérez</strong> pagó una consulta <br>
-                        <small style="color:#64748b;">Hace 10 min</small>
+        <div class="content">
+            <!-- DASHBOARD -->
+            <div class="section active" id="sec-dashboard">
+                <div class="stats-row" id="statsRow"></div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Turnos de Hoy</h4>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Paciente</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="todayTable"></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Últimos Cobros</h4>
+                        </div>
+                        <div id="recentPayments"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- PACIENTES -->
+            <div class="section" id="sec-patients">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                    <div class="search-bar" style="flex:1; max-width:400px;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="patientSearch" placeholder="Buscar paciente...">
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('patientModal')"><i class="fas fa-plus"></i>
+                        Nuevo Paciente</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>DNI</th>
+                                <th>Teléfono</th>
+                                <th>Obra Social</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AGENDA -->
+            <div class="section" id="sec-appointments">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                    <h4 style="font-size:1.1rem;">Todos los Turnos</h4>
+                    <button class="btn btn-primary" onclick="openModal('apptModal')"><i class="fas fa-plus"></i> Nuevo
+                        Turno</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Paciente</th>
+                                <th>Profesional</th>
+                                <th>Motivo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apptsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ODONTOGRAMA -->
+            <div class="section" id="sec-odontogram">
+                <div style="display:flex; gap:1rem; margin-bottom:1.5rem; align-items:center;">
+                    <select id="odontoPatient" class="form-group"
+                        style="padding:0.6rem 1rem; border-radius:10px; border:1px solid var(--border); min-width:250px;">
+                        <option value="">Seleccionar paciente...</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="loadOdontogram()">Ver Odontograma</button>
+                </div>
+                <div class="card">
+                    <h4 style="text-align:center; margin-bottom:1rem;">Adulto Superior</h4>
+                    <div class="odontogram">
+                        <div class="dental-row" id="upperRight"></div>
+                        <div class="dental-row" id="upperLeft"></div>
+                    </div>
+                    <h4 style="text-align:center; margin:1.5rem 0 1rem;">Adulto Inferior</h4>
+                    <div class="odontogram">
+                        <div class="dental-row" id="lowerLeft"></div>
+                        <div class="dental-row" id="lowerRight"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COBROS -->
+            <div class="section" id="sec-payments">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                    <h4>Registro de Cobros</h4>
+                    <button class="btn btn-primary" onclick="openModal('paymentModal')"><i class="fas fa-plus"></i>
+                        Nuevo Cobro</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Paciente</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DEUDAS -->
+            <div class="section" id="sec-debts">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                    <h4>Deudas Pendientes</h4>
+                    <button class="btn btn-primary" onclick="openModal('debtModal')"><i class="fas fa-plus"></i> Nueva
+                        Deuda</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Vencimiento</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="debtsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="patientModal">
+        <div class="modal">
+            <h3>Nuevo Paciente</h3>
+            <form id="patientForm">
+                <div class="form-grid">
+                    <div class="form-group"><label>Nombre</label><input id="pf_first" required></div>
+                    <div class="form-group"><label>Apellido</label><input id="pf_last" required></div>
+                    <div class="form-group"><label>DNI</label><input id="pf_dni"></div>
+                    <div class="form-group"><label>Teléfono</label><input id="pf_phone"></div>
+                    <div class="form-group"><label>Email</label><input id="pf_email" type="email"></div>
+                    <div class="form-group"><label>Obra Social</label><input id="pf_obra"></div>
+                </div>
+                <div class="form-group"><label>Notas</label><textarea id="pf_notes" rows="2"
+                        style="width:100%;padding:0.7rem;border-radius:10px;border:1px solid var(--border);font-family:inherit;"></textarea>
+                </div>
+                <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('patientModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="apptModal">
+        <div class="modal">
+            <h3>Nuevo Turno</h3>
+            <form id="apptForm">
+                <div class="form-grid">
+                    <div class="form-group"><label>Paciente</label><select id="af_patient" required></select></div>
+                    <div class="form-group"><label>Profesional</label><select id="af_prof"></select></div>
+                    <div class="form-group"><label>Fecha y Hora</label><input id="af_datetime" type="datetime-local"
+                            required></div>
+                    <div class="form-group"><label>Categoría</label>
+                        <select id="af_category">
+                            <option>consulta</option>
+                            <option>ortodoncia</option>
+                            <option>conductos</option>
+                            <option>extracciones</option>
+                            <option>implantes</option>
+                            <option>protesis</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Motivo</label><input id="af_reason" required></div>
+                <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('apptModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agendar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <h3>Registrar Cobro</h3>
+            <form id="paymentForm">
+                <div class="form-grid">
+                    <div class="form-group"><label>Paciente</label><select id="pyf_patient" required></select></div>
+                    <div class="form-group"><label>Monto ($)</label><input id="pyf_amount" type="number" required></div>
+                    <div class="form-group"><label>Método</label>
+                        <select id="pyf_method">
+                            <option value="cash">Efectivo</option>
+                            <option value="card">Tarjeta</option>
+                            <option value="transfer">Transferencia</option>
+                            <option value="insurance">Obra Social</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Referencia</label><input id="pyf_ref"></div>
+                </div>
+                <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('paymentModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Cobrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="debtModal">
+        <div class="modal">
+            <h3>Registrar Deuda</h3>
+            <form id="debtForm">
+                <div class="form-grid">
+                    <div class="form-group"><label>Paciente</label><select id="df_patient" required></select></div>
+                    <div class="form-group"><label>Monto ($)</label><input id="df_amount" type="number" required></div>
+                    <div class="form-group"><label>Descripción</label><input id="df_desc" required></div>
+                    <div class="form-group"><label>Vencimiento</label><input id="df_due" type="date"></div>
+                </div>
+                <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('debtModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Verificar Token
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/login';
-        }
+        const TOKEN = localStorage.getItem('token');
+        if (!TOKEN) window.location.href = '/login';
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('token');
+        const API = (url, opts = {}) => fetch(url, { ...opts, headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json', ...opts.headers } }).then(r => { if (r.status === 401) window.location.href = '/login'; return r.json(); });
+
+        // NAV
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const sec = item.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('sec-' + sec).classList.add('active');
+                document.getElementById('pageTitle').innerText = item.innerText.trim();
+                loadSection(sec);
+            });
         });
 
-        async function loadDashboard() {
-            try {
-                const response = await fetch('/api/patients', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.status === 401) window.location.href = '/login';
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('token'); window.location.href = '/login'; });
 
-                const patients = await response.json();
-                document.getElementById('patientCount').innerText = patients.length;
-            } catch (err) {
-                console.error(err);
-            }
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+        // LOAD SECTIONS
+        function loadSection(sec) {
+            if (sec === 'dashboard') loadDashboard();
+            else if (sec === 'patients') loadPatients();
+            else if (sec === 'appointments') loadAppointments();
+            else if (sec === 'payments') loadPayments();
+            else if (sec === 'debts') loadDebts();
+            else if (sec === 'odontogram') loadPatientSelectors();
         }
 
+        // DASHBOARD
+        async function loadDashboard() {
+            const stats = await API('/api/stats');
+            document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card"><div class="icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-users"></i></div><h3>${stats.total_patients}</h3><p>Pacientes Totales</p></div>
+        <div class="stat-card"><div class="icon" style="background:#fef3c7;color:#b45309;"><i class="fas fa-calendar-check"></i></div><h3>${stats.appointments_today}</h3><p>Turnos Hoy</p></div>
+        <div class="stat-card"><div class="icon" style="background:#dcfce7;color:#15803d;"><i class="fas fa-dollar-sign"></i></div><h3>$${(stats.total_revenue / 100).toLocaleString()}</h3><p>Ingresos Totales</p></div>
+        <div class="stat-card"><div class="icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div><h3>$${(stats.total_debt / 100).toLocaleString()}</h3><p>Deuda Pendiente</p></div>
+    `;
+            const today = await API('/api/appointments/today');
+            document.getElementById('todayTable').innerHTML = today.length ? today.map(a => `<tr><td>${a.time}</td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-${a.status === 'confirmed' ? 'green' : 'amber'}">${a.status}</span></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">Sin turnos hoy</td></tr>';
+
+            const payments = await API('/api/payments');
+            document.getElementById('recentPayments').innerHTML = payments.slice(0, 5).map(p => `<div style="padding:0.7rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><div><strong>${p.patient_name}</strong><br><small style="color:var(--text-light)">${p.payment_method || ''}</small></div><div style="font-weight:600;color:var(--green)">$${(p.amount / 100).toLocaleString()}</div></div>`).join('') || '<p style="color:var(--text-light)">Sin cobros registrados</p>';
+        }
+
+        // PATIENTS
+        let allPatients = [];
+        async function loadPatients() {
+            allPatients = await API('/api/patients');
+            renderPatients(allPatients);
+            loadPatientSelectors();
+        }
+        function renderPatients(list) {
+            document.getElementById('patientsTable').innerHTML = list.map(p => `<tr>
+        <td><strong>${p.first_name} ${p.last_name}</strong></td><td>${p.dni || '-'}</td><td>${p.phone || '-'}</td><td>${p.obra_social || '-'}</td>
+        <td><button class="btn btn-sm btn-outline" onclick="viewPatient(${p.id})"><i class="fas fa-eye"></i></button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center">Sin pacientes</td></tr>';
+        }
+        document.getElementById('patientSearch').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            renderPatients(allPatients.filter(p => `${p.first_name} ${p.last_name} ${p.dni || ''} ${p.phone || ''}`.toLowerCase().includes(q)));
+        });
+        document.getElementById('patientForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await API('/api/patients', {
+                method: 'POST', body: JSON.stringify({
+                    first_name: document.getElementById('pf_first').value, last_name: document.getElementById('pf_last').value,
+                    dni: document.getElementById('pf_dni').value, phone: document.getElementById('pf_phone').value,
+                    email: document.getElementById('pf_email').value, obra_social: document.getElementById('pf_obra').value,
+                    notes: document.getElementById('pf_notes').value
+                })
+            });
+            closeModal('patientModal'); e.target.reset(); loadPatients();
+        });
+        function viewPatient(id) { alert('Ficha del paciente #' + id + ' (próximamente vista detallada)'); }
+
+        // APPOINTMENTS
+        async function loadAppointments() {
+            const appts = await API('/api/appointments');
+            document.getElementById('apptsTable').innerHTML = appts.map(a => {
+                const dt = a.start_at ? new Date(a.start_at) : null;
+                const dateStr = dt ? dt.toLocaleDateString('es-AR') + ' ' + dt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '-';
+                const statusClass = { confirmed: 'green', pending: 'amber', cancelled: 'red' }[a.status] || 'blue';
+                return `<tr><td>${dateStr}</td><td>${a.patient_name}</td><td>${a.professional_name}</td><td>${a.reason}</td>
+            <td><span class="badge badge-${statusClass}">${a.status}</span></td>
+            <td>${a.status === 'confirmed' ? `<button class="btn btn-sm btn-danger" onclick="cancelAppt(${a.id})">Cancelar</button>` : ''}</td></tr>`;
+            }).join('') || '<tr><td colspan="6" style="text-align:center">Sin turnos</td></tr>';
+        }
+        async function cancelAppt(id) { if (confirm('¿Cancelar este turno?')) { await API(`/api/appointments/${id}/cancel`, { method: 'PUT' }); loadAppointments(); } }
+        document.getElementById('apptForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await API('/api/appointments', {
+                method: 'POST', body: JSON.stringify({
+                    patient_id: parseInt(document.getElementById('af_patient').value),
+                    professional_id: parseInt(document.getElementById('af_prof').value || 1),
+                    start_at: document.getElementById('af_datetime').value,
+                    reason: document.getElementById('af_reason').value,
+                    category: document.getElementById('af_category').value
+                })
+            });
+            closeModal('apptModal'); e.target.reset(); loadAppointments();
+        });
+
+        // PAYMENTS
+        async function loadPayments() {
+            const payments = await API('/api/payments');
+            document.getElementById('paymentsTable').innerHTML = payments.map(p => {
+                const dt = p.payment_date ? new Date(p.payment_date).toLocaleDateString('es-AR') : '-';
+                return `<tr><td>${dt}</td><td>${p.patient_name}</td><td><strong>$${(p.amount / 100).toLocaleString()}</strong></td><td>${p.payment_method || '-'}</td><td>${p.reference || '-'}</td></tr>`;
+            }).join('') || '<tr><td colspan="5" style="text-align:center">Sin cobros</td></tr>';
+        }
+        document.getElementById('paymentForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await API('/api/payments', {
+                method: 'POST', body: JSON.stringify({
+                    patient_id: parseInt(document.getElementById('pyf_patient').value),
+                    amount: parseInt(document.getElementById('pyf_amount').value) * 100,
+                    payment_method: document.getElementById('pyf_method').value,
+                    reference: document.getElementById('pyf_ref').value
+                })
+            });
+            closeModal('paymentModal'); e.target.reset(); loadPayments();
+        });
+
+        // DEBTS
+        async function loadDebts() {
+            const debts = await API('/api/debts');
+            document.getElementById('debtsTable').innerHTML = debts.map(d => {
+                const due = d.due_date ? new Date(d.due_date).toLocaleDateString('es-AR') : '-';
+                return `<tr><td>${d.patient_name}</td><td>${d.description}</td><td><strong>$${(d.amount / 100).toLocaleString()}</strong></td><td>${due}</td>
+            <td><span class="badge badge-${d.status === 'pending' ? 'red' : 'amber'}">${d.status}</span></td>
+            <td><button class="btn btn-sm btn-success" onclick="payDebt(${d.id})">Marcar Pagada</button></td></tr>`;
+            }).join('') || '<tr><td colspan="6" style="text-align:center">Sin deudas pendientes 🎉</td></tr>';
+        }
+        async function payDebt(id) { if (confirm('¿Marcar como pagada?')) { await API(`/api/debts/${id}/pay`, { method: 'PUT' }); loadDebts(); } }
+        document.getElementById('debtForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await API('/api/debts', {
+                method: 'POST', body: JSON.stringify({
+                    patient_id: parseInt(document.getElementById('df_patient').value),
+                    amount: parseInt(document.getElementById('df_amount').value) * 100,
+                    description: document.getElementById('df_desc').value,
+                    due_date: document.getElementById('df_due').value || null
+                })
+            });
+            closeModal('debtModal'); e.target.reset(); loadDebts();
+        });
+
+        // ODONTOGRAM
+        function buildTeeth() {
+            const rows = { upperRight: [18, 17, 16, 15, 14, 13, 12, 11], upperLeft: [21, 22, 23, 24, 25, 26, 27, 28], lowerLeft: [31, 32, 33, 34, 35, 36, 37, 38], lowerRight: [48, 47, 46, 45, 44, 43, 42, 41] };
+            Object.entries(rows).forEach(([id, teeth]) => {
+                document.getElementById(id).innerHTML = teeth.map(t => `<div class="tooth" data-tooth="${t}" onclick="selectTooth(${t})">${t}</div>`).join('');
+            });
+        }
+        function selectTooth(num) {
+            const patientId = document.getElementById('odontoPatient').value;
+            if (!patientId) { alert('Seleccione un paciente primero'); return; }
+            const proc = prompt(`Diente ${num}: Ingrese procedimiento (ej: Obturación, Extracción):`);
+            if (proc) {
+                API('/api/odontogram', { method: 'POST', body: JSON.stringify({ patient_id: parseInt(patientId), tooth: String(num), procedure_name: proc, status: 'planned' }) }).then(() => loadOdontogram());
+            }
+        }
+        async function loadOdontogram() {
+            const pid = document.getElementById('odontoPatient').value;
+            if (!pid) return;
+            const data = await API(`/api/patients/${pid}/odontogram`);
+            document.querySelectorAll('.tooth').forEach(el => { el.className = 'tooth'; });
+            data.records.forEach(r => { const el = document.querySelector(`.tooth[data-tooth="${r.tooth}"]`); if (el) { el.classList.add(r.record_status === 'done' ? 'treated' : r.record_status === 'planned' ? 'planned' : 'problem'); el.title = r.procedure_name; } });
+            data.treatments.forEach(t => { const el = document.querySelector(`.tooth[data-tooth="${t.tooth}"]`); if (el) { el.classList.add(t.status === 'done' ? 'treated' : 'planned'); el.title = t.treatment_name; } });
+        }
+
+        // PATIENT SELECTORS
+        async function loadPatientSelectors() {
+            if (!allPatients.length) allPatients = await API('/api/patients');
+            const opts = allPatients.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+            ['af_patient', 'pyf_patient', 'df_patient', 'odontoPatient'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Seleccionar...</option>' + opts; });
+            const profs = await API('/api/professionals');
+            document.getElementById('af_prof').innerHTML = profs.map(p => `<option value="${p.id}">${p.full_name}</option>`).join('');
+        }
+
+        // User info
+        API('/api/auth/me').then(u => { document.getElementById('userName').innerText = u.username; document.getElementById('userAvatar').innerText = u.username[0].toUpperCase(); });
+
+        // INIT
+        buildTeeth();
         loadDashboard();
     </script>
 </body>
