@@ -259,18 +259,13 @@ def setup_admin(app, engine):
                 try:
                     user = db.query(AdminUser).filter(AdminUser.username == username).first()
                     if user and verify_password(password, user.password_hash):
-                        # Solo permitimos login de ADMIN en este panel
-                        if user.role != "admin":
-                            print(f"DEBUG: Acceso denegado a {username} por rol insuficiente")
-                            return False
-                            
+                        if user.role != "admin": return False
                         request.session.update({"token": "authenticated", "user_id": user.id, "role": "admin"})
                         return True
                 finally:
                     db.close()
                 return False
-            except Exception as e:
-                print(f"DEBUG: Error en admin login: {e}")
+            except Exception:
                 return False
 
         async def logout(self, request: Request) -> bool:
@@ -278,9 +273,24 @@ def setup_admin(app, engine):
             return True
 
         async def authenticate(self, request: Request) -> bool:
-            return request.session.get("token") == "authenticated" and request.session.get("role") == "admin"
+            # 1. Por sesión
+            if request.session.get("token") == "authenticated" and request.session.get("role") == "admin":
+                return True
+            
+            # 2. Por Cookie de JWT (Dashboard -> Admin Panel)
+            token = request.cookies.get("access_token")
+            if token:
+                try:
+                    from app.auth import jwt, SECRET_KEY, ALGORITHM
+                    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+                    if payload.get("role") == "admin":
+                        # Sincronizar sesión
+                        request.session.update({"token": "authenticated", "role": "admin"})
+                        return True
+                except: pass
+            return False
 
-    auth_backend = AdminAuth(secret_key=settings.admin_password)
+    auth_backend = AdminAuth(secret_key="dental-studio-super-secret-key-123")
 
     admin = Admin(
         app,

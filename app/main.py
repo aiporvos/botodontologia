@@ -71,7 +71,7 @@ app = FastAPI(
 )
 
 from starlette.middleware.sessions import SessionMiddleware
-app.add_middleware(SessionMiddleware, secret_key=settings.admin_password)
+app.add_middleware(SessionMiddleware, secret_key="dental-studio-super-secret-key-123")
 
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
@@ -99,11 +99,26 @@ async def dashboard_page(request: Request):
 # ==================== AUTH ====================
 
 @app.post("/api/auth/login", response_model=schemas.Token)
-async def login(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(response: Response, request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = db.query(AdminUser).filter(AdminUser.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales inválidas")
+    
+    # Sincronizar con la sesión de sqladmin para login unificado
+    request.session.update({"token": "authenticated", "user_id": user.id, "role": user.role or "admin"})
+    
     token = create_access_token(data={"sub": user.username, "role": user.role or "admin"})
+    
+    # Set cookie para acceso unificado (especialmente para /admin y archivos estáticos si fuera necesario)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        max_age=60 * 60 * 24, # 24h
+        samesite="lax",
+        secure=False  # Cambiar a True si se usa HTTPS forzado, por ahora False para compatibilidad
+    )
+    
     return {"access_token": token, "token_type": "bearer"}
 
 @app.get("/api/auth/me")
