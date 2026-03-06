@@ -11,8 +11,10 @@ dp = Dispatcher(bot=bot, storage=storage)
 async def setup_bot():
     """Configura el bot y registra los handlers"""
     from app.handlers.conversation import router
-    if not dp.routers:
+    try:
         dp.include_router(router)
+    except ValueError:
+        pass # Ignorar si el router ya está acoplado
     return dp
 
 async def start_bot_polling():
