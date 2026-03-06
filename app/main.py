@@ -40,10 +40,10 @@ async def lifespan(app: FastAPI):
             db.commit()
             print(f"✅ Admin creado: {settings.admin_username}")
         else:
-            if not admin.password_hash.startswith("$pbkdf2"):
-                admin.password_hash = get_password_hash(settings.admin_password)
-                db.commit()
-                print("🔄 Contraseña de admin actualizada")
+            # Forzamos la contraseña de settings para asegurar el acceso
+            admin.password_hash = get_password_hash(settings.admin_password)
+            db.commit()
+            print("🔄 Contraseña de admin actualizada por seguridad")
 
         # Profesionales por defecto
         if db.query(Professional).count() == 0:
@@ -321,6 +321,14 @@ async def save_odontogram_entry(data: dict, db: Session = Depends(get_db), curre
         return {"status": "ok", "id": record.id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/api/odontogram/{record_id}")
+async def delete_odontogram_entry(record_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
+    r = db.query(DentalRecord).filter(DentalRecord.id == record_id).first()
+    if r:
+        db.delete(r)
+        db.commit()
+    return {"status": "ok"}
 
 
 # ==================== PAGOS ====================

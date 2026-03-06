@@ -914,7 +914,7 @@
         <div class="modal">
             <h3 id="t_title">Tratamiento Diente</h3><br>
             <form id="formTreatment" onsubmit="saveTreatment(event)">
-                <input type="hidden" id="t_tooth"><input type="hidden" id="t_face">
+                <input type="hidden" id="t_pid"><input type="hidden" id="t_tooth"><input type="hidden" id="t_face">
                 <div class="form-group"><label>Procedimiento</label>
                     <select id="t_proc" required>
                         <option value="Caries">Caries</option>
@@ -1278,10 +1278,13 @@
 
             const tool = mapping[activeTool];
             if (tool.proc === 'CLEAR') {
-                alert('Limpieza manual no disponible aún via API directa. Registre un tratamiento correctivo.');
+                if (confirm(`¿Desea limpiar todos los registros del diente ${tooth}?`)) {
+                    clearToothRecords(pid, tooth);
+                }
                 return;
             }
 
+            document.getElementById('t_pid').value = pid;
             document.getElementById('t_tooth').value = tooth;
             document.getElementById('t_face').value = face || '';
             document.getElementById('t_proc').value = tool.proc;
@@ -1291,9 +1294,22 @@
             openModal('modalTreatment');
         }
 
+        async function clearToothRecords(pid, tooth) {
+            try {
+                const data = await apiFetch(`/api/patients/${pid}/odontogram`);
+                const toDelete = data.records.filter(r => r.tooth == tooth);
+                for (let r of toDelete) {
+                    await apiFetch(`/api/odontogram/${r.id}`, { method: 'DELETE' });
+                }
+                loadPatientOdontogram();
+            } catch (e) { alert(e.message); }
+        }
+
         async function saveTreatment(e) {
             e.preventDefault();
-            const pid = document.getElementById('selectOdontoPatient').value;
+            const pid = document.getElementById('t_pid').value || document.getElementById('selectOdontoPatient').value;
+            if (!pid) { alert("Error: No hay paciente seleccionado"); return; }
+
             const data = {
                 patient_id: parseInt(pid),
                 tooth: document.getElementById('t_tooth').value,
