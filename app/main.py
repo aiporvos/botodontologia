@@ -38,11 +38,11 @@ async def lifespan(app: FastAPI):
             db.commit()
             print(f"✅ Admin creado: {settings.admin_username}")
         else:
-            # Re-hashear la contraseña con bcrypt si el hash actual es viejo (SHA256 u otro)
-            if not admin.password_hash.startswith("$2b$"):
+            # Re-hashear si el hash no es pbkdf2_sha256
+            if not admin.password_hash.startswith("$pbkdf2"):
                 admin.password_hash = get_password_hash(settings.admin_password)
                 db.commit()
-                print("🔄 Contraseña de admin actualizada a bcrypt")
+                print("🔄 Contraseña de admin actualizada")
     finally:
         db.close()
     
