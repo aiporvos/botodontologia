@@ -37,6 +37,7 @@ async def send_smart_response(chat_id: str, channel: str, text: str):
 @router.message()
 async def aiogram_handler(message: Message):
     """Handler para Telegram"""
+    print(f"📬 Telegram Message from {message.from_user.full_name} ({message.chat.id}): {message.text}")
     await send_smart_response(str(message.chat.id), "telegram", message.text or "")
 
 # ==================== WHATSAPP ENTRY POINT ====================

@@ -7,7 +7,8 @@ class TelegramService:
     """Servicio para enviar mensajes por Telegram"""
 
     def __init__(self):
-        self.bot = Bot(token=settings.telegram_bot_token)
+        from app.bot import bot
+        self.bot = bot
 
     async def send_message(self, chat_id: int, text: str) -> bool:
         """Envía un mensaje de texto"""

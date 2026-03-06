@@ -18,9 +18,11 @@ async def setup_bot():
 async def start_bot_polling():
     """Inicia el polling del bot en segundo plano"""
     await setup_bot()
+    print("🧹 Cleaning old Telegram webhooks...")
+    await bot.delete_webhook(drop_pending_updates=True)
     print("🤖 Bot de Telegram iniciado mediante Polling...")
     try:
-        await dp.start_polling(bot)
+        await dp.start_polling(bot, handle_signals=False)
     except Exception as e:
         print(f"❌ Error en Polling de Telegram: {e}")
 
