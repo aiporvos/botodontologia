@@ -7,6 +7,8 @@
     <title>Dental Studio Pro - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         * {
             margin: 0;
@@ -350,6 +352,74 @@
 
         .q-dr {
             border-right: 1px solid #cbd5e1 !important;
+        }
+
+        /* CALENDAR STYLES (CAL.COM LOOK) */
+        #calendar {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            height: 700px;
+        }
+
+        .fc {
+            font-family: 'Outfit', sans-serif !important;
+            border: none !important;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.25rem !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+        }
+
+        .fc-button-primary {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #475569 !important;
+            font-weight: 500 !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+
+        .fc-button-primary:hover {
+            background: #f8fafc !important;
+        }
+
+        .fc-button-active {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        .fc-day-today {
+            background: #f0f9ff !important;
+        }
+
+        .fc-event {
+            border: none !important;
+            padding: 2px 4px !important;
+            border-radius: 6px !important;
+            font-size: 0.85rem !important;
+            cursor: pointer;
+        }
+
+        .fc-v-event {
+            background: rgba(59, 130, 246, 0.1) !important;
+            color: #2563eb !important;
+            border-left: 3px solid #3b82f6 !important;
+        }
+
+        .fc-timegrid-slot {
+            height: 40px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        .fc-col-header-cell {
+            padding: 12px 0 !important;
+            font-weight: 600 !important;
+            color: #64748b !important;
         }
 
         .q-dl {
@@ -916,25 +986,13 @@
 
             <!-- APPOINTMENTS SECTION -->
             <div id="sec-appointments" class="section">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card" style="padding: 1.5rem">
+                    <div class="card-header" style="margin-bottom: 1.5rem">
                         <h4 style="margin:0">Agenda de Turnos</h4>
                         <button class="btn btn-primary" onclick="openApptModal()"><i class="fas fa-calendar-plus"></i>
                             Agendar Turno</button>
                     </div>
-                    <table id="tableAppointments">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Paciente</th>
-                                <th>Motivo</th>
-                                <th>Especialista</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <div id="calendar"></div>
                 </div>
             </div>
 
@@ -1390,33 +1448,85 @@
             }
 
             // APPOINTMENTS
-            async function loadAppointments() {
-                try {
-                    const data = await apiFetch('/api/appointments');
-                    const body = document.querySelector('#tableAppointments tbody');
-                    body.innerHTML = data.map(a => {
-                        const d = new Date(a.start_at);
-                        const isCancelled = a.status === 'cancelled';
-                        return `
-                    <tr>
-                        <td><b>${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b></td>
-                        <td>${a.patient_name}</td>
-                        <td>${a.reason}</td>
-                        <td><span class="badge badge-${isCancelled ? 'red' : 'amber'}">${a.status}</span></td>
-                        <td>
-                            ${!isCancelled ? `<button class="btn btn-sm btn-danger" onclick="cancelAppt(${a.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
-                        </td>
-                    </tr>`;
-                    }).join('');
-                } catch (e) { console.error(e); }
-            }
-            async function cancelAppt(id) {
-                if (confirm('¿Cancelar este turno?')) {
-                    try {
-                        await apiFetch(`/api/appointments/${id}/cancel`, { method: 'PUT' });
-                        loadAppointments(); loadStats();
-                    } catch (e) { alert(e.message); }
+            let calendar = null;
+            function loadAppointments() {
+                if (!calendar) {
+                    initCalendar();
+                } else {
+                    calendar.refetchEvents();
+                    setTimeout(() => calendar.updateSize(), 50);
                 }
+            }
+
+            function initCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                if (!calendarEl) return;
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    locale: 'es',
+                    firstDay: 1,
+                    slotMinTime: '08:00:00',
+                    slotMaxTime: '20:00:00',
+                    allDaySlot: false,
+                    selectable: true,
+                    nowIndicator: true,
+                    events: async function (info, successCallback, failureCallback) {
+                        try {
+                            const data = await apiFetch('/api/appointments');
+                            const events = data.map(a => {
+                                let color = '#3b82f6';
+                                const reason = (a.reason || "").toLowerCase();
+                                if (a.category === 'surgery' || reason.includes('extracción') || reason.includes('cirugía')) color = '#ef4444';
+                                else if (a.category === 'ortho' || reason.includes('ortodoncia')) color = '#a855f7';
+                                else if (reason.includes('limpieza') || reason.includes('estética')) color = '#10b981';
+
+                                return {
+                                    id: a.id,
+                                    title: `${a.patient_name}\n${a.reason}`,
+                                    start: a.start_at,
+                                    end: a.end_at,
+                                    backgroundColor: a.status === 'cancelled' ? '#f1f5f9' : color + '15',
+                                    textColor: a.status === 'cancelled' ? '#94a3b8' : color,
+                                    borderColor: a.status === 'cancelled' ? '#e2e8f0' : color,
+                                    className: a.status === 'cancelled' ? 'event-cancelled' : '',
+                                    extendedProps: { ...a }
+                                };
+                            });
+                            successCallback(events);
+                        } catch (e) {
+                            console.error("Calendar fetch error:", e);
+                            failureCallback(e);
+                        }
+                    },
+                    dateClick: function (info) {
+                        let val = info.dateStr;
+                        if (val.length === 10) val += "T09:00"; // Default time if clicked on month view
+                        document.getElementById('a_datetime').value = val.slice(0, 16);
+                        openApptModal();
+                    },
+                    eventClick: function (info) {
+                        const a = info.event.extendedProps;
+                        if (confirm(`Turno: ${a.patient_name}\nMotivo: ${a.reason}\nEstado: ${a.status}\n\n¿Desea cancelar este turno?`)) {
+                            cancelAppt(a.id);
+                        }
+                    },
+                    height: '700px'
+                });
+                calendar.render();
+            }
+
+            async function cancelAppt(id) {
+                try {
+                    await apiFetch(`/api/appointments/${id}/cancel`, { method: 'PUT' });
+                    if (calendar) calendar.refetchEvents();
+                    loadStats();
+                } catch (e) { alert(e.message); }
             }
             async function saveAppt(e) {
                 e.preventDefault();
