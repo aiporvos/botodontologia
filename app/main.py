@@ -482,6 +482,10 @@ async def webhook_evolution(request: Request):
         from app.services.evolution import evolution_service
         
         for msg in messages:
+            # Evitar bucle infinito: no procesar mensajes enviados por el propio bot o por ti mismo
+            if msg.get("key", {}).get("fromMe", False):
+                continue
+            
             msg_id = msg.get("key", {}).get("id")
             type = msg.get("type")
             from_num = msg.get("key", {}).get("remoteJid", "").split("@")[0]
