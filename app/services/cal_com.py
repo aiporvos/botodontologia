@@ -1,10 +1,11 @@
-import requests
+import httpx
 from typing import Optional, List, Dict, Any
 from config import settings
+from datetime import datetime
 
 
 class CalComService:
-    """Servicio para interactuar con la API de Cal.com"""
+    """Servicio para interactuar con la API de Cal.com v2 de forma asíncrona"""
 
     def __init__(self):
         self.base_url = settings.calcom_url
@@ -15,43 +16,48 @@ class CalComService:
             "cal-api-version": "2024-08-13",
         }
 
-    def get_event_types(self) -> List[Dict]:
+    async def get_event_types(self) -> List[Dict]:
         """Obtiene los tipos de eventos disponibles"""
-        url = f"{self.base_url}/api/v2/event-types"
-        try:
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("eventTypes", [])
-        except Exception as e:
-            print(f"Error getting event types: {e}")
-            return []
+        url = f"{self.base_url}/v2/event-types"
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                # En v2 la estructura puede variar, ajustamos según documentación usual
+                return data.get("data", {}).get("eventTypes", [])
+            except Exception as e:
+                print(f"Error getting event types: {e}")
+                return []
 
-    def get_event_type_by_slug(self, slug: str) -> Optional[Dict]:
-        """Obtiene un tipo de evento por su slug"""
-        url = f"{self.base_url}/api/v2/event-types"
-        try:
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
-            data = response.json()
-            for event in data.get("eventTypes", []):
-                if event.get("slug") == slug:
-                    return event
-            return None
-        except Exception as e:
-            print(f"Error getting event type: {e}")
-            return None
-
-    def get_availability(
+    async def get_availability(
         self, event_type_id: int, start_date: str, end_date: str
     ) -> List[Dict]:
-        """Obtiene disponibilidad para un tipo de evento"""
-        url = f"{self.base_url}/api/v2/schedules"
-        # Por ahora retornamos slots genéricos
-        # La integración real requiere obtener el schedule del profesional
-        return []
+        """Obtiene disponibilidad real para un tipo de evento"""
+        # API v2 endpoint para disponibilidad
+        url = f"{self.base_url}/v2/slots/available"
+        params = {
+            "eventTypeId": event_type_id,
+            "startTime": start_date,
+            "endTime": end_date,
+        }
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, headers=self.headers, params=params)
+                response.raise_for_status()
+                data = response.json()
+                # Retorna los slots disponibles
+                slots_data = data.get("data", {}).get("slots", {})
+                # Aplanamos los slots de todos los días en una lista simple
+                all_slots = []
+                for date_key, slots in slots_data.items():
+                    all_slots.extend(slots)
+                return all_slots
+            except Exception as e:
+                print(f"Error getting availability from Cal.com: {e}")
+                return []
 
-    def create_booking(
+    async def create_booking(
         self,
         event_type_id: int,
         start: str,
@@ -60,44 +66,35 @@ class CalComService:
         notes: str = "",
     ) -> Optional[Dict]:
         """Crea una reserva en Cal.com"""
-        url = f"{self.base_url}/api/v2/bookings"
+        url = f"{self.base_url}/v2/bookings"
         payload = {
             "eventTypeId": event_type_id,
             "start": start,
             "attendees": [{"email": attendee_email, "name": attendee_name}],
             "location": {"type": "inPerson"} if notes else {},
+            "notes": notes
         }
 
-        try:
-            response = requests.post(url, headers=self.headers, json=payload)
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            print(f"Error creating booking: {e}")
-            return None
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=self.headers, json=payload)
+                response.raise_for_status()
+                return response.json().get("data")
+            except Exception as e:
+                print(f"Error creating booking in Cal.com: {e}")
+                return None
 
-    def get_bookings(self, status: str = "upcoming") -> List[Dict]:
-        """Obtiene las reservas"""
-        url = f"{self.base_url}/api/v2/bookings?status={status}"
-        try:
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("bookings", [])
-        except Exception as e:
-            print(f"Error getting bookings: {e}")
-            return []
-
-    def cancel_booking(self, booking_id: int, reason: str = "") -> bool:
+    async def cancel_booking(self, booking_id: int, reason: str = "") -> bool:
         """Cancela una reserva"""
-        url = f"{self.base_url}/api/v2/bookings/{booking_id}/cancellation"
+        url = f"{self.base_url}/v2/bookings/{booking_id}/cancel"
         payload = {"reason": reason}
-        try:
-            response = requests.post(url, headers=self.headers, json=payload)
-            return response.status_code in [200, 201]
-        except Exception as e:
-            print(f"Error cancelling booking: {e}")
-            return False
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=self.headers, json=payload)
+                return response.status_code in [200, 201]
+            except Exception as e:
+                print(f"Error cancelling booking in Cal.com: {e}")
+                return False
 
 
 calcom_service = CalComService()

@@ -1,10 +1,10 @@
-import requests
+import httpx
 from typing import Optional
 from config import settings
 
 
 class EvolutionService:
-    """Servicio para interactuar con Evolution API (WhatsApp)"""
+    """Servicio para interactuar con Evolution API (WhatsApp) de forma asíncrona"""
 
     def __init__(self):
         self.base_url = settings.evolution_url
@@ -13,28 +13,32 @@ class EvolutionService:
         self.instance_token = settings.evolution_instance_token
         self.headers = {"apikey": self.api_key, "Content-Type": "application/json"}
 
-    def send_text(self, number: str, text: str) -> bool:
+    async def _post(self, endpoint: str, payload: dict, params: dict = None) -> bool:
+        """Helper para peticiones POST asíncronas"""
+        url = f"{self.base_url}/{endpoint}/{self.instance_name}"
+        if params is None:
+            params = {}
+        params["instanceToken"] = self.instance_token
+
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(
+                    url, headers=self.headers, json=payload, params=params
+                )
+                return response.status_code in [200, 201]
+            except Exception as e:
+                print(f"Error en Evolution API ({endpoint}): {e}")
+                return False
+
+    async def send_text(self, number: str, text: str) -> bool:
         """Envía un mensaje de texto por WhatsApp"""
-        # Asegurar formato correcto del número
         if "@c.us" not in number:
             number = f"{number}@c.us"
 
-        url = f"{self.base_url}/message/sendText/{self.instance_name}"
         payload = {"number": number, "textMessage": {"text": text}}
+        return await self._post("message/sendText", payload)
 
-        try:
-            response = requests.post(
-                url,
-                headers=self.headers,
-                json=payload,
-                params={"instanceToken": self.instance_token},
-            )
-            return response.status_code in [200, 201]
-        except Exception as e:
-            print(f"Error sending WhatsApp message: {e}")
-            return False
-
-    def send_buttons(
+    async def send_buttons(
         self,
         number: str,
         text: str,
@@ -44,8 +48,6 @@ class EvolutionService:
         """Envía mensaje con botones interactivos"""
         if "@c.us" not in number:
             number = f"{number}@c.us"
-
-        url = f"{self.base_url}/message/sendButtons/{self.instance_name}"
 
         formatted_buttons = []
         for i, btn in enumerate(buttons):
@@ -59,27 +61,14 @@ class EvolutionService:
             "textMessage": {"text": text},
             "buttons": formatted_buttons,
         }
+        return await self._post("message/sendButtons", payload)
 
-        try:
-            response = requests.post(
-                url,
-                headers=self.headers,
-                json=payload,
-                params={"instanceToken": self.instance_token},
-            )
-            return response.status_code in [200, 201]
-        except Exception as e:
-            print(f"Error sending buttons: {e}")
-            return False
-
-    def send_list(
+    async def send_list(
         self, number: str, text: str, sections: list, title: str = "Selecciona"
     ) -> bool:
-        """Envía mensaje con lista interactiva (más de 3 opciones)"""
+        """Envía mensaje con lista interactiva"""
         if "@c.us" not in number:
             number = f"{number}@c.us"
-
-        url = f"{self.base_url}/message/sendList/{self.instance_name}"
 
         formatted_sections = []
         for section in sections:
@@ -99,33 +88,7 @@ class EvolutionService:
             "textMessage": {"text": text},
             "sections": formatted_sections,
         }
-
-        try:
-            response = requests.post(
-                url,
-                headers=self.headers,
-                json=payload,
-                params={"instanceToken": self.instance_token},
-            )
-            return response.status_code in [200, 201]
-        except Exception as e:
-            print(f"Error sending list: {e}")
-            return False
-
-    def get_qr_code(self) -> Optional[str]:
-        """Obtiene el QR code para conectar WhatsApp"""
-        url = f"{self.base_url}/instance/connect/{self.instance_name}"
-        try:
-            response = requests.get(
-                url, headers=self.headers, params={"instanceToken": self.instance_token}
-            )
-            if response.status_code == 200:
-                data = response.json()
-                return data.get("qrcode", {}).get("code")
-            return None
-        except Exception as e:
-            print(f"Error getting QR code: {e}")
-            return None
+        return await self._post("message/sendList", payload)
 
 
 evolution_service = EvolutionService()

@@ -3,28 +3,25 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
-import uvicorn
+from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
 
 from config import settings
-from app.database import engine, init_db, SessionLocal
+from app.database import engine, init_db, SessionLocal, get_db
 from app.admin import setup_admin
 from app.handlers.conversation import handle_whatsapp_message
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import Patient, Appointment, Professional
-from datetime import datetime, timedelta
+from app.models import Patient, Appointment, Professional, AdminUser
+from app.utils.security import get_password_hash
+from app import schemas
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Inicialización al iniciar la app"""
-    # Inicializar base de datos
     print("📦 Inicializando base de datos...")
     init_db()
 
     # Crear admin por defecto si no existe
-    from app.models import AdminUser
-
     db = SessionLocal()
     try:
         admin = (
@@ -33,11 +30,9 @@ async def lifespan(app: FastAPI):
             .first()
         )
         if not admin:
-            import hashlib
-
-            password_hash = hashlib.sha256(settings.admin_password.encode()).hexdigest()
+            hashed_pw = get_password_hash(settings.admin_password)
             admin = AdminUser(
-                username=settings.admin_username, password_hash=password_hash
+                username=settings.admin_username, password_hash=hashed_pw
             )
             db.add(admin)
             db.commit()
@@ -222,20 +217,10 @@ async def webhook_telegram(request: Request):
 # ==================== API REST ====================
 
 
-@app.get("/api/patients")
+@app.get("/api/patients", response_model=List[schemas.Patient])
 async def list_patients(db: Session = Depends(get_db)):
     """Lista todos los pacientes"""
-    patients = db.query(Patient).all()
-    return [
-        {
-            "id": p.id,
-            "name": f"{p.first_name} {p.last_name}",
-            "phone": p.phone,
-            "obra_social": p.obra_social,
-            "created_at": p.created_at.isoformat() if p.created_at else None,
-        }
-        for p in patients
-    ]
+    return db.query(Patient).all()
 
 
 @app.get("/api/appointments/today")
@@ -299,10 +284,10 @@ async def payments():
 # ==================== API REST - PACIENTES ====================
 
 
-@app.get("/api/patients/search")
+@app.get("/api/patients/search", response_model=List[schemas.Patient])
 async def search_patients(q: str, db: Session = Depends(get_db)):
     """Buscar pacientes por nombre, DNI o teléfono"""
-    patients = (
+    return (
         db.query(Patient)
         .filter(
             (Patient.first_name.ilike(f"%{q}%"))
@@ -314,198 +299,89 @@ async def search_patients(q: str, db: Session = Depends(get_db)):
         .all()
     )
 
-    return [
-        {
-            "id": p.id,
-            "first_name": p.first_name,
-            "last_name": p.last_name,
-            "dni": p.dni,
-            "phone": p.phone,
-            "obra_social": p.obra_social,
-            "email": p.email,
-        }
-        for p in patients
-    ]
 
-
-@app.post("/api/patients")
-async def create_patient(patient_data: dict, db: Session = Depends(get_db)):
+@app.post("/api/patients", response_model=schemas.Patient)
+async def create_patient(patient_in: schemas.PatientCreate, db: Session = Depends(get_db)):
     """Crear nuevo paciente"""
-    patient = Patient(
-        first_name=patient_data.get("first_name"),
-        last_name=patient_data.get("last_name"),
-        dni=patient_data.get("dni"),
-        phone=patient_data.get("phone"),
-        obra_social=patient_data.get("obra_social", "Particular"),
-        email=patient_data.get("email"),
-    )
+    patient = Patient(**patient_in.model_dump())
     db.add(patient)
     db.commit()
     db.refresh(patient)
-
-    return {
-        "id": patient.id,
-        "first_name": patient.first_name,
-        "last_name": patient.last_name,
-        "dni": patient.dni,
-        "phone": patient.phone,
-        "obra_social": patient.obra_social,
-        "email": patient.email,
-    }
+    return patient
 
 
 # ==================== API REST - TRATAMIENTOS ====================
 
 
-@app.get("/api/patients/{patient_id}/treatments")
+@app.get("/api/patients/{patient_id}/treatments", response_model=List[schemas.DentalTreatment])
 async def get_patient_treatments(patient_id: int, db: Session = Depends(get_db)):
     """Obtener tratamientos de un paciente"""
     from app.models import DentalTreatment
 
-    treatments = (
+    return (
         db.query(DentalTreatment)
         .filter(DentalTreatment.patient_id == patient_id)
         .order_by(DentalTreatment.treatment_date.desc())
         .all()
     )
 
-    return [
-        {
-            "id": t.id,
-            "tooth": t.tooth,
-            "face": t.face,
-            "treatment_name": t.treatment_name,
-            "treatment_type": t.treatment_code,
-            "status": t.status,
-            "treatment_date": t.treatment_date.isoformat()
-            if t.treatment_date
-            else None,
-            "cost": t.cost or 0,
-            "notes": t.notes,
-            "professional": t.professional.full_name if t.professional else None,
-        }
-        for t in treatments
-    ]
 
-
-@app.post("/api/treatments")
-async def create_treatment(treatment_data: dict, db: Session = Depends(get_db)):
+@app.post("/api/treatments", response_model=schemas.DentalTreatment)
+async def create_treatment(treatment_in: schemas.DentalTreatmentBase, db: Session = Depends(get_db)):
     """Crear nuevo tratamiento"""
     from app.models import DentalTreatment
 
-    treatment = DentalTreatment(
-        patient_id=treatment_data.get("patient_id"),
-        tooth=treatment_data.get("tooth"),
-        face=treatment_data.get("face"),
-        treatment_name=treatment_data.get("treatment_name"),
-        treatment_code=treatment_data.get("treatment_type"),
-        treatment_price_id=treatment_data.get("treatment_price_id"),
-        status=treatment_data.get("status", "done"),
-        treatment_date=datetime.strptime(
-            treatment_data.get("treatment_date"), "%Y-%m-%d"
-        ).date()
-        if treatment_data.get("treatment_date")
-        else datetime.now().date(),
-        cost=treatment_data.get("cost", 0),
-        professional_id=treatment_data.get("professional_id"),
-        notes=treatment_data.get("notes"),
-    )
+    treatment = DentalTreatment(**treatment_in.model_dump())
     db.add(treatment)
     db.commit()
     db.refresh(treatment)
-
-    return {"id": treatment.id, "status": "ok"}
+    return treatment
 
 
 # ==================== API REST - PAGOS ====================
 
 
-@app.get("/api/payments")
+@app.get("/api/payments", response_model=List[schemas.Payment])
 async def list_payments(db: Session = Depends(get_db)):
     """Lista todos los pagos"""
     from app.models import Payment
 
-    payments = db.query(Payment).order_by(Payment.payment_date.desc()).limit(100).all()
-
-    return [
-        {
-            "id": p.id,
-            "patient_id": p.patient_id,
-            "patient_name": f"{p.patient.first_name} {p.patient.last_name}"
-            if p.patient
-            else "N/A",
-            "amount": p.amount,
-            "payment_method": p.payment_method,
-            "payment_date": p.payment_date.isoformat() if p.payment_date else None,
-            "reference": p.reference,
-        }
-        for p in payments
-    ]
+    return db.query(Payment).order_by(Payment.payment_date.desc()).limit(100).all()
 
 
-@app.post("/api/payments")
-async def create_payment(payment_data: dict, db: Session = Depends(get_db)):
+@app.post("/api/payments", response_model=schemas.Payment)
+async def create_payment(payment_in: schemas.PaymentBase, db: Session = Depends(get_db)):
     """Crear nuevo pago"""
     from app.models import Payment
 
-    payment = Payment(
-        patient_id=payment_data.get("patient_id"),
-        amount=payment_data.get("amount"),
-        payment_method=payment_data.get("payment_method", "cash"),
-        reference=payment_data.get("reference"),
-        notes=payment_data.get("notes"),
-    )
+    payment = Payment(**payment_in.model_dump())
     db.add(payment)
     db.commit()
-
-    return {"id": payment.id, "status": "ok"}
+    db.refresh(payment)
+    return payment
 
 
 # ==================== API REST - DEUDAS ====================
 
 
-@app.get("/api/debts")
+@app.get("/api/debts", response_model=List[schemas.Debt])
 async def list_debts(db: Session = Depends(get_db)):
     """Lista todas las deudas"""
     from app.models import Debt
 
-    debts = db.query(Debt).order_by(Debt.created_at.desc()).all()
-
-    return [
-        {
-            "id": d.id,
-            "patient_id": d.patient_id,
-            "patient_name": f"{d.patient.first_name} {d.patient.last_name}"
-            if d.patient
-            else "N/A",
-            "description": d.description,
-            "amount": d.amount,
-            "status": d.status,
-            "due_date": d.due_date.isoformat() if d.due_date else None,
-        }
-        for d in debts
-    ]
+    return db.query(Debt).order_by(Debt.created_at.desc()).all()
 
 
-@app.post("/api/debts")
-async def create_debt(debt_data: dict, db: Session = Depends(get_db)):
+@app.post("/api/debts", response_model=schemas.Debt)
+async def create_debt(debt_in: schemas.DebtBase, db: Session = Depends(get_db)):
     """Crear nueva deuda"""
     from app.models import Debt
 
-    debt = Debt(
-        patient_id=debt_data.get("patient_id"),
-        description=debt_data.get("description"),
-        amount=debt_data.get("amount"),
-        status=debt_data.get("status", "pending"),
-        due_date=datetime.strptime(debt_data["due_date"], "%Y-%m-%d").date()
-        if debt_data.get("due_date")
-        else None,
-        notes=debt_data.get("notes"),
-    )
+    debt = Debt(**debt_in.model_dump())
     db.add(debt)
     db.commit()
-
-    return {"id": debt.id, "status": "ok"}
+    db.refresh(debt)
+    return debt
 
 
 @app.post("/api/debts/{debt_id}/pay")
@@ -521,45 +397,24 @@ async def pay_debt(debt_id: int, db: Session = Depends(get_db)):
     return {"status": "ok"}
 
 
-@app.get("/api/patients/{patient_id}/debts")
+@app.get("/api/patients/{patient_id}/debts", response_model=List[schemas.Debt])
 async def get_patient_debts(patient_id: int, db: Session = Depends(get_db)):
     """Obtener deudas de un paciente"""
     from app.models import Debt
 
-    debts = (
+    return (
         db.query(Debt)
         .filter(Debt.patient_id == patient_id, Debt.status != "paid")
         .all()
     )
 
-    return [
-        {
-            "id": d.id,
-            "description": d.description,
-            "amount": d.amount,
-            "status": d.status,
-            "due_date": d.due_date.isoformat() if d.due_date else None,
-        }
-        for d in debts
-    ]
 
-
-@app.get("/api/patients/{patient_id}/payments")
+@app.get("/api/patients/{patient_id}/payments", response_model=List[schemas.Payment])
 async def get_patient_payments(patient_id: int, db: Session = Depends(get_db)):
     """Obtener pagos de un paciente"""
     from app.models import Payment
 
-    payments = db.query(Payment).filter(Payment.patient_id == patient_id).all()
-
-    return [
-        {
-            "id": p.id,
-            "amount": p.amount,
-            "payment_method": p.payment_method,
-            "payment_date": p.payment_date.isoformat() if p.payment_date else None,
-        }
-        for p in payments
-    ]
+    return db.query(Payment).filter(Payment.patient_id == patient_id).all()
 
 
 @app.get("/api/patients/account-summary")
@@ -583,7 +438,7 @@ async def account_summary(db: Session = Depends(get_db)):
         payments = db.query(Payment).filter(Payment.patient_id == patient.id).all()
         total_paid = sum(p.amount for p in payments)
 
-        # Total deuda
+        # Total deuda pendiente
         debts = (
             db.query(Debt)
             .filter(Debt.patient_id == patient.id, Debt.status != "paid")

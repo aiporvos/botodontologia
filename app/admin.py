@@ -224,6 +224,19 @@ class DebtAdmin(ModelView, model=Debt):
     name_plural = "Deudas"
 
 
+class AdminUserAdmin(ModelView, model=AdminUser):
+    """Administración de Usuarios del Panel"""
+
+    column_list = [AdminUser.id, AdminUser.username, AdminUser.is_active, AdminUser.created_at]
+    form_excluded_columns = [AdminUser.password_hash]
+    column_details_exclude_list = [AdminUser.password_hash]
+    can_delete = True
+    can_edit = True
+    can_create = True
+    name = "Usuario Admin"
+    name_plural = "Usuarios Admin"
+
+
 def setup_admin(app, engine):
     """Configura el panel de administración"""
     admin = Admin(
@@ -242,6 +255,7 @@ def setup_admin(app, engine):
     admin.add_view(DentalTreatmentAdmin)
     admin.add_view(ConsentAdmin)
     admin.add_view(ChatSessionAdmin)
+    admin.add_view(AdminUserAdmin)
     admin.add_view(TreatmentPriceAdmin)
     admin.add_view(PaymentAdmin)
     admin.add_view(DebtAdmin)

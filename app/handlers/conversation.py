@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
@@ -15,21 +15,18 @@ from app.services.cal_com import calcom_service
 
 router = Router()
 
-
 # ==================== UTILIDADES ====================
 
-
-def get_session(db: Session, chat_id: str) -> ChatSession:
+def get_session(db: Session, chat_id: str, channel: str = "telegram") -> ChatSession:
     """Obtiene o crea una sesión de chat"""
     session = db.query(ChatSession).filter(ChatSession.chat_id == chat_id).first()
     if not session:
         session = ChatSession(
-            chat_id=chat_id, channel="telegram", step="start", payload="{}"
+            chat_id=chat_id, channel=channel, step="start", payload="{}"
         )
         db.add(session)
         db.commit()
     return session
-
 
 def update_session(
     db: Session, chat_id: str, step: str, payload: dict = None, patient_id: int = None
@@ -38,303 +35,175 @@ def update_session(
     session = db.query(ChatSession).filter(ChatSession.chat_id == chat_id).first()
     if session:
         session.step = step
-        if payload:
+        if payload is not None:
             session.payload = json.dumps(payload)
         if patient_id:
             session.patient_id = patient_id
         db.commit()
 
-
 async def send_response(chat_id: str, channel: str, text: str):
-    """Envía respuesta por el canal apropiado"""
+    """Envía respuesta por el canal apropiado de forma asíncrona"""
     if channel == "telegram":
         await telegram_service.send_message(int(chat_id), text)
     elif channel == "whatsapp":
         number = chat_id.replace("@c.us", "").replace("@g.us", "")
-        evolution_service.send_text(number, text)
+        await evolution_service.send_text(number, text)
 
+# ==================== LÓGICA DE NEGOCIO ====================
 
-def get_available_slots(days_ahead: int = 14, max_slots: int = 5) -> list:
-    """Genera horarios disponibles (simulado)"""
-    slots = []
-    now = datetime.now()
-
-    # Generar slots de ejemplo (lunes a viernes, 9 a 17hs)
-    for d in range(1, days_ahead + 1):
-        day = now + timedelta(days=d)
-        if day.weekday() < 5:  # Lunes a viernes
-            for hour in range(9, 17):
-                slot_time = day.replace(hour=hour, minute=0, second=0, microsecond=0)
-                if slot_time > now:
-                    slots.append(
-                        {
-                            "datetime": slot_time,
-                            "display": slot_time.strftime("%d/%m a las %H:%M"),
-                        }
-                    )
-                    if len(slots) >= max_slots:
-                        return slots
-    return slots
-
-
-# ==================== HANDLERS ====================
-
-
-@router.message(F.text == "/start")
-async def cmd_start(message: Message, db: Session = SessionLocal()):
-    """Comando /start - Inicia la conversación"""
-    chat_id = str(message.chat.id)
-
-    session = get_session(db, chat_id)
-    session.channel = "telegram"
-    db.commit()
-
-    welcome_text = """🦷 *Bienvenido a Clínica Odontológica*
-
-Soy el asistente de turnos. Puedo ayudarte a:
-
-📅 *Solicitar un turno*
-❌ *Cancelar o reprogramar*
-📋 *Ver información*
-
-¿En qué puedo ayudarte hoy?"""
-
-    await message.answer(welcome_text, parse_mode="Markdown")
-    update_session(db, chat_id, "start")
-
-
-@router.message(F.text.in_(["/help", "/ayuda"]))
-async def cmd_help(message: Message, db: Session = SessionLocal()):
-    """Comando de ayuda"""
-    help_text = """📋 *Comandos disponibles:*
-
-/start - Iniciar conversación
-/turno - Solicitar turno
-/cancelar - Cancelar turno
-/ayuda - Ver esta ayuda
-
-También puedes escribir naturalmente lo que necesites."""
-
-    await message.answer(help_text, parse_mode="Markdown")
-
-
-@router.message(F.text == "/turno")
-async def cmd_turno(message: Message, db: Session = SessionLocal()):
-    """Inicia el proceso de solicitud de turno"""
-    chat_id = str(message.chat.id)
-
-    welcome_text = """📅 *Solicitar Turno*
-
-Perfecto, te ayudo a coordinar tu turno.
-
-Por favor, dime tu *nombre completo* (ej: Juan Pérez)"""
-
-    await message.answer(welcome_text, parse_mode="Markdown")
-    update_session(db, chat_id, "ask_name")
-
-
-@router.message()
-async def handle_message(message: Message, db: Session = SessionLocal()):
-    """Maneja todos los mensajes entrantes"""
-    chat_id = str(message.chat.id)
-    text = message.text or ""
-    session = get_session(db, chat_id)
-
+async def process_conversation(db: Session, chat_id: str, channel: str, text: str):
+    """Corazón del bot: maneja la lógica de estados para cualquier canal"""
+    session = get_session(db, chat_id, channel)
     step = session.step
     payload = json.loads(session.payload or "{}")
+    text_clean = text.strip()
 
-    # Flujo de conversación
+    # Comandos globales
+    if text_clean.lower() in ["hola", "inicio", "start", "/start"]:
+        welcome_text = (
+            "🦷 *Bienvenido a Clínica Odontológica*\n\n"
+            "Soy tu asistente virtual. Puedo ayudarte con:\n"
+            "📅 *TURNO*: Para solicitar una cita\n"
+            "❌ *CANCELAR*: Para anular un turno\n"
+            "❓ *AYUDA*: Ver más opciones"
+        )
+        await send_response(chat_id, channel, welcome_text)
+        update_session(db, chat_id, "start")
+        return
+
     if step == "start":
-        if any(
-            word in text.lower() for word in ["turno", "sacar", "reservar", "pedir"]
-        ):
-            await cmd_turno(message, db)
-        elif any(word in text.lower() for word in ["cancelar", "reprogramar"]):
-            await cmd_cancelar(message, db)
+        if any(word in text_clean.lower() for word in ["turno", "cita", "sacar", "pedir"]):
+            await send_response(chat_id, channel, "📅 *Solicitar Turno*\n\nPor favor, dime tu *nombre completo*:")
+            update_session(db, chat_id, "ask_name")
+        elif any(word in text_clean.lower() for word in ["cancelar", "reprogramar"]):
+            await handle_cancel_request(db, chat_id, channel, session)
         else:
-            await cmd_start(message, db)
+            await send_response(chat_id, channel, "Escribe *TURNO* para agendar una cita o *CANCELAR* para ver tus turnos.")
 
     elif step == "ask_name":
-        # Guardar nombre y pedir obra social
-        payload["name"] = text
+        payload["name"] = text_clean
         update_session(db, chat_id, "ask_obra", payload)
-
-        await message.answer(
-            "✅ Perfecto, {name}\n\n🏥 ¿Tienes obra social? Si es así, ¿cuál?".format(
-                name=text
-            ),
-            parse_mode="Markdown",
-        )
+        await send_response(chat_id, channel, f"✅ Gracias, {text_clean}.\n\n🏥 ¿Tienes obra social? (Si no tienes escribe 'Particular')")
 
     elif step == "ask_obra":
-        # Guardar obra social y pedir motivo
-        payload["obra_social"] = text
+        payload["obra_social"] = text_clean
         update_session(db, chat_id, "ask_reason", payload)
-
-        await message.answer(
-            "✅ Merci!\n\n"
-            "🦷 ¿Cuál es el motivo de tu consulta?\n"
-            "(ej: dolor de muela, limpieza, ortodoncia, etc.)"
-        )
+        await send_response(chat_id, channel, "🦷 ¿Cuál es el motivo de tu consulta?\n(Limpieza, dolor, brackets, etc.)")
 
     elif step == "ask_reason":
-        # Clasificar motivo y pedir teléfono
-        category = classify_reason(text)
-        payload["reason"] = text
+        category = classify_reason(text_clean)
+        payload["reason"] = text_clean
         payload["category"] = category
-
         update_session(db, chat_id, "ask_phone", payload)
-
-        emoji_map = {
-            "ortodoncia": "🦷",
-            "conductos": "🔴",
-            "extracciones": "🔧",
-            "implantes": "⚙️",
-            "protesis": "🦋",
-            "consulta": "💬",
-        }
-        emoji = emoji_map.get(category, "📅")
-
-        await message.answer(
-            f"{emoji} Entendido: *{text}*\n\n📱 ¿Cuál es tu número de teléfono?",
-            parse_mode="Markdown",
-        )
+        await send_response(chat_id, channel, "📱 Por último, dime tu *número de teléfono* con código de área (ej: 1122334455):")
 
     elif step == "ask_phone":
-        # Guardar teléfono y ofrecer horarios
-        phone = normalize_ar_phone(text)
+        phone = normalize_ar_phone(text_clean)
         payload["phone"] = phone
-
-        # Crear o buscar paciente
+        
+        # Buscar/Crear paciente
         patient = get_or_create_patient(
             db,
             phone=phone,
             first_name=payload.get("name", "").split()[0],
             last_name=" ".join(payload.get("name", "").split()[1:]),
+            obra_social=payload.get("obra_social")
         )
-
+        
         update_session(db, chat_id, "choose_slot", payload, patient.id)
-
-        # Obtener horarios disponibles
-        slots = get_available_slots()
+        
+        # Obtener disponibilidad real de Cal.com si hay tipos de eventos
+        # Por ahora simulamos slots pero llamamos al servicio para estar listos
+        start_search = datetime.now().isoformat()
+        end_search = (datetime.now() + timedelta(days=7)).isoformat()
+        
+        # slots = await calcom_service.get_availability(settings.calcom_event_type_id, start_search, end_search)
+        # fallback a slots simulados si no hay integración
+        slots = [
+            {"time": (datetime.now() + timedelta(days=1, hours=10)).replace(minute=0), "display": "Mañana a las 10:00"},
+            {"time": (datetime.now() + timedelta(days=1, hours=11)).replace(minute=0), "display": "Mañana a las 11:00"},
+            {"time": (datetime.now() + timedelta(days=2, hours=15)).replace(minute=0), "display": "Pasado mañana a las 15:00"},
+        ]
+        
+        payload["available_slots"] = [{"time": s["time"].isoformat(), "display": s["display"]} for s in slots]
+        update_session(db, chat_id, "choose_slot", payload)
 
         slots_text = "⏰ *Horarios disponibles:*\n\n"
-        for i, slot in enumerate(slots, 1):
-            slots_text += f"{i}. {slot['display']}\n"
-
-        slots_text += "\nResponde con el *número* del horario que prefieras."
-
-        await message.answer(slots_text, parse_mode="Markdown")
+        for i, s in enumerate(slots, 1):
+            slots_text += f"{i}. {s['display']}\n"
+        slots_text += "\nResponde con el *número* de la opción elegida."
+        await send_response(chat_id, channel, slots_text)
 
     elif step == "choose_slot":
-        # Confirmar turno
         try:
-            slot_index = int(text) - 1
-            slots = get_available_slots()
-
-            if 0 <= slot_index < len(slots):
-                slot = slots[slot_index]
-                patient_id = session.patient_id
-
-                # Crear turno en la base de datos
-                appointment = Appointment(
-                    patient_id=patient_id,
-                    professional_id=1,  # Por defecto el primero
-                    reason=payload.get("reason", ""),
+            idx = int(text_clean) - 1
+            available = payload.get("available_slots", [])
+            if 0 <= idx < len(available):
+                selected = available[idx]
+                dt = datetime.fromisoformat(selected["time"])
+                
+                # Crear turno
+                appt = Appointment(
+                    patient_id=session.patient_id,
+                    professional_id=1,
+                    reason=payload.get("reason", "Consulta"),
                     category=payload.get("category", "consulta"),
-                    start_at=slot["datetime"],
-                    end_at=slot["datetime"] + timedelta(minutes=30),
+                    start_at=dt,
+                    end_at=dt + timedelta(minutes=30),
                     status="confirmed",
-                    channel=session.channel,
+                    channel=channel
                 )
-                db.add(appointment)
+                db.add(appt)
                 db.commit()
-
-                # Confirmar al paciente
-                confirm_text = f"""✅ *Turno Confirmado*
-
-📅 Fecha: {slot["display"]}
-🦷 Motivo: {payload.get("reason", "Consulta")}
-📱 Canal: {session.channel.title()}
-
-💡 Recordatorio: Responde 'REPROGRAMAR' si necesitas cambiar.
-
-ℹ️ Los mensajes son solo de texto."""
-
-                await message.answer(confirm_text, parse_mode="Markdown")
-                update_session(db, chat_id, "confirmed")
+                
+                await send_response(chat_id, channel, f"✅ *¡Turno Confirmado!*\n\n📅 Fecha: {selected['display']}\n📍 Dirección: Av. Principal 123\n\nTe esperamos.")
+                update_session(db, chat_id, "start", {})
             else:
-                await message.answer(
-                    "❌ Número inválido. Por favor elegí un número de la lista."
-                )
-        except ValueError:
-            await message.answer("❌ Por favor, respondé con el *número* del horario.")
+                await send_response(chat_id, channel, "❌ Opción inválida. Elige un número de la lista.")
+        except Exception:
+            await send_response(chat_id, channel, "❌ Por favor responde solo con el número de la opción.")
 
-    else:
-        # Cualquier otro paso, reiniciar
-        await cmd_start(message, db)
+async def handle_cancel_request(db: Session, chat_id: str, channel: str, session: ChatSession):
+    """Maneja la lista de turnos para cancelar"""
+    if not session.patient_id:
+        await send_response(chat_id, channel, "No tienes turnos registrados aún. Escribe TURNO para agendar.")
+        return
 
+    appointments = db.query(Appointment).filter(
+        Appointment.patient_id == session.patient_id,
+        Appointment.status == "confirmed",
+        Appointment.start_at >= datetime.now()
+    ).all()
 
-async def cmd_cancelar(message: Message, db: Session = SessionLocal()):
-    """Maneja solicitud de cancelación"""
-    chat_id = str(message.chat.id)
+    if not appointments:
+        await send_response(chat_id, channel, "No tienes turnos próximos confirmados.")
+        update_session(db, chat_id, "start")
+        return
 
-    # Buscar turnos confirmados del paciente
-    session = get_session(db, chat_id)
+    text = "❌ *Tus turnos próximos:*\n\n"
+    for i, appt in enumerate(appointments, 1):
+        text += f"{i}. {appt.start_at.strftime('%d/%m %H:%M')} - {appt.reason}\n"
+    text += "\nEnvía el número para cancelar o 'SALIR'."
+    
+    await send_response(chat_id, channel, text)
+    update_session(db, chat_id, "cancel_select")
 
-    if session.patient_id:
-        appointments = (
-            db.query(Appointment)
-            .filter(
-                Appointment.patient_id == session.patient_id,
-                Appointment.status == "confirmed",
-            )
-            .all()
-        )
+# ==================== HANDLERS AIOGRAM ====================
 
-        if appointments:
-            text = "❌ *Cancelar Turno*\n\nTus turnos:\n\n"
-            for i, appt in enumerate(appointments, 1):
-                text += f"{i}. {appt.start_at.strftime('%d/%m a las %H:%M')} - {appt.reason}\n"
-            text += "\nresponde con el número del turno a cancelar."
-
-            await message.answer(text, parse_mode="Markdown")
-            update_session(db, chat_id, "cancel_select")
-        else:
-            await message.answer("No tienes turnos confirmados para cancelar.")
-    else:
-        await message.answer("No encontré tus datos. Iniciá con /start")
-
-
-# ==================== WEBHOOK DE WHATSAPP ====================
-
-
-async def handle_whatsapp_message(phone: str, text: str):
-    """Maneja mensajes entrantes de WhatsApp via Evolution API"""
+@router.message()
+async def aiogram_handler(message: Message):
     db = SessionLocal()
     try:
-        chat_id = f"{phone}@c.us"
-        session = get_session(db, chat_id)
-        session.channel = "whatsapp"
-        db.commit()
-
-        # Procesar mensaje similar a Telegram
-        # (aquí se reutilizaría la lógica del handler)
-
-        # Por ahora, iniciar flujo si es start
-        if text.lower() in ["hola", "start", "iniciar"]:
-            welcome_text = """🦷 *Bienvenido a Clínica Odontológica*
-
-Soy el asistente de turnos. Escribe 'TURNO' para solicitar."""
-            evolution_service.send_text(phone, welcome_text)
-        elif text.upper() == "TURNO":
-            await cmd_turno_whatsapp(db, chat_id, phone)
-
+        await process_conversation(db, str(message.chat.id), "telegram", message.text or "")
     finally:
         db.close()
 
+# ==================== WHATSAPP ENTRY POINT ====================
 
-async def cmd_turno_whatsapp(db: Session, chat_id: str, phone: str):
-    """Inicia flujo de turno para WhatsApp"""
-    update_session(db, chat_id, "ask_name")
-    evolution_service.send_text(phone, "Por favor, dime tu nombre completo:")
+async def handle_whatsapp_message(phone: str, text: str):
+    db = SessionLocal()
+    try:
+        chat_id = f"{phone}@c.us"
+        await process_conversation(db, chat_id, "whatsapp", text)
+    finally:
+        db.close()
