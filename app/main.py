@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from config import settings
 from app.database import engine, init_db, SessionLocal, get_db
@@ -111,7 +111,7 @@ async def get_me(current_user: AdminUser = Depends(get_current_active_user)):
 # ==================== STATS ====================
 
 @app.get("/api/stats")
-async def get_stats(db: Session = Depends(get_db)):
+async def get_stats(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     today = datetime.now().date()
     today_start = datetime.combine(today, datetime.min.time())
     today_end = datetime.combine(today, datetime.max.time())
@@ -142,11 +142,11 @@ async def get_stats(db: Session = Depends(get_db)):
 # ==================== PACIENTES ====================
 
 @app.get("/api/patients", response_model=List[schemas.Patient])
-async def list_patients(db: Session = Depends(get_db)):
+async def list_patients(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     return db.query(Patient).order_by(Patient.created_at.desc()).all()
 
 @app.get("/api/patients/search", response_model=List[schemas.Patient])
-async def search_patients(q: str, db: Session = Depends(get_db)):
+async def search_patients(q: str, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     return db.query(Patient).filter(
         (Patient.first_name.ilike(f"%{q}%")) |
         (Patient.last_name.ilike(f"%{q}%")) |
@@ -155,7 +155,7 @@ async def search_patients(q: str, db: Session = Depends(get_db)):
     ).limit(20).all()
 
 @app.get("/api/patients/{patient_id}")
-async def get_patient(patient_id: int, db: Session = Depends(get_db)):
+async def get_patient(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     p = db.query(Patient).filter(Patient.id == patient_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
@@ -167,7 +167,7 @@ async def get_patient(patient_id: int, db: Session = Depends(get_db)):
     }
 
 @app.post("/api/patients", response_model=schemas.Patient)
-async def create_patient(patient_in: schemas.PatientCreate, db: Session = Depends(get_db)):
+async def create_patient(patient_in: schemas.PatientCreate, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     patient = Patient(**patient_in.model_dump())
     db.add(patient)
     db.commit()
@@ -175,7 +175,7 @@ async def create_patient(patient_in: schemas.PatientCreate, db: Session = Depend
     return patient
 
 @app.put("/api/patients/{patient_id}")
-async def update_patient(patient_id: int, patient_in: schemas.PatientCreate, db: Session = Depends(get_db)):
+async def update_patient(patient_id: int, patient_in: schemas.PatientCreate, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     p = db.query(Patient).filter(Patient.id == patient_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
@@ -185,7 +185,7 @@ async def update_patient(patient_id: int, patient_in: schemas.PatientCreate, db:
     return {"status": "ok"}
 
 @app.delete("/api/patients/{patient_id}")
-async def delete_patient(patient_id: int, db: Session = Depends(get_db)):
+async def delete_patient(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     p = db.query(Patient).filter(Patient.id == patient_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
@@ -197,7 +197,7 @@ async def delete_patient(patient_id: int, db: Session = Depends(get_db)):
 # ==================== TURNOS ====================
 
 @app.get("/api/appointments")
-async def list_appointments(db: Session = Depends(get_db)):
+async def list_appointments(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     appts = db.query(Appointment).order_by(Appointment.start_at.desc()).limit(100).all()
     return [{
         "id": a.id,
@@ -211,7 +211,7 @@ async def list_appointments(db: Session = Depends(get_db)):
     } for a in appts]
 
 @app.get("/api/appointments/today")
-async def today_appointments(db: Session = Depends(get_db)):
+async def today_appointments(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     today = datetime.now().date()
     today_start = datetime.combine(today, datetime.min.time())
     today_end = datetime.combine(today, datetime.max.time())
@@ -226,23 +226,28 @@ async def today_appointments(db: Session = Depends(get_db)):
     } for a in appts]
 
 @app.post("/api/appointments")
-async def create_appointment(data: dict, db: Session = Depends(get_db)):
-    appt = Appointment(
-        patient_id=data["patient_id"],
-        professional_id=data.get("professional_id", 1),
-        reason=data.get("reason", "Consulta"),
-        category=data.get("category", "consulta"),
-        start_at=datetime.fromisoformat(data["start_at"]),
-        end_at=datetime.fromisoformat(data["start_at"]) + timedelta(minutes=30),
-        status="confirmed",
-        channel="web"
-    )
-    db.add(appt)
-    db.commit()
-    return {"status": "ok", "id": appt.id}
+async def create_appointment(data: dict, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
+    try:
+        start_at = datetime.fromisoformat(data["start_at"].replace('Z', '+00:00'))
+        appt = Appointment(
+            patient_id=data["patient_id"],
+            professional_id=data.get("professional_id", 1),
+            reason=data.get("reason", "Consulta"),
+            category=data.get("category", "consulta"),
+            start_at=start_at,
+            end_at=start_at + timedelta(minutes=30),
+            status="confirmed",
+            channel="web"
+        )
+        db.add(appt)
+        db.commit()
+        return {"status": "ok", "id": appt.id}
+    except Exception as e:
+        print(f"Error creating appointment: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.put("/api/appointments/{appt_id}/cancel")
-async def cancel_appointment(appt_id: int, db: Session = Depends(get_db)):
+async def cancel_appointment(appt_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     a = db.query(Appointment).filter(Appointment.id == appt_id).first()
     if a:
         a.status = "cancelled"
@@ -253,7 +258,7 @@ async def cancel_appointment(appt_id: int, db: Session = Depends(get_db)):
 # ==================== TRATAMIENTOS ====================
 
 @app.get("/api/patients/{patient_id}/treatments")
-async def get_patient_treatments(patient_id: int, db: Session = Depends(get_db)):
+async def get_patient_treatments(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     treatments = db.query(DentalTreatment).filter(
         DentalTreatment.patient_id == patient_id
     ).order_by(DentalTreatment.treatment_date.desc()).all()
@@ -265,7 +270,7 @@ async def get_patient_treatments(patient_id: int, db: Session = Depends(get_db))
     } for t in treatments]
 
 @app.post("/api/treatments")
-async def create_treatment(data: dict, db: Session = Depends(get_db)):
+async def create_treatment(data: dict, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     t = DentalTreatment(
         patient_id=data["patient_id"],
         tooth=data.get("tooth"),
@@ -274,7 +279,7 @@ async def create_treatment(data: dict, db: Session = Depends(get_db)):
         status=data.get("status", "planned"),
         cost=data.get("cost", 0),
         notes=data.get("notes"),
-        treatment_date=datetime.now().date()
+        treatment_date=date.today()
     )
     db.add(t)
     db.commit()
@@ -284,38 +289,44 @@ async def create_treatment(data: dict, db: Session = Depends(get_db)):
 # ==================== ODONTOGRAMA ====================
 
 @app.get("/api/patients/{patient_id}/odontogram")
-async def get_odontogram(patient_id: int, db: Session = Depends(get_db)):
+async def get_odontogram(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     records = db.query(DentalRecord).filter(DentalRecord.patient_id == patient_id).all()
     treatments = db.query(DentalTreatment).filter(DentalTreatment.patient_id == patient_id).all()
     return {
         "records": [{
             "id": r.id, "tooth": r.tooth, "face": r.face,
             "procedure_name": r.procedure_name, "record_status": r.record_status,
+            "record_date": r.record_date.isoformat() if r.record_date else None
         } for r in records],
         "treatments": [{
             "id": t.id, "tooth": t.tooth, "face": t.face,
             "treatment_name": t.treatment_name, "status": t.status,
+            "treatment_date": t.treatment_date.isoformat() if t.treatment_date else None
         } for t in treatments]
     }
 
 @app.post("/api/odontogram")
-async def save_odontogram_entry(data: dict, db: Session = Depends(get_db)):
-    record = DentalRecord(
-        patient_id=data["patient_id"],
-        tooth=data["tooth"],
-        face=data.get("face"),
-        procedure_name=data.get("procedure_name", ""),
-        record_status=data.get("status", "planned"),
-    )
-    db.add(record)
-    db.commit()
-    return {"status": "ok", "id": record.id}
+async def save_odontogram_entry(data: dict, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
+    try:
+        record = DentalRecord(
+            patient_id=data["patient_id"],
+            tooth=data["tooth"],
+            face=data.get("face"),
+            procedure_name=data.get("procedure_name", ""),
+            record_status=data.get("status", "planned"),
+            record_date=date.today()
+        )
+        db.add(record)
+        db.commit()
+        return {"status": "ok", "id": record.id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ==================== PAGOS ====================
 
 @app.get("/api/payments")
-async def list_payments(db: Session = Depends(get_db)):
+async def list_payments(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     payments = db.query(Payment).order_by(Payment.payment_date.desc()).limit(100).all()
     return [{
         "id": p.id, "patient_id": p.patient_id,
@@ -326,7 +337,7 @@ async def list_payments(db: Session = Depends(get_db)):
     } for p in payments]
 
 @app.get("/api/patients/{patient_id}/payments")
-async def get_patient_payments(patient_id: int, db: Session = Depends(get_db)):
+async def get_patient_payments(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     payments = db.query(Payment).filter(Payment.patient_id == patient_id).all()
     return [{
         "id": p.id, "amount": p.amount, "payment_method": p.payment_method,
@@ -335,7 +346,7 @@ async def get_patient_payments(patient_id: int, db: Session = Depends(get_db)):
     } for p in payments]
 
 @app.post("/api/payments")
-async def create_payment(data: dict, db: Session = Depends(get_db)):
+async def create_payment(data: dict, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     p = Payment(
         patient_id=data["patient_id"],
         amount=data["amount"],
@@ -351,7 +362,7 @@ async def create_payment(data: dict, db: Session = Depends(get_db)):
 # ==================== DEUDAS ====================
 
 @app.get("/api/debts")
-async def list_debts(db: Session = Depends(get_db)):
+async def list_debts(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     debts = db.query(Debt).filter(Debt.status != "paid").order_by(Debt.created_at.desc()).all()
     return [{
         "id": d.id, "patient_id": d.patient_id,
@@ -361,7 +372,7 @@ async def list_debts(db: Session = Depends(get_db)):
     } for d in debts]
 
 @app.get("/api/patients/{patient_id}/debts")
-async def get_patient_debts(patient_id: int, db: Session = Depends(get_db)):
+async def get_patient_debts(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     debts = db.query(Debt).filter(Debt.patient_id == patient_id, Debt.status != "paid").all()
     return [{
         "id": d.id, "description": d.description, "amount": d.amount,
@@ -369,20 +380,20 @@ async def get_patient_debts(patient_id: int, db: Session = Depends(get_db)):
     } for d in debts]
 
 @app.post("/api/debts")
-async def create_debt(data: dict, db: Session = Depends(get_db)):
+async def create_debt(data: dict, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     d = Debt(
         patient_id=data["patient_id"],
         description=data.get("description", ""),
         amount=data["amount"],
         status="pending",
-        due_date=datetime.fromisoformat(data["due_date"]).date() if data.get("due_date") else None,
+        due_date=date.fromisoformat(data["due_date"]) if data.get("due_date") else None,
     )
     db.add(d)
     db.commit()
     return {"status": "ok", "id": d.id}
 
 @app.put("/api/debts/{debt_id}/pay")
-async def pay_debt(debt_id: int, db: Session = Depends(get_db)):
+async def pay_debt(debt_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     d = db.query(Debt).filter(Debt.id == debt_id).first()
     if d:
         d.status = "paid"
@@ -393,7 +404,7 @@ async def pay_debt(debt_id: int, db: Session = Depends(get_db)):
 # ==================== CUENTA CORRIENTE ====================
 
 @app.get("/api/patients/{patient_id}/account")
-async def patient_account(patient_id: int, db: Session = Depends(get_db)):
+async def patient_account(patient_id: int, db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     p = db.query(Patient).filter(Patient.id == patient_id).first()
     if not p:
         raise HTTPException(status_code=404)
@@ -412,7 +423,7 @@ async def patient_account(patient_id: int, db: Session = Depends(get_db)):
 # ==================== PROFESIONALES ====================
 
 @app.get("/api/professionals")
-async def list_professionals(db: Session = Depends(get_db)):
+async def list_professionals(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     profs = db.query(Professional).filter(Professional.is_active == True).all()
     return [{"id": p.id, "full_name": p.full_name, "specialty": p.specialty} for p in profs]
 
@@ -420,7 +431,7 @@ async def list_professionals(db: Session = Depends(get_db)):
 # ==================== PRECIOS ====================
 
 @app.get("/api/prices")
-async def list_prices(db: Session = Depends(get_db)):
+async def list_prices(db: Session = Depends(get_db), current_user: AdminUser = Depends(get_current_active_user)):
     prices = db.query(TreatmentPrice).filter(TreatmentPrice.is_active == True).all()
     return [{"id": p.id, "code": p.code, "name": p.name, "price": p.price} for p in prices]
 
