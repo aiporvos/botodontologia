@@ -1193,8 +1193,9 @@
         <!-- MODAL APPOINTMENT -->
         <div id="modalAppt" class="modal-overlay">
             <div class="modal">
-                <h3>Agendar Turno</h3><br>
+                <h3 id="apptModalTitle">Agendar Turno</h3><br>
                 <form id="formAppt" onsubmit="saveAppt(event)">
+                    <input type="hidden" id="a_id">
                     <div class="form-group"><label>Paciente</label><select id="a_patient" required></select>
                     </div>
                     <div class="form-grid">
@@ -1202,12 +1203,31 @@
                                 required></div>
                         <div class="form-group"><label>Profesional</label><select id="a_prof"></select></div>
                     </div>
-                    <div class="form-group"><label>Motivo</label><input type="text" id="a_reason"
-                            placeholder="Consulta Gral" required></div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Motivo</label><input type="text" id="a_reason"
+                                placeholder="Ej: Consulta Gral" required></div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="a_category">
+                                <option value="consulta">Consulta</option>
+                                <option value="surgery">Cirugía / Extracción</option>
+                                <option value="ortho">Ortodoncia</option>
+                                <option value="estetica">Limpieza / Estética</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="groupStatus" style="display:none">
+                        <label>Estado</label>
+                        <select id="a_status">
+                            <option value="confirmed">Confirmado</option>
+                            <option value="cancelled">Cancelado</option>
+                            <option value="done">Realizado</option>
+                        </select>
+                    </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-outline"
                             onclick="closeModal('modalAppt')">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Turno</button>
+                        <button type="submit" class="btn btn-primary" id="btnApptSave">Guardar Turno</button>
                     </div>
                 </form>
             </div>
@@ -1359,7 +1379,16 @@
                     const apptsRes = await fetch('/api/appointments/today', { headers });
                     const appts = await apptsRes.json();
                     const body = document.querySelector('#tableTodayAppts tbody');
-                    body.innerHTML = appts.length ? appts.map(a => `<tr><td><b>${a.time}</b></td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-${a.status === 'confirmed' ? 'green' : 'amber'}">${a.status}</span></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center">No hay turnos hoy</td></tr>';
+                    const statusMap = {
+                        'confirmed': { label: 'Confirmado', class: 'green' },
+                        'pending': { label: 'Pendiente', class: 'amber' },
+                        'cancelled': { label: 'Cancelado', class: 'red' },
+                        'done': { label: 'Realizado', class: 'blue' }
+                    };
+                    body.innerHTML = appts.length ? appts.map(a => {
+                        const s = statusMap[a.status] || { label: a.status, class: 'amber' };
+                        return `<tr><td><b>${a.time}</b></td><td>${a.patient_name}</td><td>${a.reason}</td><td><span class="badge badge-${s.class}">${s.label}</span></td></tr>`;
+                    }).join('') : '<tr><td colspan="4" style="text-align:center">No hay turnos hoy</td></tr>';
                 } catch (e) { console.error(e); }
             }
 
@@ -1458,6 +1487,35 @@
                 }
             }
 
+            function openApptModal(appt = null) {
+                const title = document.getElementById('apptModalTitle');
+                const btn = document.getElementById('btnApptSave');
+                const groupStatus = document.getElementById('groupStatus');
+
+                if (appt) {
+                    title.innerText = 'Editar Turno';
+                    btn.innerText = 'Actualizar Turno';
+                    document.getElementById('a_id').value = appt.id;
+                    document.getElementById('a_patient').value = appt.patient_id;
+                    document.getElementById('a_patient').disabled = true;
+                    document.getElementById('a_datetime').value = appt.start_at.slice(0, 16);
+                    document.getElementById('a_prof').value = appt.professional_id || 1;
+                    document.getElementById('a_reason').value = appt.reason;
+                    document.getElementById('a_category').value = appt.category || 'consulta';
+                    document.getElementById('a_status').value = appt.status;
+                    groupStatus.style.display = 'block';
+                } else {
+                    title.innerText = 'Agendar Turno';
+                    btn.innerText = 'Crear Turno';
+                    document.getElementById('a_id').value = '';
+                    document.getElementById('a_patient').disabled = false;
+                    document.getElementById('a_reason').value = '';
+                    document.getElementById('a_category').value = 'consulta';
+                    groupStatus.style.display = 'none';
+                }
+                openModal('modalAppt');
+            }
+
             function initCalendar() {
                 const calendarEl = document.getElementById('calendar');
                 if (!calendarEl) return;
@@ -1468,6 +1526,12 @@
                         left: 'prev,next today',
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    buttonText: {
+                        today: 'Hoy',
+                        month: 'Mes',
+                        week: 'Semana',
+                        day: 'Día'
                     },
                     locale: 'es',
                     firstDay: 1,
@@ -1482,9 +1546,10 @@
                             const events = data.map(a => {
                                 let color = '#3b82f6';
                                 const reason = (a.reason || "").toLowerCase();
-                                if (a.category === 'surgery' || reason.includes('extracción') || reason.includes('cirugía')) color = '#ef4444';
-                                else if (a.category === 'ortho' || reason.includes('ortodoncia')) color = '#a855f7';
-                                else if (reason.includes('limpieza') || reason.includes('estética')) color = '#10b981';
+                                const cat = a.category || "";
+                                if (cat === 'surgery' || reason.includes('extracción') || reason.includes('cirugía')) color = '#ef4444';
+                                else if (cat === 'ortho' || reason.includes('ortodoncia')) color = '#a855f7';
+                                else if (cat === 'estetica' || reason.includes('limpieza') || reason.includes('estética')) color = '#10b981';
 
                                 return {
                                     id: a.id,
@@ -1506,14 +1571,15 @@
                     },
                     dateClick: function (info) {
                         let val = info.dateStr;
-                        if (val.length === 10) val += "T09:00"; // Default time if clicked on month view
+                        if (val.length === 10) val += "T09:00";
                         document.getElementById('a_datetime').value = val.slice(0, 16);
                         openApptModal();
                     },
                     eventClick: function (info) {
                         const a = info.event.extendedProps;
-                        if (confirm(`Turno: ${a.patient_name}\nMotivo: ${a.reason}\nEstado: ${a.status}\n\n¿Desea cancelar este turno?`)) {
-                            cancelAppt(a.id);
+                        const action = confirm(`Paciente: ${a.patient_name}\nMotivo: ${a.reason}\n\nPresione ACEPTAR para EDITAR el turno\no CANCELAR para simplemente ver detalles.`);
+                        if (action) {
+                            openApptModal(a);
                         }
                     },
                     height: '700px'
@@ -1530,15 +1596,21 @@
             }
             async function saveAppt(e) {
                 e.preventDefault();
+                const id = document.getElementById('a_id').value;
                 const data = {
                     patient_id: parseInt(document.getElementById('a_patient').value),
-                    professional_id: parseInt(document.getElementById('a_prof').value),
+                    professional_id: parseInt(document.getElementById('a_prof').value) || 1,
                     start_at: document.getElementById('a_datetime').value,
                     reason: document.getElementById('a_reason').value,
-                    category: "consulta"
+                    category: document.getElementById('a_category').value,
+                    status: document.getElementById('a_status').value
                 };
                 try {
-                    await apiFetch('/api/appointments', { method: 'POST', body: JSON.stringify(data) });
+                    if (id) {
+                        await apiFetch(`/api/appointments/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+                    } else {
+                        await apiFetch('/api/appointments', { method: 'POST', body: JSON.stringify(data) });
+                    }
                     closeModal('modalAppt');
                     loadAppointments(); loadStats();
                 } catch (err) { alert(err.message); }
