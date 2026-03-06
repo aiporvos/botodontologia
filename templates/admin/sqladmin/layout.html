@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ admin.title }}</title>
+
+    <!-- CSS Bases de SQLAdmin (Tabler/Bootstrap) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         :root {
             --bg: #f8fafc;
@@ -18,6 +22,7 @@
             --text-light: #64748b;
             --border: #e2e8f0;
             --blue: #3b82f6;
+            --primary: #3b82f6;
         }
 
         body {
@@ -26,9 +31,10 @@
             margin: 0;
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* SIDEBAR Mirroring Dashboard */
+        /* SIDEBAR Premium */
         .sidebar {
             width: 280px;
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
@@ -38,6 +44,7 @@
             flex-shrink: 0;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
+            z-index: 100;
         }
 
         .navbar-brand {
@@ -46,8 +53,8 @@
             gap: 15px;
             padding: 0 1.5rem;
             margin-bottom: 3rem;
-            color: white;
-            text-decoration: none;
+            color: white !important;
+            text-decoration: none !important;
             font-size: 1.2rem;
             font-weight: 700;
         }
@@ -56,7 +63,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem 1.5rem !important;
             color: #94a3b8 !important;
             text-decoration: none !important;
             transition: all 0.2s;
@@ -64,11 +71,12 @@
             font-weight: 500;
             margin: 2px 1rem;
             border-radius: 8px;
+            border: none !important;
         }
 
         .nav-link:hover {
             color: white !important;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05) !important;
         }
 
         .nav-link.active {
@@ -77,123 +85,199 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        /* MAIN CONTENT */
-        .main {
+        /* MAIN CONTENT AREA */
+        .page-wrapper {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            background: var(--bg);
         }
 
-        .topbar {
+        .header-top {
             background: white;
             padding: 1rem 2rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            min-height: 70px;
         }
 
-        .content {
+        .main-content {
             flex: 1;
             overflow-y: auto;
             padding: 2rem;
         }
 
-        /* SQLADMIN Standard Overrides */
+        /* SQLADMIN & TABLER OVERRIDES */
         .card {
             border: 1px solid var(--border) !important;
             border-radius: 12px !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-            overflow: hidden;
-            margin-bottom: 2rem;
+            background: white !important;
+            margin-bottom: 1.5rem !important;
         }
 
         .card-header {
             background: white !important;
             border-bottom: 1px solid var(--border) !important;
-            padding: 1.2rem 1.5rem !important;
-        }
-
-        .table thead th {
-            background: #f8fafc !important;
-            color: var(--text-light);
-            border-bottom: 2px solid var(--border) !important;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.05em;
+            padding: 1.25rem !important;
+            font-weight: 600;
         }
 
         .btn-primary {
             background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
             border: none !important;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+            padding: 0.5rem 1.25rem !important;
+            font-weight: 500 !important;
+            color: white !important;
         }
 
-            {
-            % block head %
+        .table thead th {
+            background: #f8fafc !important;
+            color: var(--text-light) !important;
+            text-transform: uppercase !important;
+            font-size: 0.75rem !important;
+            letter-spacing: 0.05em !important;
+            padding: 0.75rem 1rem !important;
+            border-bottom: 2px solid var(--border) !important;
         }
 
-            {
-            % endblock %
+        .table td {
+            padding: 1rem !important;
+            vertical-align: middle !important;
+        }
+
+        .badge {
+            font-weight: 500 !important;
+            padding: 0.35em 0.65em !important;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 8px !important;
+            border: 1px solid var(--border) !important;
+            padding: 0.6rem 1rem !important;
+        }
+
+        /* Pagination & List Fixes */
+        .pagination,
+        .pagination ul {
+            display: flex !important;
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            gap: 2px !important;
+        }
+
+        .pagination li {
+            list-style: none !important;
+        }
+
+        .dropdown-menu list-unstyled {
+            list-style: none !important;
+            padding: 0 !important;
+        }
+
+        ul {
+            list-style: none !important;
+            padding: 0;
         }
     </style>
+    {% block head %}{% endblock %}
 </head>
 
-<body>
-    <div class="sidebar">
-        <a href="/" class="navbar-brand">
-            <i class="fas fa-tooth" style="margin-right:10px"></i>
-            {{ admin.title }}
+<body class="layout-fixed">
+    <aside class="sidebar">
+        <a href="{{ admin.base_url }}" class="navbar-brand">
+            <div
+                style="width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                <i class="fas fa-tooth" style="color: white; font-size: 1rem;"></i>
+            </div>
+            <span>{{ admin.title }}</span>
         </a>
+
         <div class="nav-links">
             {% for view in admin.views %}
             <a href="{{ admin.base_url }}/{{ view.identity }}/list"
                 class="nav-link {% if active_view == view %}active{% endif %}">
                 <i class="{{ view.icon or 'fas fa-chevron-right' }}"></i>
-                {{ view.name_plural }}
+                <span>{{ view.name_plural }}</span>
             </a>
             {% endfor %}
-            <div style="border-top:1px solid rgba(255,255,255,0.1); margin: 1.5rem 1rem;"></div>
-            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard Principal</a>
-            <a href="{{ admin.base_url }}/logout" class="nav-link" style="color:#fca5a5 !important"><i
-                    class="fas fa-sign-out-alt"></i> Salir</a>
+            <div style="border-top:1px solid rgba(255,255,255,0.08); margin: 1.5rem 1rem;"></div>
+            <a href="/dashboard" class="nav-link"><i class="fas fa-chart-line"></i><span>Dashboard Principal</span></a>
+            <a href="{{ admin.base_url }}/logout" class="nav-link" style="color: #fca5a5 !important;"><i
+                    class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
         </div>
-    </div>
+    </aside>
 
-    <div class="main">
-        <div class="topbar">
-            <h4 style="margin:0">{{ active_view.name_plural if active_view else "Escritorio" }}</h4>
-            <div class="user-info">
-                {{ request.session.username if request.session else "Admin" }}
+    <div class="page-wrapper">
+        <header class="header-top">
+            <div class="container-xl d-flex justify-content-between align-items-center">
+                <h2 class="page-title" style="font-weight: 700; margin: 0; font-size: 1.25rem;">
+                    {{ active_view.name_plural if active_view else "Panel de Administración" }}
+                </h2>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-blue-lt">Admin</span>
+                    <div style="font-weight: 500;">{{ request.session.username if request.session else "Usuario" }}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
+        </header>
+
+        <main class="main-content">
+            <div class="container-xl">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
     <script>
-        /* Traducciones Dinámicas para elementos UI de SQLAdmin */
         document.addEventListener("DOMContentLoaded", function () {
             const translations = {
-                "New": "Nuevo", "Edit": "Editar", "Delete": "Eliminar", "Search": "Buscar",
-                "Export": "Exportar", "Details": "Detalles", "Results per page": "Resultados/Pág",
+                "New": "Nuevo/a", "Edit": "Editar", "Delete": "Eliminar", "Search": "Buscar",
+                "Export": "Exportar", "Details": "Detalles", "Results per page": "Resultados por página",
                 "Showing": "Mostrando", "to": "a", "of": "de", "items": "elementos",
-                "Are you sure you want to delete": "¿Eliminar este registro?",
-                "Cancel": "Cancelar", "Save": "Guardar", "Actions": "Acciones",
-                "Prev": "Previo", "Next": "Siguiente"
+                "Are you sure you want to delete": "¿Está seguro de eliminar este registro?",
+                "Cancel": "Cancelar", "Save": "Guardar", "Logout": "Cerrar Sesión",
+                "Actions": "Acciones", "Prev": "Anterior", "Next": "Siguiente",
+                "Delete selected items": "Eliminar seleccionados", "Please confirm": "Confirme acción",
+                "Show": "Mostrar", "Add": "Añadir", "prev": "Anterior", "next": "Siguiente",
+                "Results": "Resultados"
             };
-            function t(node) {
+
+            function translateNode(node) {
                 if (node.nodeType === 3) {
-                    const text = node.nodeValue.trim();
-                    if (translations[text]) node.nodeValue = node.nodeValue.replace(text, translations[text]);
-                } else if (node.nodeType === 1 && !['SCRIPT', 'STYLE'].includes(node.tagName)) {
-                    for (let child of node.childNodes) t(child);
+                    let text = node.nodeValue.trim();
+                    if (!text) return;
+
+                    if (translations[text]) {
+                        node.nodeValue = node.nodeValue.replace(text, translations[text]);
+                        return;
+                    }
+
+                    if (text.includes("next >")) node.nodeValue = node.nodeValue.replace("next >", "Siguiente >");
+                    if (text.includes("< prev")) node.nodeValue = node.nodeValue.replace("< prev", "< Anterior");
+                    if (text.includes("+ New")) node.nodeValue = node.nodeValue.replace("+ New", "+ Nuevo/a");
+
+                    for (let key in translations) {
+                        if (text.toLowerCase().includes(key.toLowerCase()) && key.length > 3) {
+                            let reg = new RegExp("\\b" + key + "\\b", "gi");
+                            if (reg.test(text)) node.nodeValue = node.nodeValue.replace(reg, translations[key]);
+                        }
+                    }
+                } else if (node.nodeType === 1) {
+                    if (["SCRIPT", "STYLE"].includes(node.tagName)) return;
+                    if (node.placeholder && translations[node.placeholder]) node.placeholder = translations[node.placeholder];
+                    for (let child of node.childNodes) translateNode(child);
                 }
             }
-            t(document.body);
-            const observer = new MutationObserver(() => t(document.body));
+            translateNode(document.body);
+            const observer = new MutationObserver(() => translateNode(document.body));
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
