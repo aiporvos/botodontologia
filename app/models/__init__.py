@@ -39,6 +39,9 @@ class Patient(Base):
     debts = relationship("Debt", back_populates="patient")
     consents = relationship("Consent", back_populates="patient")
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class Professional(Base):
     __tablename__ = "professionals"
@@ -54,6 +57,9 @@ class Professional(Base):
     appointments = relationship("Appointment", back_populates="professional")
     dental_records = relationship("DentalRecord", back_populates="professional")
 
+    def __str__(self):
+        return f"{self.full_name} ({self.specialty})"
+
 
 class Availability(Base):
     __tablename__ = "availabilities"
@@ -66,6 +72,15 @@ class Availability(Base):
     slot_minutes = Column(Integer, default=30)
 
     professional = relationship("Professional", back_populates="availabilities")
+
+    def __str__(self):
+        try:
+            days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+            day_name = days[self.day_of_week - 1] if 1 <= self.day_of_week <= 7 else str(self.day_of_week)
+            prof_name = self.professional.full_name if self.professional else "Sin Prof."
+            return f"{day_name} {self.start_time.strftime('%H:%M') if self.start_time else ''} - {prof_name}"
+        except:
+            return f"Disponibilidad {self.id}"
 
 
 class Appointment(Base):
@@ -94,6 +109,14 @@ class Appointment(Base):
 
     __table_args__ = (Index("idx_appt_prof_start", "professional_id", "start_at"),)
 
+    def __str__(self):
+        try:
+            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            date_str = self.start_at.strftime('%d/%m %H:%M') if self.start_at else ""
+            return f"{date_str} - {pat_name}"
+        except:
+            return f"Turno {self.id}"
+
 
 class DentalRecord(Base):
     __tablename__ = "dental_records"
@@ -115,6 +138,13 @@ class DentalRecord(Base):
     patient = relationship("Patient", back_populates="dental_records")
     professional = relationship("Professional", back_populates="dental_records")
 
+    def __str__(self):
+        try:
+            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            return f"{self.tooth}: {self.procedure_name} ({pat_name})"
+        except:
+            return f"Reg. {self.id}"
+
 
 class Consent(Base):
     __tablename__ = "consents"
@@ -132,6 +162,13 @@ class Consent(Base):
 
     patient = relationship("Patient", back_populates="consents")
 
+    def __str__(self):
+        try:
+            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            return f"{self.consent_type} - {pat_name}"
+        except:
+            return f"Consentimiento {self.id}"
+
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
@@ -148,6 +185,9 @@ class ChatSession(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    def __str__(self):
+        return f"Chat {self.chat_id} ({self.channel}) - Step: {self.step}"
+
 
 class AdminUser(Base):
     __tablename__ = "admin_users"
@@ -158,6 +198,9 @@ class AdminUser(Base):
     role = Column(String(20), default="admin") # admin, professional, reception
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def __str__(self):
+        return f"{self.username} ({self.role})"
 
 
 class TreatmentPrice(Base):
@@ -172,6 +215,9 @@ class TreatmentPrice(Base):
     price = Column(Integer)  # Precio en centavos
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def __str__(self):
+        return f"{self.name} ({self.code}) - ${self.price / 100 if self.price else 0:.2f}"
 
 
 class DentalTreatment(Base):
@@ -206,6 +252,13 @@ class DentalTreatment(Base):
     professional = relationship("Professional")
     price = relationship("TreatmentPrice")
 
+    def __str__(self):
+        try:
+            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            return f"{self.treatment_name} ({self.status}) - {pat_name}"
+        except:
+            return f"Trat. {self.id}"
+
 
 class Payment(Base):
     """Cobros realizados"""
@@ -226,6 +279,13 @@ class Payment(Base):
 
     patient = relationship("Patient", back_populates="payments")
     appointment = relationship("Appointment")
+
+    def __str__(self):
+        try:
+            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            return f"Cobro ${self.amount/100 if self.amount else 0:.2f} - {pat_name}"
+        except:
+            return f"Cobro {self.id}"
 
 
 class Debt(Base):

@@ -22,24 +22,18 @@ from app.models import (
 class PatientAdmin(ModelView, model=Patient):
     """Administración de Pacientes"""
 
-    column_list = [
-        Patient.id,
-        Patient.first_name,
-        Patient.last_name,
-        Patient.phone,
-        Patient.obra_social,
-        Patient.created_at,
-    ]
+    column_list = ["id", "first_name", "last_name", "dni", "phone", "obra_social", "created_at"]
+    column_searchable = ["first_name", "last_name", "phone", "dni"]
     column_labels = {
-        Patient.id: "ID",
-        Patient.first_name: "Nombre",
-        Patient.last_name: "Apellido",
-        Patient.phone: "Teléfono",
-        Patient.obra_social: "Obra Social",
-        Patient.created_at: "Fecha Alta",
-        Patient.dni: "DNI",
-        Patient.email: "Email",
-        Patient.notes: "Notas"
+        "id": "ID",
+        "first_name": "Nombre",
+        "last_name": "Apellido",
+        "dni": "DNI",
+        "phone": "Teléfono",
+        "email": "Email",
+        "obra_social": "Obra Social",
+        "notes": "Notas",
+        "created_at": "Fecha Alta"
     }
     can_delete = True
     can_edit = True
@@ -51,17 +45,14 @@ class PatientAdmin(ModelView, model=Patient):
 class ProfessionalAdmin(ModelView, model=Professional):
     """Administración de Profesionales"""
 
-    column_list = [
-        Professional.id,
-        Professional.full_name,
-        Professional.specialty,
-        Professional.is_active,
-    ]
+    column_list = ["id", "full_name", "specialty", "is_active"]
+    column_searchable = ["full_name", "specialty"]
     column_labels = {
-        Professional.id: "ID",
-        Professional.full_name: "Nombre Completo",
-        Professional.specialty: "Especialidad",
-        Professional.is_active: "Activo"
+        "id": "ID",
+        "full_name": "Nombre Completo",
+        "specialty": "Especialidad",
+        "location": "Ubicación",
+        "is_active": "Activo"
     }
     can_delete = True
     can_edit = True
@@ -73,19 +64,15 @@ class ProfessionalAdmin(ModelView, model=Professional):
 class AvailabilityAdmin(ModelView, model=Availability):
     """Administración de Disponibilidad"""
 
-    column_list = [
-        Availability.id,
-        Availability.professional_id,
-        Availability.day_of_week,
-        Availability.start_time,
-        Availability.end_time,
-    ]
+    column_list = ["id", "professional", "day_of_week", "start_time", "end_time"]
     column_labels = {
-        Availability.id: "ID",
-        Availability.professional_id: "Profesional",
-        Availability.day_of_week: "Día",
-        Availability.start_time: "Inicio",
-        Availability.end_time: "Fin"
+        "id": "ID",
+        "professional": "Profesional",
+        "professional_id": "ID Profesional",
+        "day_of_week": "Día (1=Lun)",
+        "start_time": "Inicio",
+        "end_time": "Fin",
+        "slot_minutes": "Duración Turno"
     }
     can_delete = True
     can_edit = True
@@ -97,22 +84,18 @@ class AvailabilityAdmin(ModelView, model=Availability):
 class AppointmentAdmin(ModelView, model=Appointment):
     """Administración de Turnos"""
 
-    column_list = [
-        Appointment.id,
-        Appointment.patient_id,
-        Appointment.professional_id,
-        Appointment.start_at,
-        Appointment.status,
-        Appointment.category,
-    ]
+    column_list = ["id", "patient", "professional", "start_at", "status", "category"]
+    column_searchable = ["patient.first_name", "patient.last_name", "professional.full_name", "category"]
     column_labels = {
-        Appointment.id: "ID",
-        Appointment.patient_id: "Paciente",
-        Appointment.professional_id: "Profesional",
-        Appointment.start_at: "Fecha/Hora",
-        Appointment.status: "Estado",
-        Appointment.category: "Categoría",
-        Appointment.reason: "Motivo"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "professional": "Profesional",
+        "professional_id": "ID Profesional",
+        "start_at": "Fecha/Hora",
+        "status": "Estado",
+        "category": "Categoría",
+        "reason": "Motivo"
     }
     can_delete = True
     can_edit = True
@@ -124,19 +107,19 @@ class AppointmentAdmin(ModelView, model=Appointment):
 class DentalRecordAdmin(ModelView, model=DentalRecord):
     """Administración de Registros Dentales (Odontograma)"""
 
-    column_list = [
-        DentalRecord.id,
-        DentalRecord.patient_id,
-        DentalRecord.tooth,
-        DentalRecord.procedure_name,
-        DentalRecord.record_status,
-    ]
+    column_list = ["id", "patient", "tooth", "procedure_name", "record_status", "created_at"]
+    column_searchable = ["patient.first_name", "patient.last_name", "tooth", "procedure_name"]
     column_labels = {
-        DentalRecord.id: "ID",
-        DentalRecord.patient_id: "Paciente",
-        DentalRecord.tooth: "Diente",
-        DentalRecord.procedure_name: "Procedimiento",
-        DentalRecord.record_status: "Estado"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "Paciente",
+        "tooth": "Diente",
+        "procedure_code": "Código Proc.",
+        "procedure_name": "Procedimiento",
+        "record_status": "Estado",
+        "record_date": "Fecha Registro",
+        "notes": "Notas",
+        "created_at": "Creado El"
     }
     can_delete = True
     can_edit = True
@@ -148,19 +131,15 @@ class DentalRecordAdmin(ModelView, model=DentalRecord):
 class ConsentAdmin(ModelView, model=Consent):
     """Administración de Consentimientos"""
 
-    column_list = [
-        Consent.id,
-        Consent.patient_id,
-        Consent.consent_type,
-        Consent.accepted,
-        Consent.accepted_at,
-    ]
+    column_list = ["id", "patient", "consent_type", "accepted", "accepted_at"]
+    column_searchable = ["patient.first_name", "patient.last_name", "consent_type"]
     column_labels = {
-        Consent.id: "ID",
-        Consent.patient_id: "Paciente",
-        Consent.consent_type: "Tipo de Consentimiento",
-        Consent.accepted: "Aceptado",
-        Consent.accepted_at: "Fecha de Aceptación"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "consent_type": "Tipo de Consentimiento",
+        "accepted": "Aceptado",
+        "accepted_at": "Fecha Aceptación"
     }
     can_delete = True
     can_edit = True
@@ -172,17 +151,16 @@ class ConsentAdmin(ModelView, model=Consent):
 class ChatSessionAdmin(ModelView, model=ChatSession):
     """Administración de Sesiones de Chat"""
 
-    column_list = [
-        ChatSession.chat_id,
-        ChatSession.channel,
-        ChatSession.step,
-        ChatSession.updated_at,
-    ]
+    column_list = ["chat_id", "channel", "patient", "step", "updated_at"]
+    column_searchable = ["chat_id", "patient.first_name", "patient.last_name"]
     column_labels = {
-        ChatSession.chat_id: "ID de Chat",
-        ChatSession.channel: "Canal",
-        ChatSession.step: "Paso Actual",
-        ChatSession.updated_at: "Última Actividad"
+        "chat_id": "ID de Chat",
+        "channel": "Canal",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "step": "Paso Actual",
+        "updated_at": "Última Actividad",
+        "payload": "Datos (JSON)"
     }
     can_delete = True
     can_edit = False
@@ -195,19 +173,15 @@ class ChatSessionAdmin(ModelView, model=ChatSession):
 class TreatmentPriceAdmin(ModelView, model=TreatmentPrice):
     """Administración de Precios de Tratamientos"""
 
-    column_list = [
-        TreatmentPrice.id,
-        TreatmentPrice.code,
-        TreatmentPrice.name,
-        TreatmentPrice.price,
-        TreatmentPrice.is_active,
-    ]
+    column_list = ["id", "code", "name", "price", "is_active"]
+    column_searchable = ["code", "name"]
     column_labels = {
-        TreatmentPrice.id: "ID",
-        TreatmentPrice.code: "Código",
-        TreatmentPrice.name: "Nombre",
-        TreatmentPrice.price: "Precio",
-        TreatmentPrice.is_active: "Activo"
+        "id": "ID",
+        "code": "Código",
+        "name": "Nombre",
+        "price": "Precio",
+        "is_active": "Activo",
+        "description": "Descripción"
     }
     can_delete = True
     can_edit = True
@@ -219,25 +193,25 @@ class TreatmentPriceAdmin(ModelView, model=TreatmentPrice):
 class DentalTreatmentAdmin(ModelView, model=DentalTreatment):
     """Administración de Tratamientos Dentales"""
 
-    column_list = [
-        DentalTreatment.id,
-        DentalTreatment.patient_id,
-        DentalTreatment.tooth,
-        DentalTreatment.face,
-        DentalTreatment.treatment_name,
-        DentalTreatment.status,
-        DentalTreatment.treatment_date,
-    ]
+    column_list = ["id", "patient", "tooth", "face", "treatment_name", "status"]
+    column_searchable = ["patient.first_name", "patient.last_name", "tooth", "treatment_name"]
     column_labels = {
-        DentalTreatment.id: "ID",
-        DentalTreatment.patient_id: "Paciente",
-        DentalTreatment.tooth: "Diente",
-        DentalTreatment.face: "Cara",
-        DentalTreatment.treatment_name: "Tratamiento",
-        DentalTreatment.status: "Estado",
-        DentalTreatment.treatment_date: "Fecha"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "tooth": "Diente",
+        "face": "Cara",
+        "treatment_name": "Tratamiento",
+        "status": "Estado",
+        "treatment_date": "Fecha",
+        "professional": "Profesional",
+        "price": "Precio / Catálogo"
     }
     can_delete = True
+    can_edit = True
+    can_create = True
+    name = "Tratamiento Dental"
+    name_plural = "Tratamientos Dentales"
     can_edit = True
     can_create = True
     name = "Tratamiento Dental"
@@ -247,20 +221,18 @@ class DentalTreatmentAdmin(ModelView, model=DentalTreatment):
 class PaymentAdmin(ModelView, model=Payment):
     """Administración de Cobros"""
 
-    column_list = [
-        Payment.id,
-        Payment.patient_id,
-        Payment.amount,
-        Payment.payment_method,
-        Payment.payment_date,
-    ]
+    column_list = ["id", "patient", "amount", "payment_method", "payment_date"]
+    column_searchable = ["patient.first_name", "patient.last_name", "reference"]
     column_labels = {
-        Payment.id: "ID",
-        Payment.patient_id: "Paciente",
-        Payment.amount: "Monto",
-        Payment.payment_method: "Método",
-        Payment.payment_date: "Fecha",
-        Payment.reference: "Referencia"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "amount": "Monto",
+        "payment_method": "Método de Pago",
+        "payment_date": "Fecha",
+        "reference": "Referencia",
+        "notes": "Notas",
+        "appointment": "Turno Relacionado"
     }
     can_delete = True
     can_edit = True
@@ -272,21 +244,16 @@ class PaymentAdmin(ModelView, model=Payment):
 class DebtAdmin(ModelView, model=Debt):
     """Administración de Deudas"""
 
-    column_list = [
-        Debt.id,
-        Debt.patient_id,
-        Debt.description,
-        Debt.amount,
-        Debt.status,
-        Debt.due_date,
-    ]
+    column_list = ["id", "patient", "description", "amount", "status", "due_date"]
+    column_searchable = ["patient.first_name", "patient.last_name", "description"]
     column_labels = {
-        Debt.id: "ID",
-        Debt.patient_id: "Paciente",
-        Debt.description: "Descripción",
-        Debt.amount: "Monto",
-        Debt.status: "Estado",
-        Debt.due_date: "Vencimiento"
+        "id": "ID",
+        "patient": "Paciente",
+        "patient_id": "ID Paciente",
+        "description": "Descripción",
+        "amount": "Monto",
+        "status": "Estado",
+        "due_date": "Vencimiento"
     }
     can_delete = True
     can_edit = True
@@ -298,15 +265,13 @@ class DebtAdmin(ModelView, model=Debt):
 class AdminUserAdmin(ModelView, model=AdminUser):
     """Administración de Usuarios del Panel"""
 
-    column_list = [AdminUser.id, AdminUser.username, AdminUser.is_active, AdminUser.created_at]
-    form_excluded_columns = [AdminUser.password_hash]
-    column_details_exclude_list = [AdminUser.password_hash]
+    column_list = ["id", "username", "role", "is_active", "created_at"]
     column_labels = {
-        AdminUser.id: "ID",
-        AdminUser.username: "Usuario",
-        AdminUser.role: "Rol",
-        AdminUser.is_active: "Activo",
-        AdminUser.created_at: "Creado el"
+        "id": "ID",
+        "username": "Usuario",
+        "role": "Rol",
+        "is_active": "Activo",
+        "created_at": "Creado el"
     }
     can_delete = True
     can_edit = True
