@@ -307,108 +307,74 @@
         }
 
         /* ODONTOGRAM STYLES */
-        /* SOLUCIÓN BLINDADA ODONTOGRAMA */
+        /* SOLUCIÓN IRROMPIBLE - TABLAS NATIVAS */
         .odonto-wrapper-scroll {
             width: 100% !important;
             overflow-x: auto !important;
             background: #f1f5f9 !important;
-            padding: 40px 20px !important;
+            padding: 30px !important;
             border-radius: 16px !important;
         }
 
         .odonto-grid {
             display: flex !important;
             flex-direction: column !important;
-            gap: 50px !important;
+            gap: 30px !important;
             align-items: center !important;
             min-width: 1000px !important;
-            margin: 0 auto !important;
         }
 
-        .fdi-cross {
-            display: table !important;
-            border-collapse: separate !important;
-            border-spacing: 0 !important;
+        .odontogram-table {
             background: white !important;
+            border-collapse: collapse !important;
+            border: 2px solid #cbd5e1 !important;
             border-radius: 12px !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-            border: 1px solid #e2e8f0 !important;
-            padding: 20px !important;
         }
 
-        .fdi-row {
-            display: table-row !important;
-        }
-
-        .fdi-cell {
-            display: table-cell !important;
+        .odontogram-table td {
+            padding: 15px !important;
             vertical-align: middle !important;
-            padding: 10px !important;
-        }
-
-        .fdi-vline {
-            width: 2px !important;
-            background: #cbd5e1 !important;
-        }
-
-        .fdi-hline-row {
-            display: table-row !important;
-        }
-
-        .fdi-hline {
-            height: 2px !important;
-            background: #cbd5e1 !important;
-        }
-
-        .fdi-quadrant {
-            display: inline-flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            gap: 4px !important;
-            align-items: center !important;
-            justify-content: center !important;
-            min-width: max-content !important;
-        }
-
-        .q-right {
-            justify-content: flex-end !important;
-        }
-
-        .q-left {
-            justify-content: flex-start !important;
-        }
-
-        .tooth-row-label {
-            font-size: 1rem !important;
-            text-transform: uppercase !important;
-            letter-spacing: 2px !important;
-            color: #0f172a !important;
-            font-weight: 800 !important;
-            margin-bottom: 20px !important;
             text-align: center !important;
+            white-space: nowrap !important;
+        }
+
+        .cross-vline {
+            width: 3px !important;
+            background: #94a3b8 !important;
+            padding: 0 !important;
+        }
+
+        .cross-hline {
+            height: 3px !important;
+            background: #94a3b8 !important;
+            padding: 0 !important;
         }
 
         .tooth-container {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            gap: 6px !important;
-            width: 45px !important;
-            flex-shrink: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            margin: 0 3px !important;
+            width: 46px !important;
+            text-align: center !important;
         }
 
         .tooth-id {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #64748b;
+            display: block !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            color: #1e293b !important;
+            margin: 4px 0 !important;
         }
 
         .tooth-map {
-            width: 40px;
-            height: 40px;
-            position: relative;
-            background: white;
-            border: 1px solid #cbd5e1;
+            display: block !important;
+            width: 40px !important;
+            height: 40px !important;
+            margin: 0 auto !important;
+            position: relative !important;
+            background: white !important;
+            border: 1px solid #94a3b8 !important;
             transition: all 0.2s;
         }
 
@@ -1027,63 +993,47 @@
                     </div>
 
                     <div id="odontogramContainer">
+                        <div style="text-align: right; font-size: 10px; color: #94a3b8; padding: 5px;">
+                            ESTRUCTURA_VER_9.0</div>
                         <div class="odonto-wrapper-scroll">
                             <div class="odonto-grid">
                                 <!-- DENTICION PERMANENTE -->
                                 <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
-                                <div class="fdi-cross">
-                                    <div class="fdi-row">
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-right" id="row-up-right"></div>
-                                        </div>
-                                        <div class="fdi-cell fdi-vline"></div>
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-left" id="row-up-left"></div>
-                                        </div>
-                                    </div>
-                                    <div class="fdi-hline-row">
-                                        <div class="fdi-cell fdi-hline"></div>
-                                        <div class="fdi-cell fdi-hline"></div>
-                                        <div class="fdi-cell fdi-hline"></div>
-                                    </div>
-                                    <div class="fdi-row">
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-right" id="row-down-right"></div>
-                                        </div>
-                                        <div class="fdi-cell fdi-vline"></div>
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-left" id="row-down-left"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <table class="odontogram-table">
+                                    <tr>
+                                        <td id="row-up-right" style="text-align: right;"></td>
+                                        <td class="cross-vline" rowspan="3"
+                                            style="width:3px; background:#94a3b8; padding:0;"></td>
+                                        <td id="row-up-left" style="text-align: left;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="cross-hline" style="height:3px; background:#94a3b8; padding:0;"></td>
+                                        <td class="cross-hline" style="height:3px; background:#94a3b8; padding:0;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td id="row-down-right" style="text-align: right;"></td>
+                                        <td id="row-down-left" style="text-align: left;"></td>
+                                    </tr>
+                                </table>
 
                                 <!-- DENTICION TEMPORAL -->
-                                <div class="tooth-row-label">DENTICIÓN TEMPORAL (NIÑOS)</div>
-                                <div class="fdi-cross">
-                                    <div class="fdi-row">
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-right" id="row-up-ped-right"></div>
-                                        </div>
-                                        <div class="fdi-cell fdi-vline"></div>
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-left" id="row-up-ped-left"></div>
-                                        </div>
-                                    </div>
-                                    <div class="fdi-hline-row">
-                                        <div class="fdi-cell fdi-hline"></div>
-                                        <div class="fdi-cell fdi-hline"></div>
-                                        <div class="fdi-cell fdi-hline"></div>
-                                    </div>
-                                    <div class="fdi-row">
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-right" id="row-down-ped-right"></div>
-                                        </div>
-                                        <div class="fdi-cell fdi-vline"></div>
-                                        <div class="fdi-cell">
-                                            <div class="fdi-quadrant q-left" id="row-down-ped-left"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="tooth-row-label" style="margin-top: 20px;">DENTICIÓN TEMPORAL (NIÑOS)</div>
+                                <table class="odontogram-table">
+                                    <tr>
+                                        <td id="row-up-ped-right" style="text-align: right;"></td>
+                                        <td class="cross-vline" rowspan="3"
+                                            style="width:3px; background:#94a3b8; padding:0;"></td>
+                                        <td id="row-up-ped-left" style="text-align: left;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="cross-hline" style="height:3px; background:#94a3b8; padding:0;"></td>
+                                        <td class="cross-hline" style="height:3px; background:#94a3b8; padding:0;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td id="row-down-ped-right" style="text-align: right;"></td>
+                                        <td id="row-down-ped-left" style="text-align: left;"></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
                     </div>
