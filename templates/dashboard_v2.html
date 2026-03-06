@@ -321,16 +321,17 @@
 
         .fdi-cross-container {
             display: grid;
-            grid-template-columns: 1fr 2px 1fr;
+            grid-template-columns: minmax(400px, 1fr) 2px minmax(400px, 1fr);
             grid-template-rows: auto 2px auto;
             gap: 0;
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
             position: relative;
             margin-bottom: 2rem;
+            width: fit-content;
         }
 
         .fdi-line-v {
@@ -349,10 +350,10 @@
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            padding: 15px;
-            gap: 6px;
+            padding: 10px 15px;
+            gap: 4px;
             align-items: center;
-            min-width: max-content;
+            overflow: visible;
         }
 
         .q-upper-right {
@@ -401,8 +402,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             position: relative;
+            flex-shrink: 0;
+            width: 44px;
         }
 
         .tooth-id {
@@ -1037,25 +1040,32 @@
                     <div id="odontogramContainer">
                         <div class="odonto-grid">
                             <!-- SECTION PERMANENTE -->
-                            <div class="tooth-row-label">Dentición Permanente (Adultos)</div>
-                            <div class="fdi-cross-container" style="width: 900px;">
+                            <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
+                            <div class="fdi-cross-container">
                                 <div class="fdi-line-v"></div>
                                 <div class="fdi-line-h"></div>
-                                <div class="fdi-quadrant q-upper-right" id="row-up-right"></div>
-                                <div class="fdi-quadrant q-upper-left" id="row-up-left"></div>
-                                <div class="fdi-quadrant q-lower-right" id="row-down-right"></div>
-                                <div class="fdi-quadrant q-lower-left" id="row-down-left"></div>
+                                <div class="fdi-quadrant q-upper-right" id="row-up-right" style="min-width: 400px;">
+                                </div>
+                                <div class="fdi-quadrant q-upper-left" id="row-up-left" style="min-width: 400px;"></div>
+                                <div class="fdi-quadrant q-lower-right" id="row-down-right" style="min-width: 400px;">
+                                </div>
+                                <div class="fdi-quadrant q-lower-left" id="row-down-left" style="min-width: 400px;">
+                                </div>
                             </div>
 
                             <!-- SECTION TEMPORAL -->
-                            <div class="tooth-row-label">Dentición Temporal (Niños)</div>
-                            <div class="fdi-cross-container" style="width: 600px;">
+                            <div class="tooth-row-label" style="margin-top: 20px;">DENTICIÓN TEMPORAL (NIÑOS)</div>
+                            <div class="fdi-cross-container">
                                 <div class="fdi-line-v"></div>
                                 <div class="fdi-line-h"></div>
-                                <div class="fdi-quadrant q-upper-right" id="row-up-ped-right"></div>
-                                <div class="fdi-quadrant q-upper-left" id="row-up-ped-left"></div>
-                                <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"></div>
-                                <div class="fdi-quadrant q-lower-left" id="row-down-ped-left"></div>
+                                <div class="fdi-quadrant q-upper-right" id="row-up-ped-right" style="min-width: 250px;">
+                                </div>
+                                <div class="fdi-quadrant q-upper-left" id="row-up-ped-left" style="min-width: 250px;">
+                                </div>
+                                <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"
+                                    style="min-width: 250px;"></div>
+                                <div class="fdi-quadrant q-lower-left" id="row-down-ped-left" style="min-width: 250px;">
+                                </div>
                             </div>
                         </div>
 
