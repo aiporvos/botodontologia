@@ -108,7 +108,7 @@ class DentalRecord(Base):
     procedure_code = Column(String(20))
     procedure_name = Column(String(200), nullable=False)
     record_status = Column(String(20), default="planned")  # planned, in_progress, done
-    record_date = Column(Date, default="current_date")
+    record_date = Column(Date, server_default=func.current_date())
     notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

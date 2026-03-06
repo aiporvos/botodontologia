@@ -70,6 +70,9 @@ app = FastAPI(
 from starlette.middleware.sessions import SessionMiddleware
 app.add_middleware(SessionMiddleware, secret_key=settings.admin_password or "dental-studio-secret-key")
 
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+app.add_middleware(ProxyHeadersMiddleware, trusted_proxies="*")
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 setup_admin(app, engine)

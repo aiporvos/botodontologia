@@ -837,15 +837,38 @@
         });
         document.getElementById('patientForm').addEventListener('submit', async e => {
             e.preventDefault();
-            await API('/api/patients', {
-                method: 'POST', body: JSON.stringify({
-                    first_name: document.getElementById('pf_first').value, last_name: document.getElementById('pf_last').value,
-                    dni: document.getElementById('pf_dni').value, phone: document.getElementById('pf_phone').value,
-                    email: document.getElementById('pf_email').value, obra_social: document.getElementById('pf_obra').value,
-                    notes: document.getElementById('pf_notes').value
-                })
-            });
-            closeModal('patientModal'); e.target.reset(); loadPatients();
+            const data = {
+                first_name: document.getElementById('pf_first').value,
+                last_name: document.getElementById('pf_last').value,
+                dni: document.getElementById('pf_dni').value || null,
+                phone: document.getElementById('pf_phone').value || null,
+                email: document.getElementById('pf_email').value || null,
+                obra_social: document.getElementById('pf_obra').value || "Particular",
+                notes: document.getElementById('pf_notes').value || null
+            };
+
+            try {
+                const response = await fetch('/api/patients', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    closeModal('patientModal');
+                    e.target.reset();
+                    loadPatients();
+                    alert("Paciente creado con éxito");
+                } else {
+                    const error = await response.json();
+                    alert("Error: " + (error.detail || "No se pudo crear el paciente"));
+                }
+            } catch (err) {
+                alert("Error de conexión");
+            }
         });
         function viewPatient(id) { alert('Ficha del paciente #' + id + ' (próximamente vista detallada)'); }
 
