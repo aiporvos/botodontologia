@@ -322,19 +322,76 @@
             gap: 20px;
             padding: 20px;
             overflow-x: auto;
-            background: #f8fafc;
+            background: #fff;
             border-radius: 12px;
         }
 
+        .fdi-cross-container {
+            display: grid;
+            grid-template-columns: 1fr 2px 1fr;
+            grid-template-rows: auto 2px auto;
+            gap: 0;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            margin-bottom: 2rem;
+            min-width: 800px;
+        }
+
+        .fdi-line-v {
+            grid-column: 2;
+            grid-row: 1 / span 3;
+            background: #cbd5e1;
+        }
+
+        .fdi-line-h {
+            grid-row: 2;
+            grid-column: 1 / span 3;
+            background: #cbd5e1;
+        }
+
+        .fdi-quadrant {
+            display: flex;
+            padding: 10px;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .q-upper-right {
+            grid-column: 1;
+            grid-row: 1;
+            justify-content: flex-end;
+        }
+
+        .q-upper-left {
+            grid-column: 3;
+            grid-row: 1;
+            justify-content: flex-start;
+        }
+
+        .q-lower-right {
+            grid-column: 1;
+            grid-row: 3;
+            justify-content: flex-end;
+        }
+
+        .q-lower-left {
+            grid-column: 3;
+            grid-row: 3;
+            justify-content: flex-start;
+        }
+
         .tooth-row-label {
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-light);
-            font-weight: 700;
-            margin-bottom: -10px;
-            margin-top: 10px;
+            color: #1e293b;
+            font-weight: 800;
+            margin-bottom: 15px;
             text-align: center;
+            width: 100%;
         }
 
         .tooth-row {
@@ -983,14 +1040,28 @@
 
                     <div id="odontogramContainer">
                         <div class="odonto-grid">
-                            <div class="tooth-row-label">Dentición Adulta (Superior)</div>
-                            <div class="tooth-row" id="row-up"></div>
-                            <div class="tooth-row-label">Dentición Pediátrica (Superior)</div>
-                            <div class="tooth-row" id="row-up-ped"></div>
-                            <div class="tooth-row-label">Dentición Pediátrica (Inferior)</div>
-                            <div class="tooth-row" id="row-down-ped"></div>
-                            <div class="tooth-row-label">Dentición Adulta (Inferior)</div>
-                            <div class="tooth-row" id="row-down"></div>
+                            <!-- SECTION PERMANENTE -->
+                            <div class="tooth-row-label">Dentición Permanente (Adultos)</div>
+                            <div class="fdi-cross-container">
+                                <div class="fdi-line-v"></div>
+                                <div class="fdi-line-h"></div>
+                                <div class="fdi-quadrant q-upper-right" id="row-up-right"></div>
+                                <div class="fdi-quadrant q-upper-left" id="row-up-left"></div>
+                                <div class="fdi-quadrant q-lower-right" id="row-down-right"></div>
+                                <div class="fdi-quadrant q-lower-left" id="row-down-left"></div>
+                            </div>
+
+                            <!-- SECTION TEMPORAL -->
+                            <div class="tooth-row-label">Dentición Temporal (Niños)</div>
+                            <div class="fdi-cross-container"
+                                style="max-width: 600px; margin-left: auto; margin-right: auto;">
+                                <div class="fdi-line-v"></div>
+                                <div class="fdi-line-h"></div>
+                                <div class="fdi-quadrant q-upper-right" id="row-up-ped-right"></div>
+                                <div class="fdi-quadrant q-upper-left" id="row-up-ped-left"></div>
+                                <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"></div>
+                                <div class="fdi-quadrant q-lower-left" id="row-down-ped-left"></div>
+                            </div>
                         </div>
 
                         <div class="odonto-legend">
@@ -1460,40 +1531,42 @@
                 }
 
                 function initOdontogram() {
-                    const up = document.getElementById('row-up');
-                    const upPed = document.getElementById('row-up-ped');
-                    const downPed = document.getElementById('row-down-ped');
-                    const down = document.getElementById('row-down');
-
-                    const adultUp = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
-                    const pedUp = [55, 54, 53, 52, 51, 61, 62, 63, 64, 65];
-                    const pedDown = [85, 84, 83, 82, 81, 71, 72, 73, 74, 75];
-                    const adultDown = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
-
-                    const renderRow = (row, ids) => {
-                        row.innerHTML = ids.map(id => {
+                    const renderQuadrant = (containerId,   ids, isLower = false) => {
+                        const container = document.getElementById(containerId);
+                         if (!container) return;
+                        container.innerHTML = ids.map(id => {
                             let icon = '<i class="fas fa-tooth"></i>';
-                            if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="fas fa-grip-lines-vertical"></i>';
+                            if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="f/i>';
+                            
+                            const toothHTML = `
+                                <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
+                                    <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
+                                    <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
+                                    <div class="tooth-face face-left" data-face="M" onclick="clickFace(event, ${id}, 'M')"></div>
+                                    <div class="tooth-face face-right" data-face="D" onclick="clickFace(event, ${id}, 'D')"></div>
+                                    <div class="tooth-face face-center" data-face="O" onclick="clickFace(event, ${id}, 'O')"></div>
+                                </div>
+                            `;
+
                             return `
                                 <div class="tooth-container">
-                                    <div class="tooth-icon-box">${icon}</div>
-                                    <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
-                                        <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
-                                        <div class="tooth-face face-bottom" data-face="P" onclick="clickFace(event, ${id}, 'P')"></div>
-                                        <div class="tooth-face face-left" data-face="M" onclick="clickFace(event, ${id}, 'M')"></div>
-                                        <div class="tooth-face face-right" data-face="D" onclick="clickFace(event, ${id}, 'D')"></div>
-                                        <div class="tooth-face face-center" data-face="O" onclick="clickFace(event, ${id}, 'O')"></div>
-                                    </div>
-                                    <span class="tooth-id">${id}</span>
+                                    ${!isLower ? `<span class="tooth-id">${id}</span><div class="tooth-icon-box">${icon}</div>${toothHTML}` : `${toothHTML}<div class="tooth-icon-box">${icon}</div><span class="tooth-id">${id}</span>`}
                                 </div>
                             `;
                         }).join('');
                     };
 
-                    renderRow(up, adultUp);
-                    renderRow(upPed, pedUp);
-                    renderRow(downPed, pedDown);
-                    renderRow(down, adultDown);
+                    // Adultos
+                    renderQuadrant('row-up-right', [18, 17, 16, 15, 14, 13, 12, 11]);
+                    renderQuadrant('row-up-left', [21, 22, 23, 24, 25, 26, 27, 28]);
+                    renderQuadrant('row-down-right', [48, 47, 46, 45, 44, 43, 42, 41], true);
+                    renderQuadrant('row-down-left', [31, 32, 33, 34, 35, 36, 37, 38], true);
+
+                    // Niños
+                    renderQuadrant('row-up-ped-right', [55, 54, 53, 52, 51]);
+                    renderQuadrant('row-up-ped-left', [61, 62, 63, 64, 65]);
+                    renderQuadrant('row-down-ped-right', [85, 84, 83, 82, 81], true);
+                    renderQuadrant('row-down-ped-left', [71, 72, 73, 74, 75], true);
                 }
 
                 function clickTooth(id) {
