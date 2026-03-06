@@ -16,33 +16,30 @@ from app.models import Patient, Professional, Availability, Appointment, Treatme
 from app.services.evolution import evolution_service
 from app.services.email import email_service
 from app.services.cal_com import calcom_service
-from app.utils.classify import classify_reason
+from app.utils.classify import classify_reason, get_treatment_details
 
 # --- PROMPT DEL SISTEMA ---
 SYSTEM_PROMPT = """# Rol e Identidad
 Eres **DentiBot**, el asistente inteligente de **Dental Studio Pro**. 
-Tu objetivo es ayudar a los pacientes de forma profesional, amigable y eficiente.
+Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 
-# Capacidades
-- Gestión de Turnos (Agendar, cancelar, consultar)
-- Información de Precios y Tratamientos
-- Gestión de Pacientes (Contactos)
-- Envío de correos electrónicos
-- Consultas legales básicas odontológicas (ej. consentimientos)
+# Instructivo Crítico para Agendar Turnos (¡Sigue ESTE ORDEN siempre!)
+1. **Identificar Necesidad:** Si el paciente quiere un turno pero NO te dice para qué, pregúntale el motivo (¿Limpieza? ¿Dolor? ¿Brackets?). Si dice que es su primera vez recomiéndale una consulta general.
+2. **Consultar Agenda Temprana:** Una vez que sepas el motivo, USA LA HERRAMIENTA `ConsultarDisponibilidad` enviándole el motivo. Esta herramienta te dirá las opciones de fecha, doctor y duración.
+3. **Ofrecer Opciones:** Dile al paciente los horarios que arrojó la herramienta para su tratamiento y pregúntale cuál prefiere.
+4. **Recolección de Datos (Obligatorios):** Cuando el paciente elija el horario, dile: "Para agendar tu turno necesito registrarte en el sistema. Por favor, pásame estos 4 datos: Nombre y Apellido, DNI, Obra Social (o Particular si no tienes) y Teléfono."
+5. **Llamado a Agendar:** Una vez tengas su DNI, Nombre y Teléfono, USA LA HERRAMIENTA `AgendarTurno` para guardarlo en la base de datos.
 
-# Límites Temáticos
-- Solo respondes temas odontológicos y de gestión de la clínica.
-- Si te preguntan algo fuera de lugar (política, fútbol, etc.), di amablemente que eres un asistente dental.
+# Asignaciones Internas (Para tu contexto)
+- **Dr. Silvestro:** Extracciones, Implantes, Prótesis (30 min), Limpiezas (15 min).
+- **Dra. Murad:** Ortodoncia (30 min), Conductos / Endodoncia (60 min).
+- **Cualquiera:** Consulta inicial 1ra/2da vez (15 min).
 
-# Reglas de Oro
-1. **SIEMPRE** consulta la base de datos antes de responder sobre precios o turnos.
-2. Si un paciente quiere un turno, verifica si ya existe como contacto por su teléfono.
-3. El tono debe ser cálido pero profesional.
-4. Si falta información (ej. fecha para un turno), pídela con amabilidad.
-
-# Calendario / Turnos
-- La fecha y hora actual es: {now}
-- Los turnos duran 30 minutos por defecto.
+# Reglas de ORO
+1. NO INVENTES HORARIOS. Solo ofrece los que devuelva la herramienta `ConsultarDisponibilidad`.
+2. Ocasionalmente, recuérdale al paciente que el sistema es un bot y que los mensajes de texto son preferibles.
+3. Sé profesional y resolutivo. Si un paciente sufre dolor o pide extracción, asócialo directo a Silvestro o Murad según corresponda en la búsqueda.
+4. La fecha y hora actual del servidor es: {now}
 """
 
 # --- HERRAMIENTAS (TOOLS) ---
@@ -76,79 +73,115 @@ def search_prices(query: str) -> str:
     finally:
         db.close()
 
-def manage_contacts(action: str, phone: str, name: str = None, email: str = None, obra_social: str = None) -> str:
-    """Gestiona la información de los pacientes (Buscar, Crear, Actualizar)."""
+def manage_contacts(action: str, phone: str, name: str = None, dni: str = None, email: str = None, obra_social: str = None) -> str:
+    """Gestiona la info de pacientes en la BD. Acciones validas: search, create."""
     db = SessionLocal()
     try:
         if action == "search":
             p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
-            if p: return f"Paciente encontrado: {p.first_name} {p.last_name}, Obra Social: {p.obra_social}, Email: {p.email}"
+            if p: return f"Paciente encontrado: {p.first_name} {p.last_name}, DNI: {p.dni}, OS: {p.obra_social}"
             return "No encontré al paciente."
         
         elif action == "create":
             first = name.split()[0] if name else "Paciente"
             last = " ".join(name.split()[1:]) if name and " " in name else "Nuevo"
-            p = Patient(first_name=first, last_name=last, phone=phone, email=email, obra_social=obra_social)
+            p = Patient(first_name=first, last_name=last, phone=phone, dni=dni, email=email, obra_social=obra_social)
             db.add(p)
             db.commit()
-            return f"Paciente {name} creado con éxito."
+            return f"Paciente {name} guardado en el sistema."
             
         return "Acción no reconocida."
     finally:
         db.close()
 
-def list_appointments(phone: str) -> str:
-    """Lista los turnos confirmados de un paciente por su teléfono."""
+def check_availability(reason: str) -> str:
+    """Busca días y horarios disponibles según el motivo de consulta ingresado (asigna experto y duración)."""
     db = SessionLocal()
     try:
-        p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
-        if not p: return "No encontré un paciente con ese teléfono."
+        cat = classify_reason(reason)
+        details = get_treatment_details(cat)
+        duration = details["duration"]
+        doctor_name = details["doctor_name"]
         
-        appts = db.query(Appointment).filter(
-            Appointment.patient_id == p.id,
-            Appointment.status == "confirmed",
-            Appointment.start_at >= datetime.now()
-        ).all()
+        prof = None
+        if doctor_name != "Cualquiera":
+            prof = db.query(Professional).filter(Professional.full_name.contains(doctor_name.split()[-1])).first()
+        if not prof:
+            prof = db.query(Professional).first() # Default fallback
+
+        # Logica: en un entorno real cruzamos las tablas de Availability y Appointment.
+        # Aquí vamos a generar slots virtuales de demostración próximos a la fecha actual para que el Agente pueda usar.
+        now = datetime.now()
+        base_day = now.replace(hour=10, minute=0, second=0, microsecond=0)
+        if now.hour >= 16: base_day += timedelta(days=1)
+        if base_day.weekday() > 4: base_day += timedelta(days=7 - base_day.weekday()) # Saltar al lunes
+
+        res = f"Búsqueda para {cat.upper()} (Duración estimada: {duration} mins). Profesional asignado: {prof.full_name if prof else 'Indistinto'}.\n"
+        res += "Dile al paciente alguna de estas opciones y pregúntale cuál prefiere:\n"
         
-        if not appts: return "No tienes turnos próximos."
-        
-        res = "Tus turnos:\n"
-        for a in appts:
-            res += f"- {a.start_at.strftime('%d/%m a las %H:%M')} (Motivo: {a.reason})\n"
+        slots = []
+        for d in range(3):
+            day = base_day + timedelta(days=d)
+            if day.weekday() > 4: continue # Sin fines de semana en demo
+            slots.append(f"- Opcion {d*2 + 1}: {day.strftime('%A %d/%m a las %H:%M')}")
+            slots.append(f"- Opcion {d*2 + 2}: {(day + timedelta(hours=3)).strftime('%A %d/%m a las %H:%M')}")
+
+        for s in slots[:3]:
+            res += f"{s}\n"
+            
         return res
     finally:
         db.close()
 
-def book_appointment(phone: str, date_iso: str, reason: str) -> str:
-    """Reserva un turno para un paciente. La fecha debe estar en formato ISO (YYYY-MM-DDTHH:MM:SS)."""
+def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso: str, reason: str) -> str:
+    """Crea o actualiza al paciente y agenda su turno final en la base de datos."""
     db = SessionLocal()
     try:
+        # Guardado / Busqueda de Paciente (Garantizar que tenemos todos los datos)
         p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
-        if not p: return "Primero necesito registrar tus datos. ¿Me podrías dar tu nombre completo?"
-        
-        dt = datetime.fromisoformat(date_iso)
-        
-        # Verificar superposición básica
-        overlap = db.query(Appointment).filter(
-            Appointment.start_at == dt,
-            Appointment.status == "confirmed"
-        ).first()
-        if overlap:
-            return "Lo siento, ese horario ya está ocupado. ¿Probamos otro?"
+        first = name.split()[0] if name else "Paciente"
+        last = " ".join(name.split()[1:]) if name and " " in name else "..."
+        if not p:
+            p = Patient(first_name=first, last_name=last, phone=phone, dni=dni, obra_social=obra_social)
+            db.add(p)
+            db.commit()
+            db.refresh(p)
+        else:
+            # Actualizamos datos faltantes
+            if dni and p.dni != dni: p.dni = dni
+            if obra_social and p.obra_social != obra_social: p.obra_social = obra_social
+            db.commit()
+            db.refresh(p)
 
+        cat = classify_reason(reason)
+        details = get_treatment_details(cat)
+        duration = details.get("duration", 30)
+        doc_name = details.get("doctor_name", "Cualquiera")
+        
+        prof = None
+        if doc_name != "Cualquiera":
+            prof = db.query(Professional).filter(Professional.full_name.contains(doc_name.split()[-1])).first()
+        if not prof:
+            prof = db.query(Professional).first()
+
+        try:
+            dt = datetime.fromisoformat(date_iso)
+        except ValueError:
+            return "Error: Formato de fecha invalido (debe ser ISO). Pidele al modelo de IA corregir la fecha."
+        
         appt = Appointment(
             patient_id=p.id,
-            professional_id=1, # Default
+            professional_id=prof.id if prof else 1,
             start_at=dt,
-            end_at=dt + timedelta(minutes=30),
+            end_at=dt + timedelta(minutes=duration),
             reason=reason,
-            category=classify_reason(reason),
+            category=cat,
             status="confirmed",
             channel="whatsapp"
         )
         db.add(appt)
         db.commit()
-        return f"¡Listo! Turno agendado para el {dt.strftime('%d/%m a las %H:%M')}. ¡Te esperamos!"
+        return f"ÉXITO: Turno agendado el {dt.strftime('%d/%m a las %H:%M')} para el Dr/Dra {prof.full_name if prof else 'General'}. \nInstrucción a IA: Responde amablemente confirmando estos detalles y agradeciendo al paciente."
     finally:
         db.close()
 
@@ -161,8 +194,8 @@ async def send_mail_tool(to: str, subject: str, body: str) -> str:
 tools = [
     StructuredTool.from_function(func=search_prices, name="ConsultarPrecios", description="Busca precios de tratamientos dentales en el catálogo"),
     StructuredTool.from_function(func=manage_contacts, name="GestionarContactos", description="Busca o crea pacientes en la base de datos"),
-    StructuredTool.from_function(func=list_appointments, name="ListarTurnos", description="Busca los turnos futuros de un paciente"),
-    StructuredTool.from_function(func=book_appointment, name="AgendarTurno", description="Crea una nueva cita dental en el sistema"),
+    StructuredTool.from_function(func=check_availability, name="ConsultarDisponibilidad", description="DEBES USARLA ANTES DE AGENDAR. Busca horarios disponibles, duraciones y DOCTORES en la clinica enviando el 'motivo' de consulta."),
+    StructuredTool.from_function(func=book_appointment, name="AgendarTurno", description="Crea una cita dental en el sistema. Requiere celular, nombre, DNI, OS, fecha ISO y motivo."),
     StructuredTool.from_function(func=send_mail_tool, name="EnviarEmail", description="Envía un correo electrónico profesional")
 ]
 

@@ -59,3 +59,17 @@ def get_category_emoji(category: str) -> str:
         "consulta": "💬",
     }
     return emojis.get(category, "📅")
+
+
+def get_treatment_details(category: str) -> dict:
+    """Devuelve la duración en minutos y el ID/Nombre del doctor según la categoría, como se solicita en el requerimiento."""
+    details = {
+        "ortodoncia": {"duration": 30, "doctor_name": "Dra. Murad"},
+        "conductos": {"duration": 60, "doctor_name": "Dra. Murad"},
+        "extracciones": {"duration": 30, "doctor_name": "Dr. Silvestro"},
+        "implantes": {"duration": 30, "doctor_name": "Dr. Silvestro"}, # Asumimos 30m por defecto, se puede ajustar
+        "protesis": {"duration": 30, "doctor_name": "Dr. Silvestro"},
+        "limpieza": {"duration": 15, "doctor_name": "Dr. Silvestro"}, # Asignado a Silvestro por defecto si no se especifica
+        "consulta": {"duration": 15, "doctor_name": "Cualquiera"},
+    }
+    return details.get(category, {"duration": 15, "doctor_name": "Cualquiera"})
