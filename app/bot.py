@@ -18,7 +18,7 @@ async def setup_bot():
 async def start_bot_polling():
     """Inicia el polling del bot en segundo plano"""
     await setup_bot()
-    print("🧹 Cleaning old Telegram webhooks...")
+    print(f"🧹 Cleaning old Telegram webhooks (Token ends in: ...{settings.telegram_bot_token[-4:] if settings.telegram_bot_token else 'NONE'})...")
     await bot.delete_webhook(drop_pending_updates=True)
     print("🤖 Bot de Telegram iniciado mediante Polling...")
     try:
