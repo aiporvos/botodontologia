@@ -251,8 +251,6 @@ def setup_admin(app, engine):
                 username = form.get("username")
                 password = form.get("password")
                 
-                print(f"DEBUG: Intentando login en admin con usuario: {username}")
-                
                 from app.database import SessionLocal
                 from app.models import AdminUser
                 from app.utils.security import verify_password
@@ -261,20 +259,15 @@ def setup_admin(app, engine):
                 try:
                     user = db.query(AdminUser).filter(AdminUser.username == username).first()
                     if user and verify_password(password, user.password_hash):
-                        print(f"DEBUG: Login exitoso para {username}")
-                        request.session.update({"token": "authenticated", "user_id": user.id})
+                        # Solo permitimos login de ADMIN en este panel
+                        if user.role != "admin":
+                            print(f"DEBUG: Acceso denegado a {username} por rol insuficiente")
+                            return False
+                            
+                        request.session.update({"token": "authenticated", "user_id": user.id, "role": "admin"})
                         return True
-                    
-                    # Fallback a settings si no hay usuarios en la DB o falla
-                    if username == settings.admin_username and password == settings.admin_password:
-                        print("DEBUG: Login exitoso via settings fallback")
-                        request.session.update({"token": "authenticated", "user_id": 0})
-                        return True
-                        
                 finally:
                     db.close()
-                    
-                print(f"DEBUG: Login fallido para {username}")
                 return False
             except Exception as e:
                 print(f"DEBUG: Error en admin login: {e}")
@@ -285,12 +278,9 @@ def setup_admin(app, engine):
             return True
 
         async def authenticate(self, request: Request) -> bool:
-            token = request.session.get("token")
-            if not token:
-                return False
-            return True
+            return request.session.get("token") == "authenticated" and request.session.get("role") == "admin"
 
-    auth_backend = AdminAuth(secret_key=settings.admin_password[:32] if len(settings.admin_password) > 32 else settings.admin_password + "x" * (32 - len(settings.admin_password)))
+    auth_backend = AdminAuth(secret_key=settings.admin_password)
 
     admin = Admin(
         app,

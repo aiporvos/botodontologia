@@ -34,16 +34,19 @@ async def lifespan(app: FastAPI):
             admin = AdminUser(
                 username=settings.admin_username,
                 password_hash=get_password_hash(settings.admin_password),
-                role="admin"
+                role="admin",
+                is_active=True
             )
             db.add(admin)
             db.commit()
             print(f"✅ Admin creado: {settings.admin_username}")
         else:
-            # Forzamos la contraseña de settings para asegurar el acceso
+            # Forzamos la contraseña y el rol para asegurar el acceso unificado
             admin.password_hash = get_password_hash(settings.admin_password)
+            admin.role = "admin"
+            admin.is_active = True
             db.commit()
-            print("🔄 Contraseña de admin actualizada por seguridad")
+            print("🔄 Usuario admin sincronizado")
 
         # Profesionales por defecto
         if db.query(Professional).count() == 0:
@@ -68,7 +71,7 @@ app = FastAPI(
 )
 
 from starlette.middleware.sessions import SessionMiddleware
-app.add_middleware(SessionMiddleware, secret_key=settings.admin_password or "dental-studio-secret-key")
+app.add_middleware(SessionMiddleware, secret_key=settings.admin_password)
 
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")

@@ -601,18 +601,25 @@
 <body>
     <div class="sidebar">
         <div class="logo"><i class="fas fa-tooth"></i> Dental Studio Pro</div>
-        <div class="nav-item active" onclick="showSection('dashboard', this)"><i class="fas fa-th-large"></i> Dashboard
-        </div>
-        <div class="nav-item" onclick="showSection('patients', this)"><i class="fas fa-users"></i> Pacientes</div>
-        <div class="nav-item" onclick="showSection('appointments', this)"><i class="fas fa-calendar-alt"></i> Agenda
-        </div>
-        <div class="nav-item" onclick="showSection('odontogram', this)"><i class="fas fa-tooth"></i> Odontograma</div>
-        <div class="nav-sep"></div>
-        <div class="nav-item" onclick="showSection('payments', this)"><i class="fas fa-dollar-sign"></i> Cobros</div>
-        <div class="nav-item" onclick="showSection('debts', this)"><i class="fas fa-file-invoice-dollar"></i> Deudas
-        </div>
-        <div class="nav-sep"></div>
-        <a href="/admin" target="_blank" class="nav-item"><i class="fas fa-user-shield"></i> Admin Panel</a>
+        <div class="nav-item active" data-role="all" onclick="showSection('dashboard', this)"><i
+                class="fas fa-th-large"></i> Dashboard</div>
+        <div class="nav-item" data-role="admin,secretary" onclick="showSection('patients', this)"><i
+                class="fas fa-users"></i> Pacientes</div>
+        <div class="nav-item" data-role="all" onclick="showSection('appointments', this)"><i
+                class="fas fa-calendar-alt"></i> Agenda</div>
+        <div class="nav-item" data-role="admin,specialist" onclick="showSection('odontogram', this)"><i
+                class="fas fa-tooth"></i> Odontograma</div>
+
+        <div class="nav-sep" data-role="admin,secretary"></div>
+        <div class="nav-item" data-role="admin,secretary" onclick="showSection('payments', this)"><i
+                class="fas fa-dollar-sign"></i> Cobros</div>
+        <div class="nav-item" data-role="admin,secretary" onclick="showSection('debts', this)"><i
+                class="fas fa-file-invoice-dollar"></i> Deudas</div>
+
+        <div class="nav-sep" data-role="admin"></div>
+        <a href="/admin" target="_blank" class="nav-item" data-role="admin"><i class="fas fa-user-shield"></i> Admin
+            Panel</a>
+
         <div class="sidebar-footer">
             <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
         </div>
@@ -1381,6 +1388,16 @@
             apiFetch('/api/auth/me').then(u => {
                 document.getElementById('headerName').innerText = u.username;
                 document.getElementById('headerAvatar').innerText = u.username[0].toUpperCase();
+
+                // Role handling
+                const role = u.role || 'admin';
+                document.querySelectorAll('.nav-item, .nav-sep').forEach(el => {
+                    const allowed = el.dataset.role;
+                    if (allowed && allowed !== 'all') {
+                        const roles = allowed.split(',');
+                        if (!roles.includes(role)) el.style.display = 'none';
+                    }
+                });
             }).catch(() => logout());
         };
     </script>
