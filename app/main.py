@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     print("📦 Inicializando base de datos...")
     init_db()
 
-    # Crear admin por defecto si no existe
+    # Crear admin por defecto o actualizar su hash
     db = SessionLocal()
     try:
         admin = db.query(AdminUser).filter(AdminUser.username == settings.admin_username).first()
@@ -37,6 +37,12 @@ async def lifespan(app: FastAPI):
             db.add(admin)
             db.commit()
             print(f"✅ Admin creado: {settings.admin_username}")
+        else:
+            # Re-hashear la contraseña con bcrypt si el hash actual es viejo (SHA256 u otro)
+            if not admin.password_hash.startswith("$2b$"):
+                admin.password_hash = get_password_hash(settings.admin_password)
+                db.commit()
+                print("🔄 Contraseña de admin actualizada a bcrypt")
     finally:
         db.close()
     
