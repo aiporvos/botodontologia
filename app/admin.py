@@ -246,13 +246,39 @@ def setup_admin(app, engine):
 
     class AdminAuth(AuthenticationBackend):
         async def login(self, request: Request) -> bool:
-            form = await request.form()
-            username = form.get("username")
-            password = form.get("password")
-            if username == settings.admin_username and password == settings.admin_password:
-                request.session.update({"token": "authenticated"})
-                return True
-            return False
+            try:
+                form = await request.form()
+                username = form.get("username")
+                password = form.get("password")
+                
+                print(f"DEBUG: Intentando login en admin con usuario: {username}")
+                
+                from app.database import SessionLocal
+                from app.models import AdminUser
+                from app.utils.security import verify_password
+                
+                db = SessionLocal()
+                try:
+                    user = db.query(AdminUser).filter(AdminUser.username == username).first()
+                    if user and verify_password(password, user.password_hash):
+                        print(f"DEBUG: Login exitoso para {username}")
+                        request.session.update({"token": "authenticated", "user_id": user.id})
+                        return True
+                    
+                    # Fallback a settings si no hay usuarios en la DB o falla
+                    if username == settings.admin_username and password == settings.admin_password:
+                        print("DEBUG: Login exitoso via settings fallback")
+                        request.session.update({"token": "authenticated", "user_id": 0})
+                        return True
+                        
+                finally:
+                    db.close()
+                    
+                print(f"DEBUG: Login fallido para {username}")
+                return False
+            except Exception as e:
+                print(f"DEBUG: Error en admin login: {e}")
+                return False
 
         async def logout(self, request: Request) -> bool:
             request.session.clear()
