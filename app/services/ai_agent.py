@@ -20,7 +20,7 @@ from app.utils.classify import classify_reason
 
 # --- PROMPT DEL SISTEMA ---
 SYSTEM_PROMPT = """# Rol e Identidad
-Eres **Lex**, el asistente inteligente de **Dental Studio Pro**. 
+Eres **DentiBot**, el asistente inteligente de **Dental Studio Pro**. 
 Tu objetivo es ayudar a los pacientes de forma profesional, amigable y eficiente.
 
 # Capacidades
