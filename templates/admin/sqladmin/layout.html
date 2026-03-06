@@ -1,0 +1,114 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block head %}
+{{ super() }}
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f8fafc;
+        --sidebar-bg: #0f172a;
+        --sidebar-text: #94a3b8;
+        --sidebar-active: #3b82f6;
+        --card: #ffffff;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --border: #e2e8f0;
+        --blue: #3b82f6;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif !important;
+        background-color: var(--bg) !important;
+    }
+
+    /* SideBar Mirroring Dashboard */
+    .sidebar {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: white !important;
+        padding-left: 1rem;
+    }
+
+    .nav-link {
+        color: #94a3b8 !important;
+        font-weight: 500;
+        border-radius: 8px;
+        margin: 2px 10px;
+        padding: 0.8rem 1.2rem !important;
+        transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link.active {
+        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Cards & Tables */
+    .card {
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: white !important;
+        border-bottom: 1px solid var(--border) !important;
+        padding: 1.2rem 1.5rem !important;
+    }
+
+    .table thead th {
+        background: #f8fafc !important;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+        color: var(--text-light);
+        border-bottom: 2px solid var(--border) !important;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const translations = {
+            "New": "Nuevo", "Edit": "Editar", "Delete": "Eliminar",
+            "Search": "Buscar", "Export": "Exportar", "Details": "Detalles",
+            "Results per page": "Resultados por página", "Showing": "Mostrando",
+            "to": "a", "of": "de", "items": "elementos", "Cancel": "Cancelar",
+            "Save": "Guardar", "Logout": "Cerrar Sesión", "Actions": "Acciones",
+            "Prev": "Previo", "Next": "Siguiente"
+        };
+
+        function translateText(node) {
+            if (node.nodeType === 3) {
+                const text = node.nodeValue.trim();
+                if (translations[text]) node.nodeValue = node.nodeValue.replace(text, translations[text]);
+            } else if (node.nodeType === 1) {
+                if (node.tagName !== "SCRIPT" && node.tagName !== "STYLE") {
+                    for (let child of node.childNodes) translateText(child);
+                }
+            }
+        }
+
+        translateText(document.body);
+        const observer = new MutationObserver(() => translateText(document.body));
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+</script>
+{% endblock %}

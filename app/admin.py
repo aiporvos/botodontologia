@@ -30,12 +30,17 @@ class PatientAdmin(ModelView, model=Patient):
         Patient.obra_social,
         Patient.created_at,
     ]
-    column_searchable = [
-        Patient.first_name,
-        Patient.last_name,
-        Patient.phone,
-        Patient.dni,
-    ]
+    column_labels = {
+        Patient.id: "ID",
+        Patient.first_name: "Nombre",
+        Patient.last_name: "Apellido",
+        Patient.phone: "Teléfono",
+        Patient.obra_social: "Obra Social",
+        Patient.created_at: "Fecha Alta",
+        Patient.dni: "DNI",
+        Patient.email: "Email",
+        Patient.notes: "Notas"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -52,7 +57,12 @@ class ProfessionalAdmin(ModelView, model=Professional):
         Professional.specialty,
         Professional.is_active,
     ]
-    column_searchable = [Professional.full_name, Professional.specialty]
+    column_labels = {
+        Professional.id: "ID",
+        Professional.full_name: "Nombre Completo",
+        Professional.specialty: "Especialidad",
+        Professional.is_active: "Activo"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -70,6 +80,13 @@ class AvailabilityAdmin(ModelView, model=Availability):
         Availability.start_time,
         Availability.end_time,
     ]
+    column_labels = {
+        Availability.id: "ID",
+        Availability.professional_id: "Profesional",
+        Availability.day_of_week: "Día",
+        Availability.start_time: "Inicio",
+        Availability.end_time: "Fin"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -88,7 +105,15 @@ class AppointmentAdmin(ModelView, model=Appointment):
         Appointment.status,
         Appointment.category,
     ]
-    column_searchable = [Appointment.reason, Appointment.category]
+    column_labels = {
+        Appointment.id: "ID",
+        Appointment.patient_id: "Paciente",
+        Appointment.professional_id: "Profesional",
+        Appointment.start_at: "Fecha/Hora",
+        Appointment.status: "Estado",
+        Appointment.category: "Categoría",
+        Appointment.reason: "Motivo"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -106,7 +131,13 @@ class DentalRecordAdmin(ModelView, model=DentalRecord):
         DentalRecord.procedure_name,
         DentalRecord.record_status,
     ]
-    column_searchable = [DentalRecord.tooth, DentalRecord.procedure_name]
+    column_labels = {
+        DentalRecord.id: "ID",
+        DentalRecord.patient_id: "Paciente",
+        DentalRecord.tooth: "Diente",
+        DentalRecord.procedure_name: "Procedimiento",
+        DentalRecord.record_status: "Estado"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -124,7 +155,13 @@ class ConsentAdmin(ModelView, model=Consent):
         Consent.accepted,
         Consent.accepted_at,
     ]
-    column_searchable = [Consent.consent_type]
+    column_labels = {
+        Consent.id: "ID",
+        Consent.patient_id: "Paciente",
+        Consent.consent_type: "Tipo de Consentimiento",
+        Consent.accepted: "Aceptado",
+        Consent.accepted_at: "Fecha de Aceptación"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -141,6 +178,12 @@ class ChatSessionAdmin(ModelView, model=ChatSession):
         ChatSession.step,
         ChatSession.updated_at,
     ]
+    column_labels = {
+        ChatSession.chat_id: "ID de Chat",
+        ChatSession.channel: "Canal",
+        ChatSession.step: "Paso Actual",
+        ChatSession.updated_at: "Última Actividad"
+    }
     can_delete = True
     can_edit = False
     can_create = False
@@ -159,7 +202,13 @@ class TreatmentPriceAdmin(ModelView, model=TreatmentPrice):
         TreatmentPrice.price,
         TreatmentPrice.is_active,
     ]
-    column_searchable = [TreatmentPrice.code, TreatmentPrice.name]
+    column_labels = {
+        TreatmentPrice.id: "ID",
+        TreatmentPrice.code: "Código",
+        TreatmentPrice.name: "Nombre",
+        TreatmentPrice.price: "Precio",
+        TreatmentPrice.is_active: "Activo"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -179,7 +228,15 @@ class DentalTreatmentAdmin(ModelView, model=DentalTreatment):
         DentalTreatment.status,
         DentalTreatment.treatment_date,
     ]
-    column_searchable = [DentalTreatment.tooth, DentalTreatment.treatment_name]
+    column_labels = {
+        DentalTreatment.id: "ID",
+        DentalTreatment.patient_id: "Paciente",
+        DentalTreatment.tooth: "Diente",
+        DentalTreatment.face: "Cara",
+        DentalTreatment.treatment_name: "Tratamiento",
+        DentalTreatment.status: "Estado",
+        DentalTreatment.treatment_date: "Fecha"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -197,7 +254,14 @@ class PaymentAdmin(ModelView, model=Payment):
         Payment.payment_method,
         Payment.payment_date,
     ]
-    column_searchable = [Payment.reference]
+    column_labels = {
+        Payment.id: "ID",
+        Payment.patient_id: "Paciente",
+        Payment.amount: "Monto",
+        Payment.payment_method: "Método",
+        Payment.payment_date: "Fecha",
+        Payment.reference: "Referencia"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -216,7 +280,14 @@ class DebtAdmin(ModelView, model=Debt):
         Debt.status,
         Debt.due_date,
     ]
-    column_searchable = [Debt.description]
+    column_labels = {
+        Debt.id: "ID",
+        Debt.patient_id: "Paciente",
+        Debt.description: "Descripción",
+        Debt.amount: "Monto",
+        Debt.status: "Estado",
+        Debt.due_date: "Vencimiento"
+    }
     can_delete = True
     can_edit = True
     can_create = True
@@ -230,12 +301,18 @@ class AdminUserAdmin(ModelView, model=AdminUser):
     column_list = [AdminUser.id, AdminUser.username, AdminUser.is_active, AdminUser.created_at]
     form_excluded_columns = [AdminUser.password_hash]
     column_details_exclude_list = [AdminUser.password_hash]
+    column_labels = {
+        AdminUser.id: "ID",
+        AdminUser.username: "Usuario",
+        AdminUser.role: "Rol",
+        AdminUser.is_active: "Activo",
+        AdminUser.created_at: "Creado el"
+    }
     can_delete = True
     can_edit = True
     can_create = True
     name = "Usuario Admin"
     name_plural = "Usuarios Admin"
-
 
 def setup_admin(app, engine):
     """Configura el panel de administración"""
@@ -298,6 +375,7 @@ def setup_admin(app, engine):
         title="Dental Studio Pro - Admin",
         base_url="/admin",
         authentication_backend=auth_backend,
+        templates_dir="templates/admin"
     )
 
     admin.add_view(PatientAdmin)
