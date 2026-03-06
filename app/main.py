@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 
