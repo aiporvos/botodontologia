@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from config import settings
@@ -25,16 +25,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(request: Optional[HTTPException] = None, db: Session = Depends(get_db)):
-    # Importamos dinámicamente para evitar dependencias circulares si las hubiera
-    from fastapi import Request
-    from starlette.requests import Request as StarletteRequest
-    
-    # Esta función ahora es más flexible para manejar header O cookie
-    # Necesitamos acceder al request de forma manual si es posible
-    # (FastAPI no nos da el request directamente en una dependencia si no lo pedimos)
-    # Así que usamos una aproximación simplificada:
-    pass
 
 # Versión simplificada y funcional
 async def get_current_user_logic(request: Request, db: Session = Depends(get_db)):
