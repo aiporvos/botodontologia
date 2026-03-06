@@ -307,108 +307,94 @@
         }
 
         /* ODONTOGRAM STYLES */
+        /* SOLUCIÓN BLINDADA ODONTOGRAMA */
         .odonto-wrapper-scroll {
-            width: 100%;
-            overflow-x: auto;
-            background: #f1f5f9;
-            padding: 30px;
-            border-radius: 16px;
+            width: 100% !important;
+            overflow-x: auto !important;
+            background: #f1f5f9 !important;
+            padding: 40px 20px !important;
+            border-radius: 16px !important;
         }
 
         .odonto-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            align-items: center;
-            min-width: 950px;
-            margin: 0 auto;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 50px !important;
+            align-items: center !important;
+            min-width: 1000px !important;
+            margin: 0 auto !important;
         }
 
-        .fdi-cross-container {
-            display: grid;
-            grid-template-columns: auto 2px auto;
-            grid-template-rows: auto 2px auto;
-            gap: 0;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            position: relative;
+        .fdi-cross {
+            display: table !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            background: white !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 20px !important;
         }
 
-        .fdi-line-v {
-            grid-column: 2;
-            grid-row: 1 / span 3;
-            background: #cbd5e1;
+        .fdi-row {
+            display: table-row !important;
         }
 
-        .fdi-line-h {
-            grid-row: 2;
-            grid-column: 1 / span 3;
-            background: #cbd5e1;
+        .fdi-cell {
+            display: table-cell !important;
+            vertical-align: middle !important;
+            padding: 10px !important;
+        }
+
+        .fdi-vline {
+            width: 2px !important;
+            background: #cbd5e1 !important;
+        }
+
+        .fdi-hline-row {
+            display: table-row !important;
+        }
+
+        .fdi-hline {
+            height: 2px !important;
+            background: #cbd5e1 !important;
         }
 
         .fdi-quadrant {
-            display: flex !important;
+            display: inline-flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            padding: 10px 15px;
-            gap: 4px;
-            align-items: center;
-            overflow: visible;
+            gap: 4px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: max-content !important;
         }
 
-        .q-upper-right {
-            grid-column: 1;
-            grid-row: 1;
-            justify-content: flex-end;
+        .q-right {
+            justify-content: flex-end !important;
         }
 
-        .q-upper-left {
-            grid-column: 3;
-            grid-row: 1;
-            justify-content: flex-start;
-        }
-
-        .q-lower-right {
-            grid-column: 1;
-            grid-row: 3;
-            justify-content: flex-end;
-        }
-
-        .q-lower-left {
-            grid-column: 3;
-            grid-row: 3;
-            justify-content: flex-start;
+        .q-left {
+            justify-content: flex-start !important;
         }
 
         .tooth-row-label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #1e293b;
-            font-weight: 800;
-            margin-bottom: 15px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .tooth-row {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            min-width: fit-content;
+            font-size: 1rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px !important;
+            color: #0f172a !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            text-align: center !important;
         }
 
         .tooth-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            position: relative;
-            width: 42px;
-            flex-shrink: 0;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 6px !important;
+            width: 45px !important;
+            flex-shrink: 0 !important;
         }
 
         .tooth-id {
@@ -1043,26 +1029,60 @@
                     <div id="odontogramContainer">
                         <div class="odonto-wrapper-scroll">
                             <div class="odonto-grid">
-                                <!-- SECTION PERMANENTE -->
+                                <!-- DENTICION PERMANENTE -->
                                 <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
-                                <div class="fdi-cross-container" style="width: 880px;">
-                                    <div class="fdi-line-v"></div>
-                                    <div class="fdi-line-h"></div>
-                                    <div class="fdi-quadrant q-upper-right" id="row-up-right"></div>
-                                    <div class="fdi-quadrant q-upper-left" id="row-up-left"></div>
-                                    <div class="fdi-quadrant q-lower-right" id="row-down-right"></div>
-                                    <div class="fdi-quadrant q-lower-left" id="row-down-left"></div>
+                                <div class="fdi-cross">
+                                    <div class="fdi-row">
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-right" id="row-up-right"></div>
+                                        </div>
+                                        <div class="fdi-cell fdi-vline"></div>
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-left" id="row-up-left"></div>
+                                        </div>
+                                    </div>
+                                    <div class="fdi-hline-row">
+                                        <div class="fdi-cell fdi-hline"></div>
+                                        <div class="fdi-cell fdi-hline"></div>
+                                        <div class="fdi-cell fdi-hline"></div>
+                                    </div>
+                                    <div class="fdi-row">
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-right" id="row-down-right"></div>
+                                        </div>
+                                        <div class="fdi-cell fdi-vline"></div>
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-left" id="row-down-left"></div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- SECTION TEMPORAL -->
+                                <!-- DENTICION TEMPORAL -->
                                 <div class="tooth-row-label">DENTICIÓN TEMPORAL (NIÑOS)</div>
-                                <div class="fdi-cross-container" style="width: 580px;">
-                                    <div class="fdi-line-v"></div>
-                                    <div class="fdi-line-h"></div>
-                                    <div class="fdi-quadrant q-upper-right" id="row-up-ped-right"></div>
-                                    <div class="fdi-quadrant q-upper-left" id="row-up-ped-left"></div>
-                                    <div class="fdi-quadrant q-lower-right" id="row-down-ped-right"></div>
-                                    <div class="fdi-quadrant q-lower-left" id="row-down-ped-left"></div>
+                                <div class="fdi-cross">
+                                    <div class="fdi-row">
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-right" id="row-up-ped-right"></div>
+                                        </div>
+                                        <div class="fdi-cell fdi-vline"></div>
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-left" id="row-up-ped-left"></div>
+                                        </div>
+                                    </div>
+                                    <div class="fdi-hline-row">
+                                        <div class="fdi-cell fdi-hline"></div>
+                                        <div class="fdi-cell fdi-hline"></div>
+                                        <div class="fdi-cell fdi-hline"></div>
+                                    </div>
+                                    <div class="fdi-row">
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-right" id="row-down-ped-right"></div>
+                                        </div>
+                                        <div class="fdi-cell fdi-vline"></div>
+                                        <div class="fdi-cell">
+                                            <div class="fdi-quadrant q-left" id="row-down-ped-left"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
