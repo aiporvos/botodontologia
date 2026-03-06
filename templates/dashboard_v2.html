@@ -310,20 +310,13 @@
         .odonto-grid {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
-            align-items: center;
-            padding: 1rem;
-            user-select: none;
-        }
-
-        .odonto-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px;
+            gap: 30px;
+            padding: 30px;
             overflow-x: auto;
-            background: #fff;
-            border-radius: 12px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            align-items: center;
+            user-select: none;
         }
 
         .fdi-cross-container {
@@ -331,13 +324,13 @@
             grid-template-columns: 1fr 2px 1fr;
             grid-template-rows: auto 2px auto;
             gap: 0;
-            background: #f8fafc;
-            padding: 15px;
+            background: white;
+            padding: 25px;
             border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
             position: relative;
             margin-bottom: 2rem;
-            min-width: 800px;
         }
 
         .fdi-line-v {
@@ -353,10 +346,13 @@
         }
 
         .fdi-quadrant {
-            display: flex;
-            padding: 10px;
-            gap: 4px;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            padding: 15px;
+            gap: 6px;
             align-items: center;
+            min-width: max-content;
         }
 
         .q-upper-right {
@@ -1042,7 +1038,7 @@
                         <div class="odonto-grid">
                             <!-- SECTION PERMANENTE -->
                             <div class="tooth-row-label">Dentición Permanente (Adultos)</div>
-                            <div class="fdi-cross-container">
+                            <div class="fdi-cross-container" style="width: 900px;">
                                 <div class="fdi-line-v"></div>
                                 <div class="fdi-line-h"></div>
                                 <div class="fdi-quadrant q-upper-right" id="row-up-right"></div>
@@ -1053,8 +1049,7 @@
 
                             <!-- SECTION TEMPORAL -->
                             <div class="tooth-row-label">Dentición Temporal (Niños)</div>
-                            <div class="fdi-cross-container"
-                                style="max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <div class="fdi-cross-container" style="width: 600px;">
                                 <div class="fdi-line-v"></div>
                                 <div class="fdi-line-h"></div>
                                 <div class="fdi-quadrant q-upper-right" id="row-up-ped-right"></div>
@@ -1531,13 +1526,13 @@
                 }
 
                 function initOdontogram() {
-                    const renderQuadrant = (containerId,   ids, isLower = false) => {
+                    const renderQuadrant = (containerId, ids, isLower = false) => {
                         const container = document.getElementById(containerId);
-                         if (!container) return;
+                        if (!container) return;
                         container.innerHTML = ids.map(id => {
                             let icon = '<i class="fas fa-tooth"></i>';
                             if ([11, 12, 21, 22, 31, 32, 41, 42].includes(id)) icon = '<i class="f/i>';
-                            
+
                             const toothHTML = `
                                 <div class="tooth-map" id="tooth-${id}" data-tooth="${id}" onclick="clickTooth(${id})">
                                     <div class="tooth-face face-top" data-face="V" onclick="clickFace(event, ${id}, 'V')"></div>
