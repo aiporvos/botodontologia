@@ -339,16 +339,21 @@
             white-space: nowrap !important;
         }
 
-        .cross-vline {
-            width: 1px !important;
-            background: #cbd5e1 !important;
-            padding: 0 !important;
+        .q-ur {
+            border-right: 1px solid #cbd5e1 !important;
+            border-bottom: 1px solid #cbd5e1 !important;
         }
 
-        .cross-hline {
-            height: 1px !important;
-            background: #cbd5e1 !important;
-            padding: 0 !important;
+        .q-ul {
+            border-bottom: 1px solid #cbd5e1 !important;
+        }
+
+        .q-dr {
+            border-right: 1px solid #cbd5e1 !important;
+        }
+
+        .q-dl {
+            border: none !important;
         }
 
         .tooth-container {
@@ -999,18 +1004,12 @@
                                 <div class="tooth-row-label">DENTICIÓN PERMANENTE (ADULTOS)</div>
                                 <table class="odontogram-table">
                                     <tr>
-                                        <td id="row-up-right" style="text-align: right;"></td>
-                                        <td class="cross-vline" rowspan="3"
-                                            style="width:1px; background:#cbd5e1; padding:0;"></td>
-                                        <td id="row-up-left" style="text-align: left;"></td>
+                                        <td id="row-up-right" class="q-ur" style="text-align: right;"></td>
+                                        <td id="row-up-left" class="q-ul" style="text-align: left;"></td>
                                     </tr>
                                     <tr>
-                                        <td class="cross-hline" style="height:1px; background:#cbd5e1; padding:0;"></td>
-                                        <td class="cross-hline" style="height:1px; background:#cbd5e1; padding:0;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td id="row-down-right" style="text-align: right;"></td>
-                                        <td id="row-down-left" style="text-align: left;"></td>
+                                        <td id="row-down-right" class="q-dr" style="text-align: right;"></td>
+                                        <td id="row-down-left" class="q-dl" style="text-align: left;"></td>
                                     </tr>
                                 </table>
 
@@ -1018,18 +1017,12 @@
                                 <div class="tooth-row-label" style="margin-top: 20px;">DENTICIÓN TEMPORAL (NIÑOS)</div>
                                 <table class="odontogram-table">
                                     <tr>
-                                        <td id="row-up-ped-right" style="text-align: right;"></td>
-                                        <td class="cross-vline" rowspan="3"
-                                            style="width:1px; background:#cbd5e1; padding:0;"></td>
-                                        <td id="row-up-ped-left" style="text-align: left;"></td>
+                                        <td id="row-up-ped-right" class="q-ur" style="text-align: right;"></td>
+                                        <td id="row-up-ped-left" class="q-ul" style="text-align: left;"></td>
                                     </tr>
                                     <tr>
-                                        <td class="cross-hline" style="height:1px; background:#cbd5e1; padding:0;"></td>
-                                        <td class="cross-hline" style="height:1px; background:#cbd5e1; padding:0;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td id="row-down-ped-right" style="text-align: right;"></td>
-                                        <td id="row-down-ped-left" style="text-align: left;"></td>
+                                        <td id="row-down-ped-right" class="q-dr" style="text-align: right;"></td>
+                                        <td id="row-down-ped-left" class="q-dl" style="text-align: left;"></td>
                                     </tr>
                                 </table>
                             </div>
