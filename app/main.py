@@ -23,6 +23,15 @@ from app.utils.security import get_password_hash, verify_password
 from app.auth import create_access_token, get_current_active_user
 from app import schemas
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -601,3 +610,6 @@ async def webhook_telegram(request: Request):
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+
