@@ -100,59 +100,124 @@
             text-transform: uppercase;
         }
         
-        .dentition-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 15px;
-        }
-        
-        .dentition-half {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .teeth-row {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .tooth-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .tooth-box:hover {
-            transform: scale(1.05);
-        }
-        
-        .tooth-number {
-            font-size: 11px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .tooth-icon {
-            font-size: 16px;
-            color: #95a5a6;
-            margin-bottom: 3px;
-        }
-        
-        .tooth-cell {
-            width: 45px;
-            height: 45px;
-            border: 2px solid #bdc3c7;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            transition: all 0.2s;
+.arcade-container {
+display: flex;
+justify-content: center;
+align-items: flex-start;
+gap: 20px;
+margin-bottom: 15px;
+padding: 15px 0;
+}
+
+.quadrant-left, .quadrant-right {
+display: flex;
+flex-direction: column;
+align-items: center;
+background: #f8f9fa;
+border-radius: 8px;
+padding: 10px;
+border: 1px solid #e0e0e0;
+}
+
+.quadrant-label {
+font-size: 12px;
+font-weight: 700;
+color: #34495e;
+margin-bottom: 8px;
+padding: 2px 10px;
+background: #e8e8e8;
+border-radius: 4px;
+}
+
+.quadrant-gap {
+width: 80px;
+height: 50px;
+border-bottom: 3px solid #34495e;
+border-left: 3px solid #34495e;
+border-right: 3px solid #34495e;
+margin: 0 10px;
+align-self: flex-end;
+margin-bottom: 15px;
+}
+
+.dentition-container {
+display: flex;
+justify-content: center;
+gap: 40px;
+margin-bottom: 15px;
+}
+
+.dentition-half {
+display: flex;
+flex-direction: column;
+align-items: center;
+background: #f8f9fa;
+border-radius: 8px;
+padding: 10px;
+border: 1px solid #e0e0e0;
+}
+
+.teeth-row {
+display: flex;
+gap: 6px;
+padding: 5px;
+border-radius: 6px;
+}
+
+.tooth-box {
+display: flex;
+flex-direction: column;
+align-items: center;
+cursor: pointer;
+transition: all 0.2s;
+padding: 5px;
+border-radius: 6px;
+background: white;
+border: 1px solid #e0e0e0;
+}
+
+.tooth-box:hover {
+transform: scale(1.05);
+background: #f0f7ff;
+border-color: #3498db;
+box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.tooth-box.selected {
+background: #e3f2fd;
+border-color: #2196f3;
+}
+
+.tooth-number {
+font-size: 12px;
+font-weight: 700;
+color: #2c3e50;
+margin-bottom: 4px;
+background: #ecf0f1;
+padding: 2px 6px;
+border-radius: 3px;
+min-width: 24px;
+text-align: center;
+}
+
+.tooth-icon {
+font-size: 14px;
+color: #95a5a6;
+margin-bottom: 2px;
+}
+
+.tooth-cell {
+width: 42px;
+height: 42px;
+border: 2px solid #bdc3c7;
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+background: white;
+transition: all 0.2s;
+font-size: 11px;
+font-weight: 600;
         }
         
         .tooth-cell:hover {
@@ -338,83 +403,87 @@
             </div>
         </div>
 
-        <!-- Odontograma Adultos -->
-        <div class="odontogram-section" id="adultOdontogram" style="display: none;">
-            <div class="odontogram-title">Dentición Permanente (Adultos)</div>
-            
-            <!-- Arcada Superior -->
-            <div class="dentition-container">
-                <!-- Cuadrante 1 (Derecha) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrant1">
-                        <!-- 18, 17, 16, 15, 14, 13, 12, 11 -->
-                    </div>
-                </div>
-                <!-- Cuadrante 2 (Izquierda) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrant2">
-                        <!-- 21, 22, 23, 24, 25, 26, 27, 28 -->
-                    </div>
-                </div>
-            </div>
-            
-            <div class="separator"></div>
-            
-            <!-- Arcada Inferior -->
-            <div class="dentition-container">
-                <!-- Cuadrante 4 (Derecha) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrant4">
-                        <!-- 48, 47, 46, 45, 44, 43, 42, 41 -->
-                    </div>
-                </div>
-                <!-- Cuadrante 3 (Izquierda) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrant3">
-                        <!-- 31, 32, 33, 34, 35, 36, 37, 38 -->
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Odontograma Adultos -->
+<div class="odontogram-section" id="adultOdontogram" style="display: none;">
+<div class="odontogram-title">Dentición Permanente (Adultos)</div>
 
-        <!-- Odontograma Niños -->
-        <div class="odontogram-section" id="childOdontogram" style="display: none;">
-            <div class="odontogram-title">Dentición Temporal (Niños)</div>
-            
-            <!-- Arcada Superior -->
-            <div class="dentition-container">
-                <!-- Cuadrante A (Derecha) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrantA">
-                        <!-- 55, 54, 53, 52, 51 -->
-                    </div>
-                </div>
-                <!-- Cuadrante B (Izquierda) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrantB">
-                        <!-- 61, 62, 63, 64, 65 -->
-                    </div>
-                </div>
-            </div>
-            
-            <div class="separator"></div>
-            
-            <!-- Arcada Inferior -->
-            <div class="dentition-container">
-                <!-- Cuadrante D (Derecha) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrantD">
-                        <!-- 85, 84, 83, 82, 81 -->
-                    </div>
-                </div>
-                <!-- Cuadrante C (Izquierda) -->
-                <div class="dentition-half">
-                    <div class="teeth-row" id="quadrantC">
-                        <!-- 71, 72, 73, 74, 75 -->
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Arcada Superior -->
+<div class="arcade-container">
+<div class="quadrant-left">
+<span class="quadrant-label">C1</span>
+<div class="teeth-row" id="quadrant1">
+<!-- 18, 17, 16, 15, 14, 13, 12, 11 -->
+</div>
+</div>
+<div class="quadrant-gap"></div>
+<div class="quadrant-right">
+<span class="quadrant-label">C2</span>
+<div class="teeth-row" id="quadrant2">
+<!-- 21, 22, 23, 24, 25, 26, 27, 28 -->
+</div>
+</div>
+</div>
+
+<div class="separator"></div>
+
+<!-- Arcada Inferior -->
+<div class="arcade-container">
+<div class="quadrant-left">
+<span class="quadrant-label">C4</span>
+<div class="teeth-row" id="quadrant4">
+<!-- 48, 47, 46, 45, 44, 43, 42, 41 -->
+</div>
+</div>
+<div class="quadrant-gap"></div>
+<div class="quadrant-right">
+<span class="quadrant-label">C3</span>
+<div class="teeth-row" id="quadrant3">
+<!-- 31, 32, 33, 34, 35, 36, 37, 38 -->
+</div>
+</div>
+</div>
+</div>
+
+<!-- Odontograma Niños -->
+<div class="odontogram-section" id="childOdontogram" style="display: none;">
+<div class="odontogram-title">Dentición Temporal (Niños)</div>
+
+<!-- Arcada Superior -->
+<div class="arcade-container">
+<div class="quadrant-left">
+<span class="quadrant-label">C A</span>
+<div class="teeth-row" id="quadrantA">
+<!-- 55, 54, 53, 52, 51 -->
+</div>
+</div>
+<div class="quadrant-gap"></div>
+<div class="quadrant-right">
+<span class="quadrant-label">C B</span>
+<div class="teeth-row" id="quadrantB">
+<!-- 61, 62, 63, 64, 65 -->
+</div>
+</div>
+</div>
+
+<div class="separator"></div>
+
+<!-- Arcada Inferior -->
+<div class="arcade-container">
+<div class="quadrant-left">
+<span class="quadrant-label">C D</span>
+<div class="teeth-row" id="quadrantD">
+<!-- 85, 84, 83, 82, 81 -->
+</div>
+</div>
+<div class="quadrant-gap"></div>
+<div class="quadrant-right">
+<span class="quadrant-label">C C</span>
+<div class="teeth-row" id="quadrantC">
+<!-- 71, 72, 73, 74, 75 -->
+</div>
+</div>
+</div>
+</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -551,18 +620,18 @@
             });
         }
 
-        // Crear caja de diente
-        function createToothBox(tooth) {
-            return `
-                <div class="tooth-box" data-tooth="${tooth}" onclick="markTooth('${tooth}')">
-                    <div class="tooth-number">${tooth}</div>
-                    <div class="tooth-icon">
-                        <i class="fas fa-tooth"></i>
-                    </div>
-                    <div class="tooth-cell" id="tooth-${tooth}"></div>
-                </div>
-            `;
-        }
+// Crear caja de diente
+function createToothBox(tooth) {
+return `
+<div class="tooth-box" data-tooth="${tooth}" onclick="markTooth('${tooth}', event)">
+<div class="tooth-number">${tooth}</div>
+<div class="tooth-icon">
+<i class="fas fa-tooth"></i>
+</div>
+<div class="tooth-cell" id="tooth-${tooth}"></div>
+</div>
+`;
+}
 
         // Seleccionar herramienta
         function selectTool(tool) {
@@ -575,24 +644,35 @@
             document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
         }
 
-        // Marcar diente
-        function markTooth(tooth) {
-            if (!currentTool) {
-                alert('Seleccione una herramienta primero');
-                return;
-            }
-            
-            const cell = document.getElementById(`tooth-${tooth}`);
-            
-            // Limpiar clases anteriores
-            cell.className = 'tooth-cell';
-            
-            // Aplicar nueva marca
-            cell.classList.add(`marked-${currentTool}`);
-            
-            // Guardar en datos
-            odontogramData[tooth] = currentTool;
-        }
+// Marcar diente
+function markTooth(tooth, event) {
+if (event) {
+event.stopPropagation();
+event.preventDefault();
+}
+
+if (!currentTool) {
+alert('Seleccione una herramienta primero');
+return;
+}
+
+const cell = document.getElementById(`tooth-${tooth}`);
+if (!cell) {
+console.error('Diente no encontrado:', tooth);
+return;
+}
+
+// Limpiar clases anteriores
+cell.className = 'tooth-cell';
+
+// Aplicar nueva marca
+cell.classList.add(`marked-${currentTool}`);
+
+// Guardar en datos
+odontogramData[tooth] = currentTool;
+
+console.log('Diente marcado:', tooth, 'con herramienta:', currentTool);
+}
 
         // Limpiar todo
         function clearAll() {
