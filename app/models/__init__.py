@@ -75,9 +75,23 @@ class Availability(Base):
 
     def __str__(self):
         try:
-            days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-            day_name = days[self.day_of_week - 1] if 1 <= self.day_of_week <= 7 else str(self.day_of_week)
-            prof_name = self.professional.full_name if self.professional else "Sin Prof."
+            days = [
+                "Lunes",
+                "Martes",
+                "Miércoles",
+                "Jueves",
+                "Viernes",
+                "Sábado",
+                "Domingo",
+            ]
+            day_name = (
+                days[self.day_of_week - 1]
+                if 1 <= self.day_of_week <= 7
+                else str(self.day_of_week)
+            )
+            prof_name = (
+                self.professional.full_name if self.professional else "Sin Prof."
+            )
             return f"{day_name} {self.start_time.strftime('%H:%M') if self.start_time else ''} - {prof_name}"
         except:
             return f"Disponibilidad {self.id}"
@@ -104,6 +118,14 @@ class Appointment(Base):
     notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Campos para recordatorios
+    reminder_sent = Column(Boolean, default=False)
+    reminder_sent_at = Column(DateTime(timezone=True))
+    reminder_channel = Column(String(20))  # whatsapp, email, both
+    confirmation_status = Column(
+        String(20), default="pending"
+    )  # pending, confirmed, cancelled
+
     patient = relationship("Patient", back_populates="appointments")
     professional = relationship("Professional", back_populates="appointments")
 
@@ -111,8 +133,12 @@ class Appointment(Base):
 
     def __str__(self):
         try:
-            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
-            date_str = self.start_at.strftime('%d/%m %H:%M') if self.start_at else ""
+            pat_name = (
+                f"{self.patient.first_name} {self.patient.last_name}"
+                if self.patient
+                else "S/P"
+            )
+            date_str = self.start_at.strftime("%d/%m %H:%M") if self.start_at else ""
             return f"{date_str} - {pat_name}"
         except:
             return f"Turno {self.id}"
@@ -140,7 +166,11 @@ class DentalRecord(Base):
 
     def __str__(self):
         try:
-            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            pat_name = (
+                f"{self.patient.first_name} {self.patient.last_name}"
+                if self.patient
+                else "S/P"
+            )
             return f"{self.tooth}: {self.procedure_name} ({pat_name})"
         except:
             return f"Reg. {self.id}"
@@ -164,7 +194,11 @@ class Consent(Base):
 
     def __str__(self):
         try:
-            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            pat_name = (
+                f"{self.patient.first_name} {self.patient.last_name}"
+                if self.patient
+                else "S/P"
+            )
             return f"{self.consent_type} - {pat_name}"
         except:
             return f"Consentimiento {self.id}"
@@ -195,7 +229,7 @@ class AdminUser(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(200), nullable=False)
-    role = Column(String(20), default="admin") # admin, professional, reception
+    role = Column(String(20), default="admin")  # admin, professional, reception
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -217,7 +251,9 @@ class TreatmentPrice(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __str__(self):
-        return f"{self.name} ({self.code}) - ${self.price / 100 if self.price else 0:.2f}"
+        return (
+            f"{self.name} ({self.code}) - ${self.price / 100 if self.price else 0:.2f}"
+        )
 
 
 class DentalTreatment(Base):
@@ -254,7 +290,11 @@ class DentalTreatment(Base):
 
     def __str__(self):
         try:
-            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
+            pat_name = (
+                f"{self.patient.first_name} {self.patient.last_name}"
+                if self.patient
+                else "S/P"
+            )
             return f"{self.treatment_name} ({self.status}) - {pat_name}"
         except:
             return f"Trat. {self.id}"
@@ -282,8 +322,12 @@ class Payment(Base):
 
     def __str__(self):
         try:
-            pat_name = f"{self.patient.first_name} {self.patient.last_name}" if self.patient else "S/P"
-            return f"Cobro ${self.amount/100 if self.amount else 0:.2f} - {pat_name}"
+            pat_name = (
+                f"{self.patient.first_name} {self.patient.last_name}"
+                if self.patient
+                else "S/P"
+            )
+            return f"Cobro ${self.amount / 100 if self.amount else 0:.2f} - {pat_name}"
         except:
             return f"Cobro {self.id}"
 

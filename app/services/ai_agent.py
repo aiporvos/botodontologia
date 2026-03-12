@@ -12,7 +12,14 @@ from sqlalchemy import or_
 
 from config import settings
 from app.database import SessionLocal
-from app.models import Patient, Professional, Availability, Appointment, TreatmentPrice, ChatSession
+from app.models import (
+    Patient,
+    Professional,
+    Availability,
+    Appointment,
+    TreatmentPrice,
+    ChatSession,
+)
 from app.services.evolution import evolution_service
 from app.services.email import email_service
 from app.services.cal_com import calcom_service
@@ -44,6 +51,7 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 
 # --- HERRAMIENTAS (TOOLS) ---
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -51,21 +59,28 @@ def get_db():
     finally:
         db.close()
 
+
 def search_prices(query: str) -> str:
     """Busca precios de tratamientos en el catálogo dental."""
     db = SessionLocal()
     try:
-        prices = db.query(TreatmentPrice).filter(
-            or_(
-                TreatmentPrice.name.ilike(f"%{query}%"),
-                TreatmentPrice.code.ilike(f"%{query}%"),
-                TreatmentPrice.description.ilike(f"%{query}%")
-            ),
-            TreatmentPrice.is_active == True
-        ).all()
+        prices = (
+            db.query(TreatmentPrice)
+            .filter(
+                or_(
+                    TreatmentPrice.name.ilike(f"%{query}%"),
+                    TreatmentPrice.code.ilike(f"%{query}%"),
+                    TreatmentPrice.description.ilike(f"%{query}%"),
+                ),
+                TreatmentPrice.is_active == True,
+            )
+            .all()
+        )
         if not prices:
-            return "No encontré precios para ese tratamiento. ¿Podrías ser más específico?"
-        
+            return (
+                "No encontré precios para ese tratamiento. ¿Podrías ser más específico?"
+            )
+
         res = "Catálogo de Precios:\n"
         for p in prices:
             res += f"- {p.name} ({p.code}): ${p.price}\n"
@@ -73,67 +88,86 @@ def search_prices(query: str) -> str:
     finally:
         db.close()
 
-def manage_contacts(action: str, phone: str, name: str = None, dni: str = None, email: str = None, obra_social: str = None) -> str:
+
+def manage_contacts(
+    action: str,
+    phone: str,
+    name: str = None,
+    dni: str = None,
+    email: str = None,
+    obra_social: str = None,
+) -> str:
     """Gestiona la info de pacientes en la BD. Acciones validas: search, create."""
     db = SessionLocal()
     try:
         if action == "search":
             p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
-            if p: return f"Paciente encontrado: {p.first_name} {p.last_name}, DNI: {p.dni}, OS: {p.obra_social}"
+            if p:
+                return f"Paciente encontrado: {p.first_name} {p.last_name}, DNI: {p.dni}, OS: {p.obra_social}"
             return "No encontré al paciente."
-        
+
         elif action == "create":
             first = name.split()[0] if name else "Paciente"
             last = " ".join(name.split()[1:]) if name and " " in name else "Nuevo"
-            p = Patient(first_name=first, last_name=last, phone=phone, dni=dni, email=email, obra_social=obra_social)
+            p = Patient(
+                first_name=first,
+                last_name=last,
+                phone=phone,
+                dni=dni,
+                email=email,
+                obra_social=obra_social,
+            )
             db.add(p)
             db.commit()
             return f"Paciente {name} guardado en el sistema."
-            
+
         return "Acción no reconocida."
     finally:
         db.close()
 
+
 def check_availability(reason: str) -> str:
-    """Busca días y horarios disponibles según el motivo de consulta ingresado (asigna experto y duración)."""
+    """Busca días y horarios disponibles según el motivo de consulta ingresado usando el sistema real."""
     db = SessionLocal()
     try:
-        cat = classify_reason(reason)
-        details = get_treatment_details(cat)
-        duration = details["duration"]
-        doctor_name = details["doctor_name"]
-        
-        prof = None
-        if doctor_name != "Cualquiera":
-            prof = db.query(Professional).filter(Professional.full_name.contains(doctor_name.split()[-1])).first()
-        if not prof:
-            prof = db.query(Professional).first() # Default fallback
+        from app.services.availability import AvailabilityService
 
-        # Logica: en un entorno real cruzamos las tablas de Availability y Appointment.
-        # Aquí vamos a generar slots virtuales de demostración próximos a la fecha actual para que el Agente pueda usar.
-        now = datetime.now()
-        base_day = now.replace(hour=10, minute=0, second=0, microsecond=0)
-        if now.hour >= 16: base_day += timedelta(days=1)
-        if base_day.weekday() > 4: base_day += timedelta(days=7 - base_day.weekday()) # Saltar al lunes
+        availability_service = AvailabilityService(db)
+        result = availability_service.find_available_slots(
+            reason, days_ahead=14, max_options=6
+        )
 
-        res = f"Búsqueda para {cat.upper()} (Duración estimada: {duration} mins). Profesional asignado: {prof.full_name if prof else 'Indistinto'}.\n"
-        res += "Dile al paciente alguna de estas opciones y pregúntale cuál prefiere:\n"
-        
-        slots = []
-        for d in range(3):
-            day = base_day + timedelta(days=d)
-            if day.weekday() > 4: continue # Sin fines de semana en demo
-            slots.append(f"- Opcion {d*2 + 1}: {day.strftime('%A %d/%m a las %H:%M')}")
-            slots.append(f"- Opcion {d*2 + 2}: {(day + timedelta(hours=3)).strftime('%A %d/%m a las %H:%M')}")
+        if not result["success"]:
+            return f"Lo siento, no pude encontrar disponibilidad: {result.get('error', 'Error desconocido')}"
 
-        for s in slots[:3]:
-            res += f"{s}\n"
-            
+        professional = result["professional"]
+        treatment = result["treatment"]
+        slots = result["slots"]
+
+        if not slots:
+            return (
+                f"Lo siento, no hay horarios disponibles para {reason} en los próximos días. "
+                f"Te sugiero llamar al consultorio para coordinar."
+            )
+
+        res = f"📅 *Consulta para: {reason}*\n"
+        res += f"⏱️ Duración: {treatment['duration']} minutos\n"
+        res += f"👨‍⚕️ Profesional asignado: {professional['name']} ({professional['specialty']})\n\n"
+        res += "*Horarios disponibles:*\n"
+
+        for i, slot in enumerate(slots, 1):
+            res += f"{i}. {slot['date']} a las {slot['time']}\n"
+
+        res += "\n¿Cuál opción prefieres? Indícame el número (1, 2, 3...)"
+
         return res
     finally:
         db.close()
 
-def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso: str, reason: str) -> str:
+
+def book_appointment(
+    phone: str, name: str, dni: str, obra_social: str, date_iso: str, reason: str
+) -> str:
     """Crea o actualiza al paciente y agenda su turno final en la base de datos."""
     db = SessionLocal()
     try:
@@ -142,14 +176,22 @@ def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso
         first = name.split()[0] if name else "Paciente"
         last = " ".join(name.split()[1:]) if name and " " in name else "..."
         if not p:
-            p = Patient(first_name=first, last_name=last, phone=phone, dni=dni, obra_social=obra_social)
+            p = Patient(
+                first_name=first,
+                last_name=last,
+                phone=phone,
+                dni=dni,
+                obra_social=obra_social,
+            )
             db.add(p)
             db.commit()
             db.refresh(p)
         else:
             # Actualizamos datos faltantes
-            if dni and p.dni != dni: p.dni = dni
-            if obra_social and p.obra_social != obra_social: p.obra_social = obra_social
+            if dni and p.dni != dni:
+                p.dni = dni
+            if obra_social and p.obra_social != obra_social:
+                p.obra_social = obra_social
             db.commit()
             db.refresh(p)
 
@@ -157,10 +199,14 @@ def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso
         details = get_treatment_details(cat)
         duration = details.get("duration", 30)
         doc_name = details.get("doctor_name", "Cualquiera")
-        
+
         prof = None
         if doc_name != "Cualquiera":
-            prof = db.query(Professional).filter(Professional.full_name.contains(doc_name.split()[-1])).first()
+            prof = (
+                db.query(Professional)
+                .filter(Professional.full_name.contains(doc_name.split()[-1]))
+                .first()
+            )
         if not prof:
             prof = db.query(Professional).first()
 
@@ -168,7 +214,7 @@ def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso
             dt = datetime.fromisoformat(date_iso)
         except ValueError:
             return "Error: Formato de fecha invalido (debe ser ISO). Pidele al modelo de IA corregir la fecha."
-        
+
         appt = Appointment(
             patient_id=p.id,
             professional_id=prof.id if prof else 1,
@@ -177,7 +223,7 @@ def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso
             reason=reason,
             category=cat,
             status="confirmed",
-            channel="whatsapp"
+            channel="whatsapp",
         )
         db.add(appt)
         db.commit()
@@ -185,52 +231,89 @@ def book_appointment(phone: str, name: str, dni: str, obra_social: str, date_iso
     finally:
         db.close()
 
+
 async def send_mail_tool(to: str, subject: str, body: str) -> str:
     """Envía un correo electrónico al paciente."""
     success = await email_service.send_email(to, subject, body)
     return "Correo enviado con éxito." if success else "Error al enviar el correo."
 
+
 # DEFINICIÓN DE TOOLS PARA LANGCHAIN
 tools = [
-    StructuredTool.from_function(func=search_prices, name="ConsultarPrecios", description="Busca precios de tratamientos dentales en el catálogo"),
-    StructuredTool.from_function(func=manage_contacts, name="GestionarContactos", description="Busca o crea pacientes en la base de datos"),
-    StructuredTool.from_function(func=check_availability, name="ConsultarDisponibilidad", description="DEBES USARLA ANTES DE AGENDAR. Busca horarios disponibles, duraciones y DOCTORES en la clinica enviando el 'motivo' de consulta."),
-    StructuredTool.from_function(func=book_appointment, name="AgendarTurno", description="Crea una cita dental en el sistema. Requiere celular, nombre, DNI, OS, fecha ISO y motivo."),
-    StructuredTool.from_function(func=send_mail_tool, name="EnviarEmail", description="Envía un correo electrónico profesional")
+    StructuredTool.from_function(
+        func=search_prices,
+        name="ConsultarPrecios",
+        description="Busca precios de tratamientos dentales en el catálogo",
+    ),
+    StructuredTool.from_function(
+        func=manage_contacts,
+        name="GestionarContactos",
+        description="Busca o crea pacientes en la base de datos",
+    ),
+    StructuredTool.from_function(
+        func=check_availability,
+        name="ConsultarDisponibilidad",
+        description="DEBES USARLA ANTES DE AGENDAR. Busca horarios disponibles, duraciones y DOCTORES en la clinica enviando el 'motivo' de consulta.",
+    ),
+    StructuredTool.from_function(
+        func=book_appointment,
+        name="AgendarTurno",
+        description="Crea una cita dental en el sistema. Requiere celular, nombre, DNI, OS, fecha ISO y motivo.",
+    ),
+    StructuredTool.from_function(
+        func=send_mail_tool,
+        name="EnviarEmail",
+        description="Envía un correo electrónico profesional",
+    ),
 ]
 
 # --- EL AGENTE ---
 
+
 class AIAgent:
     def __init__(self):
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, openai_api_key=settings.openai_api_key)
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", SYSTEM_PROMPT.format(now=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("user", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
+        self.llm = ChatOpenAI(
+            model="gpt-4o-mini", temperature=0.3, openai_api_key=settings.openai_api_key
+        )
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    SYSTEM_PROMPT.format(
+                        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ),
+                ),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("user", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
         self.agent = create_openai_functions_agent(self.llm, tools, self.prompt)
         self.executor = AgentExecutor(agent=self.agent, tools=tools, verbose=True)
         self._memories = {}
 
     def get_memory(self, chat_id: str):
         if chat_id not in self._memories:
-            self._memories[chat_id] = ConversationBufferWindowMemory(k=5, return_messages=True, memory_key="chat_history")
+            self._memories[chat_id] = ConversationBufferWindowMemory(
+                k=5, return_messages=True, memory_key="chat_history"
+            )
         return self._memories[chat_id]
 
     async def ask(self, chat_id: str, text: str) -> str:
         memory = self.get_memory(chat_id)
         try:
-            response = await self.executor.ainvoke({
-                "input": text,
-                "chat_history": memory.load_memory_variables({})["chat_history"]
-            })
+            response = await self.executor.ainvoke(
+                {
+                    "input": text,
+                    "chat_history": memory.load_memory_variables({})["chat_history"],
+                }
+            )
             output = response["output"]
             memory.save_context({"input": text}, {"output": output})
             return output
         except Exception as e:
             print(f"Agent Error: {e}")
             return "Lo siento, tuve un pequeño problema procesando eso. ¿Podrías repetirlo?"
+
 
 ai_agent = AIAgent()

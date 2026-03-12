@@ -1,0 +1,703 @@
+/*
+ * Dental Studio Pro - Odontogram Styles
+ * Diseño basado en ficha odontológica estándar (OSPESYM)
+ * Sistema de numeración FDI (ISO 3950)
+ */
+
+:root {
+  --ospesym-blue: #1e4d8c;
+  --ospesym-light-blue: #4a90e2;
+  --tooth-border: #2c3e50;
+  --tooth-bg: #ffffff;
+  --tooth-hover: #e8f4f8;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --bg-paper: #f5f5f5;
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+  
+  /* Colores de tratamientos */
+  --caries: #e74c3c;
+  --obturation: #3498db;
+  --extraction: #9b59b6;
+  --implant: #1abc9c;
+  --crown: #f39c12;
+  --root-canal: #e67e22;
+  --other: #95a5a6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-paper);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--ospesym-blue);
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+
+.sidebar-header h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sidebar-nav {
+  padding: 15px 0;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: all 0.3s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-left-color: var(--ospesym-light-blue);
+}
+
+.sidebar-nav a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border-left-color: white;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 250px;
+  flex: 1;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Patient Selector */
+.patient-selector {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 20px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.search-box input {
+  padding-left: 45px;
+  height: 45px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.search-box input:focus {
+  border-color: var(--ospesym-blue);
+  box-shadow: 0 0 0 3px rgba(30, 77, 140, 0.1);
+}
+
+/* Patient List Dropdown */
+.patient-list-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: var(--shadow-medium);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+  margin-top: 5px;
+}
+
+.patient-list-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.patient-list-item:last-child {
+  border-bottom: none;
+}
+
+.patient-list-item:hover {
+  background: #f5f5f5;
+}
+
+/* No Patient Message */
+.no-patient-message {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+}
+
+.no-patient-message i {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 20px;
+}
+
+.no-patient-message h4 {
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.no-patient-message p {
+  color: #999;
+}
+
+/* Layout principal tipo ficha */
+.dental-chart {
+  max-width: 1400px;
+  margin: 20px auto;
+  background: white;
+  border: 2px solid var(--ospesym-blue);
+  border-radius: 8px;
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+}
+
+/* Header de la ficha */
+.chart-header {
+  background: linear-gradient(135deg, var(--ospesym-blue) 0%, var(--ospesym-light-blue) 100%);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.chart-header .clinic-name {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Info del paciente - estilo ficha */
+.patient-info-section {
+  padding: 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #ddd;
+}
+
+.patient-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.info-field {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.info-field label {
+  font-weight: 600;
+  color: var(--ospesym-blue);
+  font-size: 0.85rem;
+  min-width: 120px;
+}
+
+.info-field .value {
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+  padding: 2px 0;
+  font-size: 0.95rem;
+}
+
+/* Odontograma - Layout tipo ficha */
+.odontogram-section {
+  padding: 25px;
+}
+
+.odontogram-title {
+  text-align: center;
+  color: var(--ospesym-blue);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Arcadas dentales */
+.dental-arch {
+  margin-bottom: 30px;
+}
+
+.arch-label {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+/* Contenedor de dientes */
+.teeth-container {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+/* Cada cuadrante */
+.quadrant {
+  display: flex;
+  gap: 2px;
+}
+
+.quadrant-right {
+  flex-direction: row-reverse;
+}
+
+/* Diente individual - estilo ficha */
+.tooth-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.tooth-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.tooth-number {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+/* Representación gráfica del diente */
+.tooth-graphic {
+  width: 32px;
+  height: 40px;
+  border: 2px solid var(--tooth-border);
+  background: var(--tooth-bg);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Formas de dientes según posición */
+.tooth-graphic.molar {
+  border-radius: 4px;
+}
+
+.tooth-graphic.premolar {
+  border-radius: 6px 6px 2px 2px;
+}
+
+.tooth-graphic.canine {
+  border-radius: 50% 50% 20% 20%;
+}
+
+.tooth-graphic.incisor {
+  border-radius: 30% 30% 10% 10%;
+}
+
+.tooth-graphic:hover {
+  background: var(--tooth-hover);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Marcadores de caras dentales */
+.tooth-face {
+  position: absolute;
+  font-size: 7px;
+  color: #999;
+  font-weight: bold;
+}
+
+.face-mesial { top: 2px; left: 2px; }
+.face-distal { top: 2px; right: 2px; }
+.face-occlusal { 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  font-size: 6px;
+}
+.face-vestibular { bottom: 2px; left: 50%; transform: translateX(-50%); }
+.face-palatine { bottom: 2px; right: 2px; }
+
+/* Estados de tratamiento en dientes */
+.tooth-graphic.has-treatment::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Colores de tratamiento */
+.tooth-graphic.treatment-caries { 
+  background: rgba(231, 76, 60, 0.2); 
+  border-color: var(--caries);
+}
+.tooth-graphic.treatment-obturation { 
+  background: rgba(52, 152, 219, 0.2); 
+  border-color: var(--obturation);
+}
+.tooth-graphic.treatment-extraction { 
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(155, 89, 182, 0.3) 2px,
+    rgba(155, 89, 182, 0.3) 4px
+  );
+}
+.tooth-graphic.treatment-implant { 
+  background: rgba(26, 188, 156, 0.2); 
+  border-color: var(--implant);
+}
+.tooth-graphic.treatment-crown { 
+  background: rgba(243, 156, 18, 0.2); 
+  border-color: var(--crown);
+}
+.tooth-graphic.treatment-root-canal { 
+  background: rgba(230, 126, 34, 0.2); 
+  border-color: var(--root-canal);
+}
+
+/* Arcada inferior - orientación */
+.lower-arch .tooth-graphic {
+  transform: rotate(180deg);
+}
+
+.lower-arch .tooth-number {
+  order: 2;
+  margin-bottom: 0;
+  margin-top: 4px;
+}
+
+/* Tabla de tratamientos - estilo ficha OSPESYM */
+.treatments-table-section {
+  padding: 20px;
+  background: white;
+  border-top: 2px solid var(--ospesym-blue);
+}
+
+.table-title {
+  color: var(--ospesym-blue);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tabla estilo ficha */
+.odontogram-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.odontogram-table th {
+  background: var(--ospesym-blue);
+  color: white;
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.odontogram-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.odontogram-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.odontogram-table tr:hover {
+  background: #f0f7ff;
+}
+
+/* Columnas de la tabla */
+.col-diente { width: 80px; text-align: center; }
+.col-cara { width: 60px; text-align: center; }
+.col-codigo { width: 100px; }
+.col-observaciones { width: auto; }
+.col-fecha { width: 100px; text-align: center; }
+.col-profesional { width: 150px; }
+.col-estado { width: 100px; text-align: center; }
+
+/* Estados en tabla */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-planned {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.status-in_progress {
+  background: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+.status-done {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* Leyenda */
+.legend-section {
+  padding: 15px 20px;
+  background: #f5f5f5;
+  border-top: 1px solid #ddd;
+}
+
+.legend-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.legend-symbol {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--tooth-border);
+  border-radius: 2px;
+}
+
+.legend-symbol.caries { background: rgba(231, 76, 60, 0.2); border-color: var(--caries); }
+.legend-symbol.obturation { background: rgba(52, 152, 219, 0.2); border-color: var(--obturation); }
+.legend-symbol.extraction { 
+  background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(155, 89, 182, 0.3) 2px, rgba(155, 89, 182, 0.3) 4px);
+}
+.legend-symbol.implant { background: rgba(26, 188, 156, 0.2); border-color: var(--implant); }
+.legend-symbol.crown { background: rgba(243, 156, 18, 0.2); border-color: var(--crown); }
+.legend-symbol.root-canal { background: rgba(230, 126, 34, 0.2); border-color: var(--root-canal); }
+
+/* Modal de tratamiento */
+.modal-content {
+  border-radius: 8px;
+  border: none;
+}
+
+.modal-header {
+  background: var(--ospesym-blue);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+/* Botones */
+.btn-primary {
+  background: var(--ospesym-blue);
+  border-color: var(--ospesym-blue);
+}
+
+.btn-primary:hover {
+  background: var(--ospesym-light-blue);
+  border-color: var(--ospesym-light-blue);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dental-chart {
+    margin: 10px;
+  }
+  
+  .teeth-container {
+    gap: 1px;
+  }
+  
+  .tooth-graphic {
+    width: 28px;
+    height: 35px;
+  }
+  
+  .tooth-number {
+    font-size: 9px;
+  }
+  
+  .odontogram-table {
+    font-size: 0.8rem;
+  }
+  
+  .odontogram-table th,
+  .odontogram-table td {
+    padding: 6px 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .teeth-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .quadrant {
+    gap: 4px;
+  }
+  
+  .odontogram-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dental-chart {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Tooltips personalizados */
+.tooth-wrapper[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+/* Dientes seleccionados */
+.tooth-wrapper.selected .tooth-graphic {
+  box-shadow: 0 0 0 3px var(--ospesym-light-blue);
+  background: #e3f2fd;
+}
+
+/* Espacio entre arcadas */
+.arch-separator {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Sección de observaciones */
+.observations-section {
+  padding: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.observations-title {
+  color: var(--ospesym-blue);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.observations-textarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.observations-textarea:focus {
+  outline: none;
+  border-color: var(--ospesym-light-blue);
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
