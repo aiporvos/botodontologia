@@ -14,7 +14,9 @@ from datetime import datetime, timedelta, date
 from config import settings
 from app.database import engine, init_db, SessionLocal, get_db
 from app.admin import setup_admin
-from app.handlers.conversation import handle_whatsapp_message
+
+# from app.handlers.conversation import handle_whatsapp_message
+handle_whatsapp_message = None
 from app.models import (
     Patient,
     Appointment,
@@ -79,11 +81,11 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
 
-    # Iniciar Bot de Telegram en Segundo Plano (Polling)
-    from app.bot import start_bot
+    # Telegram bot disabled for testing
+    # from app.bot import start_bot
 
     if settings.telegram_bot_token:
-        asyncio.create_task(start_bot())
+        pass  # asyncio.create_task(start_bot())
         print("🤖 Telegram Bot Polling task created")
 
     print("🚀 Dental Studio Pro iniciado")
@@ -565,6 +567,32 @@ async def get_odontogram(
             for t in treatments
         ],
     }
+
+
+@app.post("/api/patients/{patient_id}/odontogram")
+async def save_patient_odontogram(
+    patient_id: int,
+    data: dict,
+    db: Session = Depends(get_db),
+    current_user: AdminUser = Depends(get_current_active_user),
+):
+    teeth = data.get("teeth", {})
+    try:
+        db.query(DentalRecord).filter(DentalRecord.patient_id == patient_id).delete()
+        for tooth_number, treatment_type in teeth.items():
+            record = DentalRecord(
+                patient_id=patient_id,
+                tooth=int(tooth_number),
+                procedure_name=treatment_type,
+                record_status="completed",
+                record_date=date.today(),
+            )
+            db.add(record)
+        db.commit()
+        return {"status": "ok"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/api/odontogram")
