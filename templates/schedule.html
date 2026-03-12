@@ -471,10 +471,15 @@
         async function loadPatients() {
             try {
                 const response = await fetch('/api/patients?limit=1000', API_CONFIG);
-                const data = await response.json();
+                const patients = await response.json();
                 const select = document.getElementById('patientSelect');
+                
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
 
-                data.patients.forEach(patient => {
+                patients.forEach(patient => {
                     const option = document.createElement('option');
                     option.value = patient.id;
                     option.textContent = `${patient.first_name} ${patient.last_name} - ${patient.phone || 'Sin teléfono'}`;

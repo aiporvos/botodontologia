@@ -749,23 +749,23 @@
                     return;
                 }
                 
-                tbody.innerHTML = appointments.map(apt => {
-                    const time = new Date(apt.start_at).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
-                    const statusClass = apt.status === 'confirmed' ? 'status-confirmed' : 
-                                       apt.status === 'pending' ? 'status-pending' : 'status-cancelled';
-                    const statusText = apt.status === 'confirmed' ? 'Confirmado' : 
-                                      apt.status === 'pending' ? 'Pendiente' : 'Cancelado';
-                    
-                    return `
-                        <tr>
-                            <td><strong>${time}</strong></td>
-                            <td>${apt.patient_name || 'N/A'}</td>
-                            <td>${apt.reason || 'Consulta'}</td>
-                            <td>${apt.professional_name || 'N/A'}</td>
-                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        </tr>
-                    `;
-                }).join('');
+                    tbody.innerHTML = appointments.map(apt => {
+                        const time = apt.time || '00:00';
+                        const statusClass = apt.status === 'confirmed' ? 'status-confirmed' : 
+                                          apt.status === 'pending' ? 'status-pending' : 'status-cancelled';
+                        const statusText = apt.status === 'confirmed' ? 'Confirmado' : 
+                                          apt.status === 'pending' ? 'Pendiente' : 'Cancelado';
+                        
+                        return `
+                            <tr>
+                                <td><strong>${time}</strong></td>
+                                <td>${apt.patient_name || 'N/A'}</td>
+                                <td>${apt.reason || 'Consulta'}</td>
+                                <td>${apt.professional_name || 'N/A'}</td>
+                                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
             } catch (error) {
                 console.error('Error loading appointments:', error);
                 document.getElementById('appointmentsTable').innerHTML = `

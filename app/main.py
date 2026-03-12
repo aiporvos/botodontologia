@@ -64,19 +64,32 @@ async def lifespan(app: FastAPI):
 
         # Profesionales por defecto
         if db.query(Professional).count() == 0:
-            db.add_all(
-                [
-                    Professional(
-                        full_name="Dr. Silvestro",
-                        specialty="extracciones/implantes/protesis",
-                    ),
-                    Professional(
-                        full_name="Dra. Murad", specialty="ortodoncia/conductos"
-                    ),
-                ]
+            prof1 = Professional(
+                full_name="Dr. Silvestro",
+                specialty="extracciones/implantes/protesis",
             )
+            prof2 = Professional(
+                full_name="Dra. Murad", specialty="ortodoncia/conductos"
+            )
+            db.add_all([prof1, prof2])
             db.commit()
-            print("✅ Profesionales creados")
+
+            # Crear disponibilidad por defecto (Lunes a Viernes, 9:00 - 18:00)
+            from datetime import time
+            from app.models import Availability
+
+            for prof in [prof1, prof2]:
+                for day in range(1, 6):  # Lunes a Viernes
+                    availability = Availability(
+                        professional_id=prof.id,
+                        day_of_week=day,
+                        start_time=time(9, 0),  # 9:00 AM
+                        end_time=time(18, 0),  # 6:00 PM
+                        slot_minutes=30,
+                    )
+                    db.add(availability)
+            db.commit()
+            print("✅ Profesionales creados con horarios de disponibilidad")
     finally:
         db.close()
 

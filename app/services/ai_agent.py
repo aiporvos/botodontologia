@@ -1,14 +1,18 @@
+"""
+AI Agent para Dental Studio Pro
+Procesa mensajes de pacientes usando LangChain y OpenAI
+"""
+
 import json
-import asyncio
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
-from langchain_openai import ChatOpenAI
-from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.tools import StructuredTool
-from langchain.memory import ConversationBufferWindowMemory
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.tools import tool
 
 from config import settings
 from app.database import SessionLocal
@@ -22,12 +26,12 @@ from app.models import (
 )
 from app.services.evolution import evolution_service
 from app.services.email import email_service
-from app.services.cal_com import calcom_service
 from app.utils.classify import classify_reason, get_treatment_details
+
 
 # --- PROMPT DEL SISTEMA ---
 SYSTEM_PROMPT = """# Rol e Identidad
-Eres **DentiBot**, el asistente inteligente de **Dental Studio Pro**. 
+Eres **DentiBot**, el asistente inteligente de **Dental Studio Pro**.
 Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 
 # Instructivo Crítico para Agendar Turnos (¡Sigue ESTE ORDEN siempre!)
@@ -49,17 +53,11 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 4. La fecha y hora actual del servidor es: {now}
 """
 
+
 # --- HERRAMIENTAS (TOOLS) ---
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
+@tool
 def search_prices(query: str) -> str:
     """Busca precios de tratamientos en el catálogo dental."""
     db = SessionLocal()
@@ -89,6 +87,7 @@ def search_prices(query: str) -> str:
         db.close()
 
 
+@tool
 def manage_contacts(
     action: str,
     phone: str,
@@ -126,6 +125,7 @@ def manage_contacts(
         db.close()
 
 
+@tool
 def check_availability(reason: str) -> str:
     """Busca días y horarios disponibles según el motivo de consulta ingresado usando el sistema real."""
     db = SessionLocal()
@@ -165,16 +165,18 @@ def check_availability(reason: str) -> str:
         db.close()
 
 
+@tool
 def book_appointment(
     phone: str, name: str, dni: str, obra_social: str, date_iso: str, reason: str
 ) -> str:
     """Crea o actualiza al paciente y agenda su turno final en la base de datos."""
     db = SessionLocal()
     try:
-        # Guardado / Busqueda de Paciente (Garantizar que tenemos todos los datos)
+        # Buscar o crear paciente
         p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
         first = name.split()[0] if name else "Paciente"
         last = " ".join(name.split()[1:]) if name and " " in name else "..."
+
         if not p:
             p = Patient(
                 first_name=first,
@@ -188,9 +190,9 @@ def book_appointment(
             db.refresh(p)
         else:
             # Actualizamos datos faltantes
-            if dni and p.dni != dni:
+            if dni and not p.dni:
                 p.dni = dni
-            if obra_social and p.obra_social != obra_social:
+            if obra_social and not p.obra_social:
                 p.obra_social = obra_social
             db.commit()
             db.refresh(p)
@@ -213,7 +215,7 @@ def book_appointment(
         try:
             dt = datetime.fromisoformat(date_iso)
         except ValueError:
-            return "Error: Formato de fecha invalido (debe ser ISO). Pidele al modelo de IA corregir la fecha."
+            return "Error: Formato de fecha inválido."
 
         appt = Appointment(
             patient_id=p.id,
@@ -227,45 +229,30 @@ def book_appointment(
         )
         db.add(appt)
         db.commit()
-        return f"ÉXITO: Turno agendado el {dt.strftime('%d/%m a las %H:%M')} para el Dr/Dra {prof.full_name if prof else 'General'}. \nInstrucción a IA: Responde amablemente confirmando estos detalles y agradeciendo al paciente."
+
+        return f"✅ Turno agendado exitosamente!\n\n📅 Fecha: {dt.strftime('%d/%m/%Y')}\n🕐 Hora: {dt.strftime('%H:%M')}\n👨‍⚕️ Profesional: {prof.full_name if prof else 'General'}\n📝 Motivo: {reason}\n\nTe esperamos en Dental Studio Pro. ¡Gracias por confiar en nosotros!"
+    except Exception as e:
+        return f"Error al agendar: {str(e)}"
     finally:
         db.close()
 
 
+@tool
 async def send_mail_tool(to: str, subject: str, body: str) -> str:
     """Envía un correo electrónico al paciente."""
     success = await email_service.send_email(to, subject, body)
     return "Correo enviado con éxito." if success else "Error al enviar el correo."
 
 
-# DEFINICIÓN DE TOOLS PARA LANGCHAIN
-tools = [
-    StructuredTool.from_function(
-        func=search_prices,
-        name="ConsultarPrecios",
-        description="Busca precios de tratamientos dentales en el catálogo",
-    ),
-    StructuredTool.from_function(
-        func=manage_contacts,
-        name="GestionarContactos",
-        description="Busca o crea pacientes en la base de datos",
-    ),
-    StructuredTool.from_function(
-        func=check_availability,
-        name="ConsultarDisponibilidad",
-        description="DEBES USARLA ANTES DE AGENDAR. Busca horarios disponibles, duraciones y DOCTORES en la clinica enviando el 'motivo' de consulta.",
-    ),
-    StructuredTool.from_function(
-        func=book_appointment,
-        name="AgendarTurno",
-        description="Crea una cita dental en el sistema. Requiere celular, nombre, DNI, OS, fecha ISO y motivo.",
-    ),
-    StructuredTool.from_function(
-        func=send_mail_tool,
-        name="EnviarEmail",
-        description="Envía un correo electrónico profesional",
-    ),
+# Lista de herramientas disponibles
+TOOLS = [
+    search_prices,
+    manage_contacts,
+    check_availability,
+    book_appointment,
+    send_mail_tool,
 ]
+
 
 # --- EL AGENTE ---
 
@@ -273,47 +260,97 @@ tools = [
 class AIAgent:
     def __init__(self):
         self.llm = ChatOpenAI(
-            model="gpt-4o-mini", temperature=0.3, openai_api_key=settings.openai_api_key
+            model="gpt-4o-mini", temperature=0.3, api_key=settings.openai_api_key
         )
-        self.prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    SYSTEM_PROMPT.format(
-                        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    ),
-                ),
-                MessagesPlaceholder(variable_name="chat_history"),
-                ("user", "{input}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
-            ]
-        )
-        self.agent = create_openai_functions_agent(self.llm, tools, self.prompt)
-        self.executor = AgentExecutor(agent=self.agent, tools=tools, verbose=True)
+        self.llm_with_tools = self.llm.bind_tools(TOOLS)
         self._memories = {}
 
-    def get_memory(self, chat_id: str):
+    def get_memory(self, chat_id: str) -> List:
+        """Obtiene el historial de conversación para un chat"""
         if chat_id not in self._memories:
-            self._memories[chat_id] = ConversationBufferWindowMemory(
-                k=5, return_messages=True, memory_key="chat_history"
-            )
-        return self._memories[chat_id]
+            self._memories[chat_id] = []
+        # Mantener solo últimos 10 mensajes
+        return self._memories[chat_id][-10:]
+
+    def save_to_memory(self, chat_id: str, role: str, content: str):
+        """Guarda un mensaje en la memoria"""
+        if chat_id not in self._memories:
+            self._memories[chat_id] = []
+        self._memories[chat_id].append({"role": role, "content": content})
 
     async def ask(self, chat_id: str, text: str) -> str:
-        memory = self.get_memory(chat_id)
+        """Procesa un mensaje y retorna la respuesta"""
         try:
-            response = await self.executor.ainvoke(
-                {
-                    "input": text,
-                    "chat_history": memory.load_memory_variables({})["chat_history"],
-                }
-            )
-            output = response["output"]
-            memory.save_context({"input": text}, {"output": output})
+            # Obtener historial
+            memory = self.get_memory(chat_id)
+
+            # Construir mensajes
+            messages = [
+                SystemMessage(
+                    content=SYSTEM_PROMPT.format(
+                        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    )
+                )
+            ]
+
+            # Agregar historial
+            for msg in memory:
+                if msg["role"] == "user":
+                    messages.append(HumanMessage(content=msg["content"]))
+                elif msg["role"] == "assistant":
+                    messages.append(AIMessage(content=msg["content"]))
+
+            # Agregar mensaje actual
+            messages.append(HumanMessage(content=text))
+
+            # Crear prompt
+            prompt = ChatPromptTemplate.from_messages(messages)
+
+            # Ejecutar
+            chain = prompt | self.llm_with_tools
+            response = await chain.ainvoke({})
+
+            # Si hay tool calls, ejecutarlas
+            if hasattr(response, "tool_calls") and response.tool_calls:
+                tool_results = []
+                for tool_call in response.tool_calls:
+                    tool_name = tool_call["name"]
+                    tool_args = tool_call["args"]
+
+                    # Encontrar la herramienta
+                    for tool in TOOLS:
+                        if tool.name == tool_name:
+                            try:
+                                result = tool.invoke(tool_args)
+                                tool_results.append(f"{tool_name}: {result}")
+                            except Exception as e:
+                                tool_results.append(f"{tool_name}: Error - {str(e)}")
+                            break
+
+                # Segunda llamada con los resultados
+                tool_msg = "\n".join(tool_results)
+                messages.append(
+                    AIMessage(content=f"Resultados de herramientas: {tool_msg}")
+                )
+                prompt2 = ChatPromptTemplate.from_messages(messages)
+                chain2 = prompt2 | self.llm
+                response = await chain2.ainvoke({})
+
+            output = response.content
+
+            # Guardar en memoria
+            self.save_to_memory(chat_id, "user", text)
+            self.save_to_memory(chat_id, "assistant", output)
+
             return output
+
         except Exception as e:
             print(f"Agent Error: {e}")
+            import traceback
+
+            traceback.print_exc()
             return "Lo siento, tuve un pequeño problema procesando eso. ¿Podrías repetirlo?"
 
 
+# Instancia global
 ai_agent = AIAgent()
