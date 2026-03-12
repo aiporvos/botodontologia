@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - Dental Studio Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --primary-light: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(44, 62, 80, 0.95) 0%, rgba(52, 73, 94, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h5 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-nav a i {
+            width: 25px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            color: var(--accent);
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        /* Calendar Container */
+        .calendar-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            min-height: 700px;
+        }
+
+        /* FullCalendar Customization */
+        .fc {
+            font-family: 'Segoe UI', system-ui, sans-serif !important;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            color: var(--primary) !important;
+        }
+
+        .fc-button-primary {
+            background: var(--accent) !important;
+            border-color: var(--accent) !important;
+            border-radius: 8px !important;
+            padding: 8px 16px !important;
+            font-weight: 500 !important;
+            text-transform: capitalize !important;
+        }
+
+        .fc-button-primary:hover {
+            background: #2980b9 !important;
+            border-color: #2980b9 !important;
+        }
+
+        .fc-button-primary:not(:disabled).fc-button-active,
+        .fc-button-primary:not(:disabled):active {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        .fc-event {
+            border-radius: 6px !important;
+            border: none !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            padding: 4px 8px !important;
+            cursor: pointer !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+        }
+
+        .fc-event:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* Event Colors */
+        .fc-event.consulta {
+            background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        }
+
+        .fc-event.extraccion {
+            background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+        }
+
+        .fc-event.endodoncia {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad) !important;
+        }
+
+        .fc-event.ortodoncia {
+            background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+        }
+
+        .fc-event.limpieza {
+            background: linear-gradient(135deg, #1abc9c, #16a085) !important;
+        }
+
+        .fc-event.implante {
+            background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+        }
+
+        .fc-event.pendiente {
+            opacity: 0.7;
+            border: 2px dashed rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* Calendar Grid */
+        .fc-day-today {
+            background: rgba(52, 152, 219, 0.1) !important;
+        }
+
+        .fc-day-today .fc-daygrid-day-number {
+            background: var(--accent) !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 30px !important;
+            height: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .fc-col-header-cell {
+            background: #f8f9fa !important;
+            padding: 12px 0 !important;
+        }
+
+        .fc-col-header-cell-cushion {
+            font-weight: 600 !important;
+            color: var(--primary) !important;
+            text-transform: uppercase !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* Time Grid */
+        .fc-timegrid-slot {
+            height: 50px !important;
+        }
+
+        .fc-timegrid-slot-label {
+            font-weight: 500 !important;
+            color: #7f8c8d !important;
+        }
+
+        /* Legend */
+        .legend-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-glass-primary {
+            background: linear-gradient(135deg, var(--accent), #2980b9);
+            color: white;
+            border: none;
+        }
+
+        .btn-glass-success {
+            background: linear-gradient(135deg, var(--success), #229954);
+            color: white;
+            border: none;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue {
+            background: linear-gradient(135deg, #ebf5ff, #d6eaff);
+            color: #3498db;
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, #e8f8f5, #d1f2eb);
+            color: #27ae60;
+        }
+
+        .stat-icon.orange {
+            background: linear-gradient(135deg, #fef5e7, #fdebd0);
+            color: #f39c12;
+        }
+
+        .stat-icon.red {
+            background: linear-gradient(135deg, #fdedec, #fadbd8);
+            color: #e74c3c;
+        }
+
+        .stat-content h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .stat-content p {
+            margin: 5px 0 0;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 16px 16px 0 0;
+            padding: 20px 25px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .loading-overlay {
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h5><i class="fas fa-tooth"></i> Dental Studio Pro</h5>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/admin"><i class="fas fa-cog"></i> Administración</a>
+            <a href="/patients"><i class="fas fa-users"></i> Pacientes</a>
+            <a href="/odontogram"><i class="fas fa-tooth"></i> Odontograma</a>
+            <a href="/payments"><i class="fas fa-dollar-sign"></i> Cobros</a>
+            <a href="/schedule" class="active"><i class="fas fa-calendar-alt"></i> Agenda</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-calendar-alt"></i>
+                Agenda de Turnos
+            </h1>
+            <div class="d-flex gap-3">
+                <button class="btn btn-glass btn-glass-success" onclick="openNewAppointmentModal()">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Turno
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="todayCount">-</h3>
+                    <p>Turnos Hoy</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="weekCount">-</h3>
+                    <p>Esta Semana</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingCount">-</h3>
+                    <p>Pendientes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="urgentCount">-</h3>
+                    <p>Urgentes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="glass-card">
+            <div id="calendar"></div>
+            
+            <!-- Legend -->
+            <div class="legend-container">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #3498db, #2980b9);"></div>
+                    <span>Consulta</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #e74c3c, #c0392b);"></div>
+                    <span>Extracción</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);"></div>
+                    <span>Endodoncia</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #f39c12, #e67e22);"></div>
+                    <span>Ortodoncia</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #1abc9c, #16a085);"></div>
+                    <span>Limpieza</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #34495e, #2c3e50);"></div>
+                    <span>Implante</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(52, 152, 219, 0.5); border: 2px dashed #3498db;"></div>
+                    <span>Pendiente</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- New Appointment Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-plus"></i>
+                        Nuevo Turno
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Paciente</label>
+                                <select class="form-select" id="patientSelect" required>
+                                    <option value="">Seleccionar paciente...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Profesional</label>
+                                <select class="form-select" id="professionalSelect" required>
+                                    <option value="">Seleccionar profesional...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha y Hora</label>
+                                <input type="datetime-local" class="form-control" id="appointmentDateTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Duración (minutos)</label>
+                                <select class="form-select" id="durationSelect">
+                                    <option value="15">15 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">1 hora</option>
+                                    <option value="90">1 hora 30 min</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Consulta</label>
+                            <select class="form-select" id="appointmentType" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="consulta">Consulta General</option>
+                                <option value="limpieza">Limpieza Dental</option>
+                                <option value="extraccion">Extracción</option>
+                                <option value="endodoncia">Endodoncia (Conducto)</option>
+                                <option value="ortodoncia">Ortodoncia</option>
+                                <option value="corona">Corona</option>
+                                <option value="implante">Implante</option>
+                                <option value="protesis">Prótesis</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notas / Motivo</label>
+                            <textarea class="form-control" id="appointmentNotes" rows="3" placeholder="Describe el motivo de la consulta..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-glass btn-glass-primary" onclick="saveAppointment()">
+                        <i class="fas fa-save"></i>
+                        Guardar Turno
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script>
+        let calendar;
+        let selectedEvent = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
+            loadStats();
+            loadPatients();
+            loadProfessionals();
+        });
+
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                    day: 'Día'
+                },
+                locale: 'es',
+                firstDay: 1, // Lunes
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                slotDuration: '00:30:00',
+                allDaySlot: false,
+                nowIndicator: true,
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5], // Lunes a Viernes
+                    startTime: '08:00',
+                    endTime: '18:00',
+                },
+                events: fetchEvents,
+                eventClick: function(info) {
+                    showEventDetails(info.event);
+                },
+                dateClick: function(info) {
+                    openNewAppointmentModal(info.date);
+                },
+                eventDidMount: function(info) {
+                    // Add custom classes based on appointment type and status
+                    const type = info.event.extendedProps.type || 'consulta';
+                    const status = info.event.extendedProps.status || 'confirmed';
+                    info.el.classList.add(type);
+                    if (status === 'pending') {
+                        info.el.classList.add('pendiente');
+                    }
+                },
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }
+            });
+
+            calendar.render();
+        }
+
+        async function fetchEvents(info, successCallback, failureCallback) {
+            try {
+                showLoading();
+                const start = info.start.toISOString();
+                const end = info.end.toISOString();
+                
+                const response = await fetch(`/api/appointments?start=${start}&end=${end}`);
+                const appointments = await response.json();
+                
+                const events = appointments.map(apt => ({
+                    id: apt.id,
+                    title: `${apt.patient_name || 'Paciente'} - ${apt.reason || 'Consulta'}`,
+                    start: apt.start_at,
+                    end: apt.end_at,
+                    className: apt.category || 'consulta',
+                    extendedProps: {
+                        type: apt.category || 'consulta',
+                        status: apt.status,
+                        patient: apt.patient_name,
+                        professional: apt.professional_name,
+                        phone: apt.patient_phone,
+                        notes: apt.notes
+                    }
+                }));
+                
+                successCallback(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                failureCallback(error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('todayCount').textContent = stats.appointments_today || 0;
+                document.getElementById('weekCount').textContent = stats.appointments_week || 0;
+                document.getElementById('pendingCount').textContent = stats.pending_appointments || 0;
+                document.getElementById('urgentCount').textContent = stats.urgent_appointments || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadPatients() {
+            try {
+                const response = await fetch('/api/patients?limit=1000');
+                const data = await response.json();
+                const select = document.getElementById('patientSelect');
+                
+                data.patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient.id;
+                    option.textContent = `${patient.first_name} ${patient.last_name} - ${patient.phone || 'Sin teléfono'}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function loadProfessionals() {
+            try {
+                const response = await fetch('/api/professionals');
+                const professionals = await response.json();
+                const select = document.getElementById('professionalSelect');
+                
+                professionals.forEach(prof => {
+                    const option = document.createElement('option');
+                    option.value = prof.id;
+                    option.textContent = `${prof.full_name} (${prof.specialty})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading professionals:', error);
+            }
+        }
+
+        function openNewAppointmentModal(date = null) {
+            if (date) {
+                // Format date for datetime-local input
+                const dateStr = date.toISOString().slice(0, 16);
+                document.getElementById('appointmentDateTime').value = dateStr;
+            } else {
+                // Default to tomorrow at 9 AM
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(9, 0, 0, 0);
+                document.getElementById('appointmentDateTime').value = tomorrow.toISOString().slice(0, 16);
+            }
+            
+            new bootstrap.Modal(document.getElementById('appointmentModal')).show();
+        }
+
+        async function saveAppointment() {
+            const form = document.getElementById('appointmentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const data = {
+                patient_id: document.getElementById('patientSelect').value,
+                professional_id: document.getElementById('professionalSelect').value,
+                start_at: document.getElementById('appointmentDateTime').value,
+                duration: parseInt(document.getElementById('durationSelect').value),
+                reason: document.getElementById('appointmentType').value,
+                category: document.getElementById('appointmentType').value,
+                notes: document.getElementById('appointmentNotes').value
+            };
+
+            try {
+                showLoading();
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('appointmentModal')).hide();
+                    form.reset();
+                    calendar.refetchEvents();
+                    loadStats();
+                    alert('Turno agendado exitosamente');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.detail || 'No se pudo agendar el turno'));
+                }
+            } catch (error) {
+                console.error('Error saving appointment:', error);
+                alert('Error al guardar el turno');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showEventDetails(event) {
+            const props = event.extendedProps;
+            const start = new Date(event.start).toLocaleString('es-AR');
+            const end = event.end ? new Date(event.end).toLocaleString('es-AR') : 'N/A';
+            
+            alert(`
+                Turno: ${event.title}
+                
+                Paciente: ${props.patient || 'N/A'}
+                Teléfono: ${props.phone || 'N/A'}
+                Profesional: ${props.professional || 'N/A'}
+                
+                Inicio: ${start}
+                Fin: ${end}
+                
+                Notas: ${props.notes || 'Sin notas'}
+            `);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
