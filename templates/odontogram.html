@@ -6,67 +6,79 @@
     <title>Odontograma - Dental Studio Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/odontogram.css">
 </head>
 <body>
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar">
         <div class="sidebar-header">
-            <h5><i class="fas fa-tooth me-2"></i>Dental Studio Pro</h5>
+            <div class="sidebar-logo">
+                <i class="fas fa-tooth"></i>
+            </div>
+            <h5>Dental Studio Pro</h5>
+            <small>Sistema de Gestión</small>
         </div>
         <nav class="sidebar-nav">
-            <a href="/dashboard"><i class="fas fa-home me-2"></i>Inicio</a>
-            <a href="/admin"><i class="fas fa-cog me-2"></i>Administración</a>
-            <a href="/patients"><i class="fas fa-users me-2"></i>Pacientes</a>
-            <a href="/odontogram" class="active"><i class="fas fa-tooth me-2"></i>Odontograma</a>
-            <a href="/payments"><i class="fas fa-dollar-sign me-2"></i>Cobros</a>
-            <a href="/schedule"><i class="fas fa-calendar me-2"></i>Turnos</a>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/schedule"><i class="fas fa-calendar-alt"></i> Agenda</a>
+            <a href="/patients"><i class="fas fa-users"></i> Pacientes</a>
+            <a href="/odontogram" class="active"><i class="fas fa-tooth"></i> Odontograma</a>
+            <a href="/payments"><i class="fas fa-dollar-sign"></i> Cobros</a>
+            <a href="/admin"><i class="fas fa-cog"></i> Administración</a>
+            <a href="/reports"><i class="fas fa-chart-bar"></i> Reportes</a>
         </nav>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-tooth"></i>
+                    Odontograma
+                </h1>
+                <p class="page-subtitle">Visualiza y registra los tratamientos dentales</p>
+            </div>
+            <button class="btn btn-glass btn-glass-primary" data-bs-toggle="modal" data-bs-target="#newPatientModal">
+                <i class="fas fa-plus me-2"></i>
+                Nuevo Paciente
+            </button>
+        </div>
+
         <!-- Patient Selection Bar -->
-        <div class="patient-selector">
+        <div class="glass-card mb-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="form-control" id="patientSearch" 
-                               placeholder="Buscar paciente por nombre, DNI o teléfono..." autocomplete="off">
+                        <input type="text" class="form-control" id="patientSearch"
+                            placeholder="Buscar paciente por nombre, DNI o teléfono..." autocomplete="off">
                         <div id="patientList" class="patient-list-dropdown"></div>
                     </div>
-                </div>
-                <div class="col-md-6 text-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newPatientModal">
-                        <i class="fas fa-plus me-2"></i>Nuevo Paciente
-                    </button>
                 </div>
             </div>
         </div>
 
         <!-- No Patient Message -->
-        <div id="noPatientMessage" class="no-patient-message">
-            <i class="fas fa-user-injured"></i>
-            <h4>Seleccione un paciente</h4>
-            <p>Busque un paciente para ver y editar su odontograma</p>
+        <div id="noPatientMessage" class="glass-card text-center py-5">
+            <i class="fas fa-user-injured fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Seleccione un paciente</h4>
+            <p class="text-muted">Busque un paciente para ver y editar su odontograma</p>
         </div>
 
         <!-- Dental Chart (Hidden until patient selected) -->
-        <div id="dentalChart" class="dental-chart" style="display: none;">
-            <!-- Header -->
-            <div class="chart-header">
-                <div>
-                    <h2>FICHA ODONTOLÓGICA</h2>
-                    <span class="clinic-name">Dental Studio Pro</span>
-                </div>
-                <div class="text-end">
-                    <div id="chartDate"></div>
-                </div>
-            </div>
-
+        <div id="dentalChart" style="display: none;">
             <!-- Patient Info -->
-            <div class="patient-info-section">
+            <div class="glass-card mb-4">
+                <div class="glass-card-header">
+                    <h4 class="glass-card-title">
+                        <i class="fas fa-user"></i>
+                        Información del Paciente
+                    </h4>
+                    <span id="chartDate" class="text-muted"></span>
+                </div>
                 <div class="patient-info-grid">
                     <div class="info-field">
                         <label>Apellido y Nombres:</label>
@@ -96,9 +108,14 @@
             </div>
 
             <!-- Odontogram -->
-            <div class="odontogram-section">
-                <h3 class="odontogram-title">ODONTOGRAMA</h3>
-                
+            <div class="glass-card mb-4">
+                <div class="glass-card-header">
+                    <h4 class="glass-card-title">
+                        <i class="fas fa-tooth"></i>
+                        Odontograma
+                    </h4>
+                </div>
+
                 <!-- Upper Arch -->
                 <div class="dental-arch upper-arch">
                     <div class="arch-label">ARCADA SUPERIOR</div>
@@ -127,13 +144,15 @@
             </div>
 
             <!-- Treatments Table -->
-            <div class="treatments-table-section">
-                <h4 class="table-title">
-                    <i class="fas fa-clipboard-list"></i>
-                    REGISTRO DE TRATAMIENTOS
-                </h4>
+            <div class="glass-card mb-4">
+                <div class="glass-card-header">
+                    <h4 class="glass-card-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        Registro de Tratamientos
+                    </h4>
+                </div>
                 <div class="table-responsive">
-                    <table class="odontogram-table">
+                    <table class="table odontogram-table">
                         <thead>
                             <tr>
                                 <th class="col-diente">DIENTE N°</th>
@@ -154,17 +173,25 @@
             </div>
 
             <!-- Observations -->
-            <div class="observations-section">
-                <h5 class="observations-title">
-                    <i class="fas fa-sticky-note me-2"></i>Observaciones Generales
-                </h5>
-                <textarea class="observations-textarea" id="generalObservations" 
-                          placeholder="Ingrese observaciones generales del paciente..."></textarea>
+            <div class="glass-card mb-4">
+                <div class="glass-card-header">
+                    <h5 class="glass-card-title">
+                        <i class="fas fa-sticky-note"></i>
+                        Observaciones Generales
+                    </h5>
+                </div>
+                <textarea class="form-control" id="generalObservations" rows="4"
+                    placeholder="Ingrese observaciones generales del paciente..."></textarea>
             </div>
 
             <!-- Legend -->
-            <div class="legend-section">
-                <div class="legend-title">LEYENDA DE TRATAMIENTOS</div>
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h5 class="glass-card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Leyenda de Tratamientos
+                    </h5>
+                </div>
                 <div class="legend-items">
                     <div class="legend-item">
                         <div class="legend-symbol caries"></div>
@@ -204,12 +231,12 @@
                         <i class="fas fa-tooth me-2"></i>
                         Registrar Tratamiento - Diente <span id="modalToothNumber"></span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="treatmentForm">
                         <input type="hidden" id="treatmentTooth">
-                        
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Cara del Diente <span class="text-danger">*</span></label>
@@ -295,8 +322,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Descripción / Observaciones</label>
-                            <textarea class="form-control" id="treatmentDescription" rows="3" 
-                                      placeholder="Describa el tratamiento realizado..."></textarea>
+                            <textarea class="form-control" id="treatmentDescription" rows="3"
+                                placeholder="Describa el tratamiento realizado..."></textarea>
                         </div>
 
                         <div class="row mb-3">
@@ -306,8 +333,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Costo ($)</label>
-                                <input type="number" class="form-control" id="treatmentCost" 
-                                       placeholder="0.00" step="0.01" min="0">
+                                <input type="number" class="form-control" id="treatmentCost"
+                                    placeholder="0.00" step="0.01" min="0">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Profesional</label>
@@ -320,7 +347,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveTreatment()">
+                    <button type="button" class="btn btn-glass btn-glass-primary" onclick="saveTreatment()">
                         <i class="fas fa-save me-2"></i>Guardar Tratamiento
                     </button>
                 </div>
@@ -336,7 +363,7 @@
                     <h5 class="modal-title">
                         <i class="fas fa-user-plus me-2"></i>Nuevo Paciente
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="newPatientForm">
@@ -357,20 +384,20 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Teléfono <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="newPhone" 
-                                       placeholder="+54 11 1234 5678" required>
+                                <input type="tel" class="form-control" id="newPhone"
+                                    placeholder="+54 11 1234 5678" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Obra Social</label>
-                                <input type="text" class="form-control" id="newInsurance" 
-                                       placeholder="Particular">
+                                <input type="text" class="form-control" id="newInsurance"
+                                    placeholder="Particular">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" id="newEmail" 
-                                       placeholder="paciente@email.com">
+                                <input type="email" class="form-control" id="newEmail"
+                                    placeholder="paciente@email.com">
                             </div>
                         </div>
                         <div class="row">
@@ -380,15 +407,15 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Domicilio</label>
-                                <input type="text" class="form-control" id="newAddress" 
-                                       placeholder="Calle y número">
+                                <input type="text" class="form-control" id="newAddress"
+                                    placeholder="Calle y número">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="createPatient()">
+                    <button type="button" class="btn btn-glass btn-glass-primary" onclick="createPatient()">
                         <i class="fas fa-save me-2"></i>Crear Paciente
                     </button>
                 </div>
@@ -398,6 +425,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Configuración de la API con credentials
+        const API_CONFIG = {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
         // Global variables
         let currentPatient = null;
         let treatments = [];
@@ -409,7 +444,7 @@
             quadrant1: [18, 17, 16, 15, 14, 13, 12, 11], // Upper Right
             quadrant2: [21, 22, 23, 24, 25, 26, 27, 28], // Upper Left
             quadrant3: [31, 32, 33, 34, 35, 36, 37, 38], // Lower Left
-            quadrant4: [48, 47, 46, 45, 44, 43, 42, 41]  // Lower Right
+            quadrant4: [48, 47, 46, 45, 44, 43, 42, 41] // Lower Right
         };
 
         // Tooth types for visual representation
@@ -429,7 +464,7 @@
         };
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initOdontogram();
             loadProfessionals();
             setupEventListeners();
@@ -442,13 +477,13 @@
         function initOdontogram() {
             // Upper Right (Quadrant 1): 18-11 (right to left)
             renderQuadrant('quadrant1', dentalNumbering.quadrant1, false);
-            
+
             // Upper Left (Quadrant 2): 21-28 (left to right)
             renderQuadrant('quadrant2', dentalNumbering.quadrant2, false);
-            
+
             // Lower Left (Quadrant 3): 31-38 (left to right)
             renderQuadrant('quadrant3', dentalNumbering.quadrant3, true);
-            
+
             // Lower Right (Quadrant 4): 48-41 (right to left)
             renderQuadrant('quadrant4', dentalNumbering.quadrant4, true);
         }
@@ -457,21 +492,21 @@
         function renderQuadrant(quadrantId, teeth, isLower) {
             const container = document.getElementById(quadrantId);
             container.innerHTML = '';
-            
+
             teeth.forEach(tooth => {
                 const toothWrapper = document.createElement('div');
                 toothWrapper.className = 'tooth-wrapper';
                 toothWrapper.setAttribute('data-tooth', tooth);
                 toothWrapper.onclick = () => selectTooth(tooth);
-                
+
                 const toothNumber = document.createElement('div');
                 toothNumber.className = 'tooth-number';
                 toothNumber.textContent = tooth;
-                
+
                 const toothGraphic = document.createElement('div');
                 toothGraphic.className = `tooth-graphic ${toothTypes[tooth] || 'molar'}`;
                 toothGraphic.id = `tooth-${tooth}`;
-                
+
                 // Add face indicators
                 const faces = ['M', 'O', 'D', 'V', 'P'];
                 faces.forEach(face => {
@@ -480,7 +515,7 @@
                     faceDiv.textContent = face;
                     toothGraphic.appendChild(faceDiv);
                 });
-                
+
                 if (isLower) {
                     toothWrapper.appendChild(toothGraphic);
                     toothWrapper.appendChild(toothNumber);
@@ -488,7 +523,7 @@
                     toothWrapper.appendChild(toothNumber);
                     toothWrapper.appendChild(toothGraphic);
                 }
-                
+
                 container.appendChild(toothWrapper);
             });
         }
@@ -496,12 +531,12 @@
         // Load professionals
         async function loadProfessionals() {
             try {
-                const response = await fetch('/api/professionals');
+                const response = await fetch('/api/professionals', API_CONFIG);
                 professionals = await response.json();
-                
+
                 const select = document.getElementById('treatmentProfessional');
                 select.innerHTML = '<option value="">Seleccionar...</option>';
-                
+
                 professionals.forEach(prof => {
                     const option = document.createElement('option');
                     option.value = prof.id;
@@ -518,21 +553,21 @@
             // Patient search
             const searchInput = document.getElementById('patientSearch');
             let searchTimeout;
-            
-            searchInput.addEventListener('input', function() {
+
+            searchInput.addEventListener('input', function () {
                 clearTimeout(searchTimeout);
                 const query = this.value.trim();
-                
+
                 if (query.length < 2) {
                     document.getElementById('patientList').style.display = 'none';
                     return;
                 }
-                
+
                 searchTimeout = setTimeout(() => searchPatients(query), 300);
             });
-            
+
             // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (!e.target.closest('.search-box')) {
                     document.getElementById('patientList').style.display = 'none';
                 }
@@ -542,12 +577,12 @@
         // Search patients
         async function searchPatients(query) {
             try {
-                const response = await fetch(`/api/patients/search?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`/api/patients/search?q=${encodeURIComponent(query)}`, API_CONFIG);
                 const patients = await response.json();
-                
+
                 const list = document.getElementById('patientList');
                 list.innerHTML = '';
-                
+
                 if (patients.length === 0) {
                     list.innerHTML = '<div class="patient-list-item text-muted">No se encontraron pacientes</div>';
                 } else {
@@ -562,7 +597,7 @@
                         list.appendChild(item);
                     });
                 }
-                
+
                 list.style.display = 'block';
             } catch (error) {
                 console.error('Error searching patients:', error);
@@ -572,23 +607,23 @@
         // Select patient
         async function selectPatient(patient) {
             currentPatient = patient;
-            
+
             // Update UI
-            document.getElementById('patientFullName').textContent = 
+            document.getElementById('patientFullName').textContent =
                 `${patient.first_name} ${patient.last_name}`;
             document.getElementById('patientDni').textContent = patient.dni || '-';
             document.getElementById('patientInsurance').textContent = patient.obra_social || 'Particular';
             document.getElementById('patientPhone').textContent = patient.phone || '-';
             document.getElementById('patientEmail').textContent = patient.email || '-';
             document.getElementById('patientBirthDate').textContent = patient.birth_date || '-';
-            
+
             document.getElementById('patientSearch').value = '';
             document.getElementById('patientList').style.display = 'none';
-            
+
             // Show dental chart
             document.getElementById('noPatientMessage').style.display = 'none';
             document.getElementById('dentalChart').style.display = 'block';
-            
+
             // Load patient data
             await loadPatientTreatments(patient.id);
         }
@@ -596,12 +631,12 @@
         // Load patient treatments
         async function loadPatientTreatments(patientId) {
             try {
-                const response = await fetch(`/api/patients/${patientId}/treatments`);
+                const response = await fetch(`/api/patients/${patientId}/treatments`, API_CONFIG);
                 treatments = await response.json();
-                
+
                 // Update teeth colors
                 updateTeethVisuals();
-                
+
                 // Update treatments table
                 renderTreatmentsTable();
             } catch (error) {
@@ -615,7 +650,7 @@
             document.querySelectorAll('.tooth-graphic').forEach(tooth => {
                 tooth.className = `tooth-graphic ${toothTypes[tooth.parentElement.getAttribute('data-tooth')] || 'molar'}`;
             });
-            
+
             // Apply treatment colors
             treatments.forEach(treatment => {
                 const tooth = document.getElementById(`tooth-${treatment.tooth}`);
@@ -630,7 +665,7 @@
         function renderTreatmentsTable() {
             const tbody = document.getElementById('treatmentsTableBody');
             tbody.innerHTML = '';
-            
+
             if (treatments.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -641,7 +676,7 @@
                 `;
                 return;
             }
-            
+
             treatments.forEach(treatment => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -685,20 +720,20 @@
                 alert('Por favor seleccione un paciente primero');
                 return;
             }
-            
+
             selectedTooth = tooth;
-            
+
             // Remove previous selection
             document.querySelectorAll('.tooth-wrapper').forEach(t => t.classList.remove('selected'));
-            
+
             // Add selection to current tooth
             document.querySelector(`[data-tooth="${tooth}"]`).classList.add('selected');
-            
+
             // Open treatment modal
             document.getElementById('modalToothNumber').textContent = tooth;
             document.getElementById('treatmentTooth').value = tooth;
             document.getElementById('treatmentDate').value = new Date().toISOString().split('T')[0];
-            
+
             new bootstrap.Modal(document.getElementById('treatmentModal')).show();
         }
 
@@ -717,20 +752,20 @@
                 professional_id: document.getElementById('treatmentProfessional').value || null,
                 notes: document.getElementById('treatmentDescription').value
             };
-            
+
             // Validation
             if (!data.face || !data.treatment_type) {
                 alert('Por favor complete los campos obligatorios');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/treatments', {
+                    ...API_CONFIG,
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('treatmentModal')).hide();
                     document.getElementById('treatmentForm').reset();
@@ -756,20 +791,20 @@
                 birth_date: document.getElementById('newBirthDate').value,
                 address: document.getElementById('newAddress').value
             };
-            
+
             // Validation
             if (!data.first_name || !data.last_name || !data.phone) {
                 alert('Por favor complete los campos obligatorios');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/patients', {
+                    ...API_CONFIG,
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     const patient = await response.json();
                     bootstrap.Modal.getInstance(document.getElementById('newPatientModal')).hide();
@@ -795,12 +830,13 @@
             if (!confirm('¿Está seguro de eliminar este tratamiento?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/treatments/${treatmentId}`, {
+                    ...API_CONFIG,
                     method: 'DELETE'
                 });
-                
+
                 if (response.ok) {
                     await loadPatientTreatments(currentPatient.id);
                 } else {

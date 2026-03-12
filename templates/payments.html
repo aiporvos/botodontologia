@@ -3,198 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobros y Deudas - Clínica Dental</title>
+    <title>Cobros - Dental Studio Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: #2c3e50; color: white; }
-        .sidebar a { color: #bdc3c7; text-decoration: none; padding: 12px 20px; display: block; border-radius: 5px; margin: 2px 10px; }
-        .sidebar a:hover { background: #34495e; color: white; }
-        .sidebar a.active { background: #3498db; color: white; }
-        
-        .stat-card { border-radius: 10px; padding: 20px; text-align: center; }
-        .stat-card.success { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
-        .stat-card.danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
-        .stat-card.warning { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; }
-        .stat-card.info { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
-        
-        .table-clickable tr { cursor: pointer; }
-        .table-clickable tr:hover { background: #f8f9fa; }
-        
-        .badge-pending { background: #f39c12; }
-        .badge-partial { background: #3498db; }
-        .badge-paid { background: #27ae60; }
-        .badge-cancelled { background: #95a5a6; }
-    </style>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 sidebar p-0">
-                <div class="p-3 text-center border-bottom" style="border-color: #34495e !important;">
-                    <h5>🦷 Clínica Dental</h5>
-                </div>
-                <a href="/dashboard"><i class="fas fa-home me-2"></i> Inicio</a>
-                <a href="/admin"><i class="fas fa-cog me-2"></i> Admin</a>
-                <a href="/patients"><i class="fas fa-users me-2"></i> Pacientes</a>
-                <a href="/odontogram"><i class="fas fa-tooth me-2"></i> Odontograma</a>
-                <a href="/payments" class="active"><i class="fas fa-dollar-sign me-2"></i> Cobros</a>
-                <a href="/schedule"><i class="fas fa-calendar me-2"></i> Turnos</a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-tooth"></i>
             </div>
-            
-            <!-- Content -->
-            <div class="col-md-10 p-4">
-                <h2 class="mb-4"><i class="fas fa-dollar-sign me-2"></i>Cobros y Deudas</h2>
-                
-                <!-- Stats -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stat-card success">
-                            <h3 id="totalReceived">$0</h3>
-                            <small>Total Cobrado Hoy</small>
-                        </div>
+            <h5>Dental Studio Pro</h5>
+            <small>Sistema de Gestión</small>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/schedule"><i class="fas fa-calendar-alt"></i> Agenda</a>
+            <a href="/patients"><i class="fas fa-users"></i> Pacientes</a>
+            <a href="/odontogram"><i class="fas fa-tooth"></i> Odontograma</a>
+            <a href="/payments" class="active"><i class="fas fa-dollar-sign"></i> Cobros</a>
+            <a href="/admin"><i class="fas fa-cog"></i> Administración</a>
+            <a href="/reports"><i class="fas fa-chart-bar"></i> Reportes</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-dollar-sign"></i>
+                    Cobros y Deudas
+                </h1>
+                <p class="page-subtitle">Gestiona los pagos y deudas de los pacientes</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row mb-4">
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalReceived">$0</h3>
+                    <p>Total Cobrado Hoy</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalPending">$0</h3>
+                    <p>Deuda Total</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalPatients">0</h3>
+                    <p>Pacientes con Deuda</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="monthlyIncome">$0</h3>
+                    <p>Ingreso del Mes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-3" id="paymentTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button">
+                    <i class="fas fa-arrow-down me-1"></i> Cobros
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="debts-tab" data-bs-toggle="tab" data-bs-target="#debts" type="button">
+                    <i class="fas fa-arrow-up me-1"></i> Deudas
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
+                    <i class="fas fa-list me-1"></i> Estado de Cuenta
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="paymentTabsContent">
+            <!-- Payments -->
+            <div class="tab-pane fade show active" id="payments">
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <h4 class="glass-card-title">
+                            <i class="fas fa-history"></i>
+                            Historial de Cobros
+                        </h4>
+                        <button class="btn btn-glass btn-glass-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                            <i class="fas fa-plus me-1"></i>Nuevo Cobro
+                        </button>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stat-card danger">
-                            <h3 id="totalPending">$0</h3>
-                            <small>Deuda Total</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card warning">
-                            <h3 id="totalPatients">0</h3>
-                            <small>Pacientes con Deuda</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card info">
-                            <h3 id="monthlyIncome">$0</h3>
-                            <small>Ingreso del Mes</small>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="paymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Paciente</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTableBody">
+                                <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <!-- Tabs -->
-                <ul class="nav nav-tabs mb-3" id="paymentTabs" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button">
-                            <i class="fas fa-arrow-down me-1"></i> Cobros
+            </div>
+
+            <!-- Debts -->
+            <div class="tab-pane fade" id="debts">
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <h4 class="glass-card-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Deudas Pendientes
+                        </h4>
+                        <button class="btn btn-glass btn-glass-danger btn-sm" data-bs-toggle="modal" data-bs-target="#debtModal">
+                            <i class="fas fa-plus me-1"></i>Nueva Deuda
                         </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="debts-tab" data-bs-toggle="tab" data-bs-target="#debts" type="button">
-                            <i class="fas fa-arrow-up me-1"></i> Deudas
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
-                            <i class="fas fa-list me-1"></i> Estado de Cuenta
-                        </button>
-                    </li>
-                </ul>
-                
-                <div class="tab-content" id="paymentTabsContent">
-                    <!-- Payments -->
-                    <div class="tab-pane fade show active" id="payments">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Historial de Cobros</h5>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                                    <i class="fas fa-plus me-1"></i>Nuevo Cobro
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-hover" id="paymentsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Paciente</th>
-                                            <th>Monto</th>
-                                            <th>Método</th>
-                                            <th>Referencia</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="paymentsTableBody">
-                                        <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
-                                    </tbody>
-                                </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="debtsTable">
+                            <thead>
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Estado</th>
+                                    <th>Vencimiento</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="debtsTableBody">
+                                <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Accounts -->
+            <div class="tab-pane fade" id="all">
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <h4 class="glass-card-title">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Estado de Cuenta por Paciente
+                        </h4>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="form-control" id="patientFilter" placeholder="Buscar paciente...">
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Debts -->
-                    <div class="tab-pane fade" id="debts">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Deudas Pendientes</h5>
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#debtModal">
-                                    <i class="fas fa-plus me-1"></i>Nueva Deuda
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-hover" id="debtsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Paciente</th>
-                                            <th>Descripción</th>
-                                            <th>Monto</th>
-                                            <th>Estado</th>
-                                            <th>Vencimiento</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="debtsTableBody">
-                                        <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- All Accounts -->
-                    <div class="tab-pane fade" id="all">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Estado de Cuenta por Paciente</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" id="patientFilter" placeholder="Buscar paciente...">
-                                    </div>
-                                </div>
-                                <table class="table table-hover table-clickable" id="accountTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Paciente</th>
-                                            <th>Tratamientos</th>
-                                            <th>Total</th>
-                                            <th>Pagado</th>
-                                            <th>Deuda</th>
-                                            <th>Estado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="accountTableBody">
-                                        <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="accountTable">
+                            <thead>
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Tratamientos</th>
+                                    <th>Total</th>
+                                    <th>Pagado</th>
+                                    <th>Deuda</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountTableBody">
+                                <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Payment Modal -->
     <div class="modal fade" id="paymentModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Registrar Cobro</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">
+                        <i class="fas fa-money-bill-wave me-2"></i>Registrar Cobro
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="paymentForm">
@@ -229,21 +247,23 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="savePayment()">
+                    <button type="button" class="btn btn-glass btn-glass-primary" onclick="savePayment()">
                         <i class="fas fa-save me-1"></i>Guardar
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Debt Modal -->
     <div class="modal fade" id="debtModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Crear Deuda</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-circle me-2"></i>Crear Deuda
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="debtForm">
@@ -273,7 +293,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" onclick="saveDebt()">
+                    <button type="button" class="btn btn-glass btn-glass-danger" onclick="saveDebt()">
                         <i class="fas fa-save me-1"></i>Guardar
                     </button>
                 </div>
@@ -283,36 +303,44 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Configuración de la API con credentials
+        const API_CONFIG = {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
         async function loadData() {
             await loadPatients();
             await loadPayments();
             await loadDebts();
             await loadAccountSummary();
         }
-        
+
         async function loadPatients() {
             try {
-                const response = await fetch('/api/patients');
+                const response = await fetch('/api/patients', API_CONFIG);
                 const patients = await response.json();
-                
-                const options = patients.map(p => 
+
+                const options = patients.map(p =>
                     `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`
                 ).join('');
-                
-                document.getElementById('paymentPatient').innerHTML = 
+
+                document.getElementById('paymentPatient').innerHTML =
                     '<option value="">Seleccionar...</option>' + options;
-                document.getElementById('debtPatient').innerHTML = 
+                document.getElementById('debtPatient').innerHTML =
                     '<option value="">Seleccionar...</option>' + options;
             } catch (err) {
                 console.error('Error loading patients:', err);
             }
         }
-        
+
         async function loadPayments() {
             try {
-                const response = await fetch('/api/payments');
+                const response = await fetch('/api/payments', API_CONFIG);
                 const payments = await response.json();
-                
+
                 const tbody = document.getElementById('paymentsTableBody');
                 if (payments.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay cobros registrados</td></tr>';
@@ -327,23 +355,23 @@
                         </tr>
                     `).join('');
                 }
-                
+
                 // Update stats
                 const today = new Date().toDateString();
                 const todayPayments = payments.filter(p => new Date(p.payment_date).toDateString() === today);
                 const todayTotal = todayPayments.reduce((sum, p) => sum + p.amount, 0);
                 document.getElementById('totalReceived').textContent = `$${(todayTotal / 100).toFixed(2)}`;
-                
+
             } catch (err) {
                 console.error('Error loading payments:', err);
             }
         }
-        
+
         async function loadDebts() {
             try {
-                const response = await fetch('/api/debts');
+                const response = await fetch('/api/debts', API_CONFIG);
                 const debts = await response.json();
-                
+
                 const tbody = document.getElementById('debtsTableBody');
                 if (debts.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay deudas registradas</td></tr>';
@@ -361,52 +389,50 @@
                         </tr>
                     `).join('');
                 }
-                
+
                 // Update stats
                 const pendingDebts = debts.filter(d => d.status === 'pending');
                 const totalPending = pendingDebts.reduce((sum, d) => sum + d.amount, 0);
                 const uniquePatients = [...new Set(pendingDebts.map(d => d.patient_id))];
-                
+
                 document.getElementById('totalPending').textContent = `$${(totalPending / 100).toFixed(2)}`;
                 document.getElementById('totalPatients').textContent = uniquePatients.length;
-                
+
             } catch (err) {
                 console.error('Error loading debts:', err);
             }
         }
-        
+
         async function loadAccountSummary() {
             try {
-                const response = await fetch('/api/patients/account-summary');
+                const response = await fetch('/api/patients/account-summary', API_CONFIG);
                 const accounts = await response.json();
-                
+
                 const tbody = document.getElementById('accountTableBody');
                 if (accounts.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay datos</td></tr>';
                 } else {
                     tbody.innerHTML = accounts.map(a => `
-                        <tr onclick="viewPatientAccount(${a.patient_id})">
+                        <tr onclick="viewPatientAccount(${a.patient_id})" style="cursor: pointer;">
                             <td><strong>${a.patient_name}</strong></td>
                             <td>${a.treatments_count}</td>
                             <td>$${(a.total_treatments / 100).toFixed(2)}</td>
                             <td class="text-success">$${(a.total_paid / 100).toFixed(2)}</td>
                             <td class="${a.debt > 0 ? 'text-danger' : 'text-success'}"><strong>$${(a.debt / 100).toFixed(2)}</strong></td>
-                            <td>${a.debt > 0 ? '<span class="badge badge-pending">Pendiente</span>' : '<span class="badge badge-paid">Cancelado</span>'}</td>
+                            <td>${a.debt > 0 ? '<span class="badge bg-warning">Pendiente</span>' : '<span class="badge bg-success">Cancelado</span>'}</td>
                         </tr>
                     `).join('');
                 }
-                
+
                 // Monthly income
-                const now = new Date();
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
                 const monthlyPayments = accounts.reduce((sum, a) => sum + a.total_paid, 0);
                 document.getElementById('monthlyIncome').textContent = `$${(monthlyPayments / 100).toFixed(2)}`;
-                
+
             } catch (err) {
                 console.error('Error loading account summary:', err);
             }
         }
-        
+
         function getPaymentMethodLabel(method) {
             const labels = {
                 'cash': 'Efectivo',
@@ -416,7 +442,7 @@
             };
             return labels[method] || method;
         }
-        
+
         function getStatusColor(status) {
             const colors = {
                 'pending': 'warning',
@@ -425,7 +451,7 @@
             };
             return colors[status] || 'secondary';
         }
-        
+
         function getStatusLabel(status) {
             const labels = {
                 'pending': 'Pendiente',
@@ -434,7 +460,7 @@
             };
             return labels[status] || status;
         }
-        
+
         async function savePayment() {
             const data = {
                 patient_id: document.getElementById('paymentPatient').value,
@@ -443,14 +469,14 @@
                 reference: document.getElementById('paymentReference').value,
                 notes: document.getElementById('paymentNotes').value
             };
-            
+
             try {
                 const response = await fetch('/api/payments', {
+                    ...API_CONFIG,
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
                     document.getElementById('paymentForm').reset();
@@ -462,7 +488,7 @@
                 console.error('Error saving payment:', err);
             }
         }
-        
+
         async function saveDebt() {
             const data = {
                 patient_id: document.getElementById('debtPatient').value,
@@ -472,14 +498,14 @@
                 notes: document.getElementById('debtNotes').value,
                 status: 'pending'
             };
-            
+
             try {
                 const response = await fetch('/api/debts', {
+                    ...API_CONFIG,
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('debtModal')).hide();
                     document.getElementById('debtForm').reset();
@@ -491,15 +517,16 @@
                 console.error('Error saving debt:', err);
             }
         }
-        
+
         async function payDebt(debtId) {
             if (!confirm('¿Marcar esta deuda como pagada?')) return;
-            
+
             try {
                 const response = await fetch(`/api/debts/${debtId}/pay`, {
+                    ...API_CONFIG,
                     method: 'POST'
                 });
-                
+
                 if (response.ok) {
                     loadData();
                 }
@@ -507,11 +534,11 @@
                 console.error('Error paying debt:', err);
             }
         }
-        
+
         function viewPatientAccount(patientId) {
             window.location.href = `/odontogram?patient=${patientId}`;
         }
-        
+
         // Initialize
         loadData();
     </script>
