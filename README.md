@@ -257,10 +257,184 @@ Una vez que tengas la app corriendo:
 #### Dashboard
 1. Ve a: https://botodontologia.aiporvos.com/dashboard
 2. Verás:
-   - Total de pacientes
-   - Turnos de hoy
-   - Turnos de la semana
-   - Pacientes nuevos del mes
+- Total de pacientes
+- Turnos de hoy
+- Turnos de la semana
+- Pacientes nuevos del mes
+
+---
+
+## 🆕 Nuevas Funcionalidades Implementadas
+
+### 🦷 Odontograma Digital Mejorado
+
+El sistema ahora incluye un odontograma completo basado en fichas odontológicas estándar (OSPESYM):
+
+#### Características:
+- **Numeración FDI (ISO 3950)**: Sistema estándar internacional (18-11, 21-28, 31-38, 48-41)
+- **Visualización de Arcadas**: Superior e inferior con orientación correcta
+- **Marcado por Caras**: M (Mesial), D (Distal), O (Oclusal), V (Vestibular), P (Palatino)
+- **Tabla de Tratamientos**: Registro completo tipo ficha odontológica
+- **Códigos de Procedimientos**: Sistema de códigos estandarizados
+- **Historial Visual**: Colores diferentes según el estado del tratamiento
+- **Responsive**: Adaptable a dispositivos móviles y tablets
+
+#### Acceso:
+- URL: `/odontogram`
+- O desde el menú lateral: "Odontograma"
+
+#### Uso:
+1. Buscar paciente en la barra superior
+2. Seleccionar un diente haciendo clic
+3. Completar el formulario con:
+   - Caras afectadas
+   - Tipo de tratamiento
+   - Código del procedimiento
+   - Profesional asignado
+   - Costo
+   - Observaciones
+4. Guardar - el tratamiento aparece en la tabla y el diente cambia de color
+
+---
+
+### 📅 Sistema de Disponibilidad Real
+
+Implementación completa de calendario propio en lugar de depender exclusivamente de Cal.com.
+
+#### Ventajas:
+- **Control Total**: Gestión interna de horarios sin dependencias externas
+- **Turnos Variables**: Duraciones ajustables según el tipo de tratamiento
+- **Sin Costos Externos**: Reduce dependencia de servicios de terceros
+- **Integración Nativa**: Mejor experiencia con el bot conversacional
+- **Privacidad**: Datos médicos permanecen en tu infraestructura
+
+#### Configuración de Disponibilidad:
+1. Ve a `/admin` → Profesionales → Selecciona un profesional
+2. Configura los horarios de atención por día de la semana
+3. Define duración de slots por defecto (generalmente 30 min)
+
+#### Duraciones por Tipo de Tratamiento:
+| Tratamiento | Duración | Profesional Sugerido |
+|-------------|----------|---------------------|
+| Consulta/Inicial | 15 min | Cualquiera |
+| Limpieza | 15 min | General |
+| Obturación | 30 min | General |
+| Extracción | 30 min | Cirugía |
+| Endodoncia | 60 min | Endodoncia |
+| Corona | 45 min | Prótesis |
+| Implante | 90 min | Implantología |
+| Ortodoncia | 30 min | Ortodoncia |
+
+#### Integración con Cal.com:
+El sistema mantiene compatibilidad con Cal.com como **opción complementaria**:
+- Los pacientes pueden reservar online si tienen acceso a Cal.com
+- El webhook de Cal.com sincroniza los turnos con la base de datos
+- La base de datos local es la **fuente de verdad principal**
+
+---
+
+### 🔔 Recordatorios Automáticos
+
+Sistema automatizado de recordatorios de turnos.
+
+#### Características:
+- **Envío Automático**: Se ejecuta diariamente (configurable)
+- **Multi-canal**: WhatsApp (Evolution API) y Email
+- **Personalizado**: Incluye nombre del paciente, fecha, hora y profesional
+- **Confirmación**: Los pacientes pueden confirmar o cancelar respondiendo
+
+#### Configuración:
+
+##### 1. Variables de Entorno Adicionales:
+```env
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu-email@gmail.com
+SMTP_PASSWORD=tu-password-app
+FROM_EMAIL=noreply@dentalstudio.com
+
+# Recordatorios
+REMINDER_DAYS_AHEAD=1  # Días de anticipación
+REMINDER_SEND_TIME=09:00  # Hora de envío (formato 24h)
+```
+
+##### 2. Configurar Cron Job:
+
+**Opción A - Cron Local:**
+```bash
+# Editar crontab
+crontab -e
+
+# Agregar línea (ejecuta todos los días a las 9 AM)
+0 9 * * * cd /ruta/al/proyecto && python -m app.services.reminders
+```
+
+**Opción B - Docker:**
+```bash
+# Añadir al docker-compose.yml
+services:
+  reminders:
+    image: botodontologia-app
+    command: python -m app.services.reminders
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - EVOLUTION_URL=${EVOLUTION_URL}
+    depends_on:
+      - db
+```
+
+**Opción C - Ejecución Manual:**
+```bash
+python -m app.services.reminders
+```
+
+#### Mensaje de Recordatorio:
+El sistema envía mensajes como:
+```
+👋 Hola [Nombre]!
+
+📅 Te recordamos que tienes un turno agendado para mañana:
+
+📆 Fecha: DD/MM/YYYY
+⏰ Hora: HH:MM
+🦷 Motivo: [Motivo]
+👨‍⚕️ Profesional: [Nombre]
+
+📍 Dirección: [Tu dirección]
+
+Por favor confirma tu asistencia respondiendo:
+✅ SI - Confirmo asistencia
+❌ NO - Necesito cancelar/reprogramar
+
+_Dental Studio Pro_ 🦷
+```
+
+---
+
+## 📊 Arquitectura: Cal.com vs Calendario Propio
+
+### Decisión Tomada: **Calendario Propio como Fuente de Verdad**
+
+Después de analizar las necesidades del consultorio, se decidió implementar un **sistema híbrido**:
+
+#### Calendario Propio (Principal):
+- ✅ **Control total** sobre lógica de negocio
+- ✅ **Turnos variables**: Duraciones personalizables según tratamiento
+- ✅ **Sin dependencias externas**: Sin riesgo de downtime de terceros
+- ✅ **Costo reducido**: Sin límites ni suscripciones
+- ✅ **Integración perfecta** con el bot conversacional
+- ✅ **Datos locales**: Privacidad y cumplimiento normativo
+
+#### Cal.com (Complementario):
+- ✅ **Reservas online**: Para pacientes que prefieren web
+- ✅ **Integración existente**: Webhook funcional
+- ⚠️ **Limitaciones**: Dependencia de servicio externo, costos en escala
+
+#### Recomendación:
+- Usar el **calendario propio** para todas las operaciones del bot
+- Mantener **Cal.com** opcional para reservas web de pacientes
+- Sincronizar mediante webhooks cuando sea necesario
 
 ---
 
@@ -274,11 +448,20 @@ Una vez que tengas la app corriendo:
 | GET | `/dashboard` | Dashboard con stats |
 | GET | `/admin` | Panel de administración |
 | GET | `/docs` | Documentación API |
+| GET | `/odontogram` | Odontograma digital |
 | GET | `/api/patients` | Lista de pacientes |
+| GET | `/api/patients/search` | Buscar pacientes |
+| GET | `/api/patients/{id}/treatments` | Tratamientos del paciente |
 | GET | `/api/appointments/today` | Turnos de hoy |
+| GET | `/api/appointments` | Lista de turnos |
 | GET | `/api/stats` | Estadísticas |
+| GET | `/api/professionals` | Lista de profesionales |
+| GET | `/api/professionals/{id}/schedule` | Agenda del profesional |
+| POST | `/api/availability/check` | Consultar disponibilidad |
+| POST | `/api/treatments` | Crear tratamiento |
 | POST | `/webhook` | Webhook de WhatsApp |
 | POST | `/webhook/telegram` | Webhook de Telegram |
+| POST | `/webhook/calcom` | Webhook de Cal.com |
 
 ### Autenticación
 
