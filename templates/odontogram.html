@@ -6,15 +6,219 @@
     <title>Odontograma - Dental Studio Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
     <style>
+        /* Odontograma Styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
+        
+        .odontogram-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tooth {
+            width: 45px;
+            height: 55px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+        }
+        
+        .tooth:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        
+        .tooth.selected {
+            border-color: var(--secondary);
+            background: #ebf5ff;
+        }
+        
+        .tooth.has-treatment {
+            background: #f8f9fa;
+        }
+        
+        /* Colores según estado */
+        .tooth.carie { background: var(--caries); color: white; }
+        .tooth.obturation { background: var(--obturation); color: white; }
+        .tooth.extraction { background: var(--extraction); color: white; }
+        .tooth.implant { background: var(--implant); color: white; }
+        .tooth.crown { background: var(--crown); color: white; }
+        .tooth.root-canal { background: var(--root-canal); color: white; }
+        
+        .quadrant-label {
+            text-align: center;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin: 10px 0;
+        }
+        
+        .dental-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .history-item {
+            border-left: 3px solid var(--secondary);
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .patient-info-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
             padding: 20px;
         }
-        /* ========== TOOLBAR ========== */
-        .toolbar {
+        
+        .stats-card {
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .stats-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+        }
+        
+        :root {
+            --caries: #e74c3c;
+            --obturation: #3498db;
+            --extraction: #9b59b6;
+            --implant: #1abc9c;
+            --crown: #f39c12;
+            --root-canal: #e67e22;
+            --other: #95a5a6;
+        }
+        
+        /* New 5-surface tooth styles */
+        .tooth-5s {
+            display: grid;
+            grid-template-columns: 14px 20px 14px;
+            grid-template-rows: 14px 20px 14px;
+            gap: 1px;
+            width: 50px;
+            height: 50px;
+            position: relative;
+        }
+        
+        .tooth-surface {
+            border: 1px solid #bdc3c7;
+            background: white;
+            cursor: pointer;
+            transition: background 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+        }
+        
+        .tooth-surface:hover { filter: brightness(0.92); }
+        
+        .surf-top { grid-column: 2; grid-row: 1; border-radius: 3px 3px 0 0; }
+        .surf-left { grid-column: 1; grid-row: 2; border-radius: 3px 0 0 3px; }
+        .surf-center { grid-column: 2; grid-row: 2; border: 1.5px solid #9ca3af; }
+        .surf-right { grid-column: 3; grid-row: 2; border-radius: 0 3px 3px 0; }
+        .surf-bottom { grid-column: 2; grid-row: 3; border-radius: 0 0 3px 3px; }
+        
+        .tooth-overlay-5s {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* Treatment colors for surfaces */
+        .s-caries-azul { background: #3498db !important; border-color: #2980b9 !important; }
+        .s-caries-rojo { background: #e74c3c !important; border-color: #c0392b !important; }
+        .s-obturacion-azul { background: #3498db !important; border-color: #2980b9 !important; }
+        .s-obturacion-rojo { background: #e74c3c !important; border-color: #c0392b !important; }
+        .s-conducto-azul { background: #85c1e9 !important; border-color: #3498db !important; }
+        .s-conducto-rojo { background: #f1948a !important; border-color: #e74c3c !important; }
+        
+        /* Whole tooth treatments */
+        .t-extraccion .tooth-surface { background: white !important; }
+        .t-ausente .tooth-surface { background: white !important; }
+        .t-corona-azul .tooth-surface { outline: 2.5px solid #3498db; outline-offset: -1px; }
+        .t-corona-rojo .tooth-surface { outline: 2.5px solid #e74c3c; outline-offset: -1px; }
+        .t-implante .tooth-surface { background: #d5f5e3 !important; border-color: #27ae60 !important; }
+        .t-ortodoncia .tooth-surface { background: #e8daef !important; border-color: #8e44ad !important; }
+        
+        .x-mark {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .full-label {
+            font-size: 9px;
+            font-weight: 900;
+        }
+        
+        .tooth-wrap-5s {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: default;
+        }
+        
+        .tooth-num-5s {
+            font-size: 10px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        /* Toolbar */
+        .odontogram-toolbar {
             background: white;
             border-radius: 8px;
             padding: 12px 16px;
@@ -25,6 +229,7 @@
             gap: 6px;
             align-items: center;
         }
+        
         .tool-btn {
             border: 1.5px solid #ddd;
             border-radius: 4px;
@@ -38,6 +243,7 @@
             transition: all 0.15s;
             white-space: nowrap;
         }
+        
         .tool-btn:hover { background: #f8f9fa; }
         .tool-btn.active { font-weight: 600; }
         .tool-azul { border-color: #3498db; color: #3498db; }
@@ -46,16 +252,7 @@
         .tool-rojo.active { background: #e74c3c; color: white; }
         .tool-gray { border-color: #95a5a6; color: #7f8c8d; }
         .tool-gray.active { background: #95a5a6; color: white; }
-        .tool-limpiar {
-            margin-left: auto;
-            border-color: #95a5a6;
-            color: #7f8c8d;
-        }
-        .tool-limpiar:hover {
-            background: #e74c3c;
-            color: white;
-            border-color: #e74c3c;
-        }
+        
         .dot {
             width: 10px;
             height: 10px;
@@ -72,351 +269,161 @@
         }
         .sq-blue { border-color: #3498db; }
         .sq-red { border-color: #e74c3c; }
-
-        /* ========== SECCIÓN CARD ========== */
-        .section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .section-title {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        /* ========== ODONTOGRAMA LAYOUT ========== */
-        .odontogram-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0;
-        }
-        .arch-row {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 2px;
-        }
-        .arch-row.upper { align-items: flex-end; }
-        .arch-row.lower { align-items: flex-start; }
+        
         .midline {
             width: 2px;
             background: #bdc3c7;
             align-self: stretch;
             margin: 0 4px;
-            min-height: 80px;
+            min-height: 60px;
         }
-        .arch-separator {
-            height: 12px;
-            width: 100%;
-            border-top: 2px dashed #e0e0e0;
-            margin: 8px 0;
-        }
-
-        /* ========== DIENTE: estructura con 5 superficies ========== */
-        .tooth-wrap {
+        
+        .arch-row-5s {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            cursor: default;
-        }
-        .tooth-num {
-            font-size: 10px;
-            font-weight: 700;
-            color: #2c3e50;
-            line-height: 1;
-            height: 12px;
-            display: flex;
-            align-items: center;
-        }
-        .tooth-grid {
-            display: grid;
-            grid-template-columns: 14px 20px 14px;
-            grid-template-rows: 14px 20px 14px;
-            gap: 1px;
-            position: relative;
-            width: 50px;
-            height: 50px;
-        }
-        .surf {
-            border: 1px solid #bdc3c7;
-            background: white;
-            cursor: pointer;
-            transition: background 0.1s;
-            display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            font-size: 8px;
-            font-weight: 700;
-            position: relative;
+            gap: 4px;
+            margin: 10px 0;
         }
-        .surf:hover { filter: brightness(0.92); }
-        .surf-top { grid-column: 2; grid-row: 1; border-radius: 3px 3px 0 0; }
-        .surf-left { grid-column: 1; grid-row: 2; border-radius: 3px 0 0 3px; }
-        .surf-center { grid-column: 2; grid-row: 2; border: 1.5px solid #9ca3af; }
-        .surf-right { grid-column: 3; grid-row: 2; border-radius: 0 3px 3px 0; }
-        .surf-bottom { grid-column: 2; grid-row: 3; border-radius: 0 0 3px 3px; }
-        .tooth-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* ========== COLORES DE ESTADOS ========== */
-        .s-caries-azul { background: #3498db !important; border-color: #2980b9 !important; }
-        .s-caries-rojo { background: #e74c3c !important; border-color: #c0392b !important; }
-        .s-obturacion-azul { background: #3498db !important; border-color: #2980b9 !important; }
-        .s-obturacion-rojo { background: #e74c3c !important; border-color: #c0392b !important; }
-        .s-conducto-azul { background: #85c1e9 !important; border-color: #3498db !important; }
-        .s-conducto-rojo { background: #f1948a !important; border-color: #e74c3c !important; }
-        .t-extraccion .surf { background: white !important; }
-        .t-ausente .surf { background: white !important; }
-        .t-corona-azul .surf { outline: 2.5px solid #3498db; outline-offset: -1px; }
-        .t-corona-rojo .surf { outline: 2.5px solid #e74c3c; outline-offset: -1px; }
-        .t-implante .surf { background: #d5f5e3 !important; border-color: #27ae60 !important; }
-        .t-ortodoncia .surf { background: #e8daef !important; border-color: #8e44ad !important; }
-        .x-mark {
-            width: 50px;
-            height: 50px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 3;
-        }
-        .full-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 9px;
-            font-weight: 900;
-            pointer-events: none;
-            z-index: 3;
-            white-space: nowrap;
-        }
-
-        /* ========== LEYENDA ========== */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 20px;
-            font-size: 11px;
-            color: #555;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #eee;
-        }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-
-        /* ========== PACIENTES PANEL ========== */
-        .patients-panel {
-            background: white;
-            border-radius: 8px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .patients-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .patients-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        .search-box { position: relative; width: 280px; }
-        .search-box input {
-            width: 100%;
-            padding: 7px 12px 7px 32px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        .search-box i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #95a5a6;
-            font-size: 12px;
-        }
-        .patients-list {
-            max-height: 260px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-        }
-        .patient-item {
-            padding: 10px 14px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.15s;
-        }
-        .patient-item:last-child { border-bottom: none; }
-        .patient-item:hover { background: #f8f9fa; }
-        .patient-item.selected { background: #e3f2fd; border-left: 3px solid #3498db; }
-        .patient-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-        .patient-info h4 {
-            font-size: 13px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin: 0;
-        }
-        .patient-info p {
-            font-size: 11px;
-            color: #7f8c8d;
-            margin: 1px 0 0 0;
-        }
-        .patient-selected-info {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px 18px;
-            margin-bottom: 14px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .patient-selected-info.show { display: flex; }
-        .btn-save {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-save:hover { background: #229954; }
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #7f8c8d;
-        }
-        .spinner {
-            width: 28px;
-            height: 28px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 8px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .arch-row-5s.lower { align-items: flex-start; }
     </style>
 </head>
 <body>
-    <!-- Panel Pacientes -->
-    <div class="patients-panel">
-        <div class="patients-header">
-            <div class="patients-title"><i class="fas fa-users"></i> Seleccionar Paciente</div>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="patientSearch" placeholder="Buscar paciente..." onkeyup="filterPatients()">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-tooth"></i>
+            </div>
+            <h5>Dental Studio Pro</h5>
+            <small>Sistema de Gestión</small>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/schedule"><i class="fas fa-calendar-alt"></i> Agenda</a>
+            <a href="/patients"><i class="fas fa-users"></i> Pacientes</a>
+            <a href="/odontogram" class="active"><i class="fas fa-tooth"></i> Odontograma</a>
+            <a href="/payments"><i class="fas fa-dollar-sign"></i> Cobros</a>
+            <a href="/admin"><i class="fas fa-cog"></i> Administración</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-tooth"></i>
+                    Odontograma
+                </h1>
+                <p class="page-subtitle">Registro de tratamientos dentales</p>
             </div>
         </div>
-        <div class="patients-list" id="patientsList">
-            <div class="loading"><div class="spinner"></div><p>Cargando pacientes...</p></div>
-        </div>
-    </div>
 
-    <!-- Info Paciente Seleccionado -->
-    <div class="patient-selected-info" id="patientInfo">
-        <div>
-            <h4 style="margin:0 0 4px;color:#2c3e50;"><strong>Paciente:</strong> <span id="patientName">-</span></h4>
-            <p style="margin:0;color:#7f8c8d;font-size:13px;">
-                <span id="patientDni">-</span> | <span id="patientOs">-</span> | <span id="patientPhone">-</span>
-            </p>
+        <!-- Patient Selection -->
+        <div class="glass-card mb-4">
+            <div class="glass-card-header">
+                <h4 class="glass-card-title">
+                    <i class="fas fa-users"></i>
+                    Seleccionar Paciente
+                </h4>
+            </div>
+            <div class="search-box mb-3">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control form-control-lg" id="patientSearch" 
+                    placeholder="Buscar paciente por nombre, DNI, teléfono..." oninput="searchPatients(this.value)">
+            </div>
+            <div class="patients-list-container" id="patientsList">
+                <div class="text-center py-4 text-muted">
+                    <div class="loading-spinner mb-2"></div>
+                    <p>Cargando pacientes...</p>
+                </div>
+            </div>
         </div>
-        <button class="btn-save" onclick="saveOdontogram()">
-            <i class="fas fa-save"></i> Guardar Odontograma
-        </button>
-    </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar" id="toolbar" style="display:none;">
-        <button class="tool-btn tool-azul" data-tool="caries-azul" onclick="selectTool('caries-azul')"><span class="dot dot-blue"></span> Caries (Azul)</button>
-        <button class="tool-btn tool-rojo" data-tool="caries-rojo" onclick="selectTool('caries-rojo')"><span class="dot dot-red"></span> Caries (Rojo)</button>
-        <button class="tool-btn tool-azul" data-tool="obturacion-azul" onclick="selectTool('obturacion-azul')"><span class="sq sq-blue"></span> Obturación (Azul)</button>
-        <button class="tool-btn tool-rojo" data-tool="obturacion-rojo" onclick="selectTool('obturacion-rojo')"><span class="sq sq-red"></span> Obturación (Rojo)</button>
-        <button class="tool-btn tool-azul" data-tool="extraccion" onclick="selectTool('extraccion')"><span style="font-weight:900;font-size:13px;">✕</span> Extracción (Azul)</button>
-        <button class="tool-btn tool-rojo" data-tool="ausente" onclick="selectTool('ausente')"><span style="font-weight:900;font-size:13px;">✕</span> Ausente (Rojo)</button>
-        <button class="tool-btn tool-azul" data-tool="conducto-azul" onclick="selectTool('conducto-azul')"><span style="font-size:9px;font-weight:900;">TC</span> Conducto (Azul)</button>
-        <button class="tool-btn tool-rojo" data-tool="conducto-rojo" onclick="selectTool('conducto-rojo')"><span style="font-size:9px;font-weight:900;">TC</span> Conducto (Rojo)</button>
-        <button class="tool-btn tool-azul" data-tool="corona-azul" onclick="selectTool('corona-azul')"><span class="sq sq-blue"></span> Corona (Azul)</button>
-        <button class="tool-btn tool-rojo" data-tool="corona-rojo" onclick="selectTool('corona-rojo')"><span class="sq sq-red"></span> Corona (Rojo)</button>
-        <button class="tool-btn tool-gray" data-tool="implante" onclick="selectTool('implante')"><span style="font-weight:900;">IM</span> Implante</button>
-        <button class="tool-btn tool-gray" data-tool="ortodoncia" onclick="selectTool('ortodoncia')"><span style="font-weight:900;">=</span> Ortodoncia</button>
-        <button class="tool-btn tool-limpiar" onclick="clearAll()"><i class="fas fa-trash-alt"></i> Limpiar Todo</button>
-    </div>
-
-    <!-- Dentición Permanente -->
-    <div class="section" id="adultSection" style="display:none;">
-        <div class="section-title">Dentición Permanente (Adultos)</div>
-        <div class="odontogram-wrapper">
-            <!-- Arcada Superior -->
-            <div class="arch-row upper" id="upperRow"></div>
-            <!-- Separador arcadas -->
-            <div style="height:18px; width:100%; border-top: 2px dashed #bdc3c7; margin: 6px 0;"></div>
-            <!-- Arcada Inferior -->
-            <div class="arch-row lower" id="lowerRow"></div>
+        <!-- Selected Patient Info -->
+        <div id="patientInfo" class="glass-card mb-4" style="display:none;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1"><strong>Paciente:</strong> <span id="patientName">-</span></h5>
+                    <p class="mb-0 text-muted"><span id="patientDni">-</span> | <span id="patientOs">-</span></p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-glass btn-glass-primary" onclick="saveOdontogram()">
+                        <i class="fas fa-save"></i> Guardar Odontograma
+                    </button>
+                </div>
+            </div>
         </div>
-        <!-- Leyenda -->
-        <div class="legend">
-            <div class="legend-item"><span class="dot dot-blue" style="width:12px;height:12px;"></span> Caries / Obturación (existente)</div>
-            <div class="legend-item"><span class="dot dot-red" style="width:12px;height:12px;"></span> Caries / Obturación (a tratar)</div>
-            <div class="legend-item"><span style="font-weight:900;color:#3498db;">✕</span> Extracción indicada</div>
-            <div class="legend-item"><span style="font-weight:900;color:#e74c3c;">✕</span> Diente ausente</div>
-            <div class="legend-item"><span style="font-size:9px;font-weight:900;color:#3498db;">TC</span> Conducto (azul)</div>
-            <div class="legend-item"><span style="font-size:9px;font-weight:900;color:#e74c3c;">TC</span> Conducto (rojo)</div>
-            <div class="legend-item"><span class="sq sq-blue" style="width:12px;height:12px;"></span> Corona (azul)</div>
-            <div class="legend-item"><span class="sq sq-red" style="width:12px;height:12px;"></span> Corona (rojo)</div>
-        </div>
-    </div>
 
-    <!-- Dentición Temporal -->
-    <div class="section" id="childSection" style="display:none;">
-        <div class="section-title">Dentición Temporal (Niños)</div>
-        <div class="odontogram-wrapper">
-            <div class="arch-row upper" id="childUpperRow"></div>
-            <div style="height:18px; width:100%; border-top: 2px dashed #bdc3c7; margin: 6px 0;"></div>
-            <div class="arch-row lower" id="childLowerRow"></div>
+        <!-- Toolbar -->
+        <div class="odontogram-toolbar" id="toolbar" style="display:none;">
+            <button class="tool-btn tool-azul" data-tool="caries-azul" onclick="selectTool('caries-azul')"><span class="dot dot-blue"></span> Caries (Azul)</button>
+            <button class="tool-btn tool-rojo" data-tool="caries-rojo" onclick="selectTool('caries-rojo')"><span class="dot dot-red"></span> Caries (Rojo)</button>
+            <button class="tool-btn tool-azul" data-tool="obturacion-azul" onclick="selectTool('obturacion-azul')"><span class="sq sq-blue"></span> Obturación (Azul)</button>
+            <button class="tool-btn tool-rojo" data-tool="obturacion-rojo" onclick="selectTool('obturacion-rojo')"><span class="sq sq-red"></span> Obturación (Rojo)</button>
+            <button class="tool-btn tool-azul" data-tool="extraccion" onclick="selectTool('extraccion')" style="font-weight:900;">✕ Extracción</button>
+            <button class="tool-btn tool-rojo" data-tool="ausente" onclick="selectTool('ausente')" style="font-weight:900;">✕ Ausente</button>
+            <button class="tool-btn tool-azul" data-tool="conducto-azul" onclick="selectTool('conducto-azul')" style="font-size:9px;font-weight:900;">TC Conducto</button>
+            <button class="tool-btn tool-rojo" data-tool="conducto-rojo" onclick="selectTool('conducto-rojo')" style="font-size:9px;font-weight:900;">TC Conducto</button>
+            <button class="tool-btn tool-azul" data-tool="corona-azul" onclick="selectTool('corona-azul')"><span class="sq sq-blue"></span> Corona (Azul)</button>
+            <button class="tool-btn tool-rojo" data-tool="corona-rojo" onclick="selectTool('corona-rojo')"><span class="sq sq-red"></span> Corona (Rojo)</button>
+            <button class="tool-btn tool-gray" data-tool="implante" onclick="selectTool('implante')" style="font-weight:900;">IM Implante</button>
+            <button class="tool-btn tool-gray" data-tool="ortodoncia" onclick="selectTool('ortodoncia')" style="font-weight:900;">= Ortodoncia</button>
+            <button class="tool-btn" onclick="clearAll()" style="margin-left:auto;border-color:#e74c3c;color:#e74c3c;">
+                <i class="fas fa-trash"></i> Limpiar
+            </button>
+        </div>
+
+        <!-- Dentición Permanente -->
+        <div class="glass-card" id="adultSection" style="display:none;">
+            <div class="glass-card-header">
+                <h4 class="glass-card-title">Dentición Permanente (Adultos)</h4>
+            </div>
+            
+            <div style="text-align:center;">
+                <!-- Superior -->
+                <div class="arch-row-5s upper" id="upperRow"></div>
+                
+                <!-- Separador -->
+                <div style="height:25px;width:100%;border-top:2px dashed #bdc3c7;margin:10px 0;"></div>
+                
+                <!-- Inferior -->
+                <div class="arch-row-5s lower" id="lowerRow"></div>
+            </div>
+            
+            <!-- Leyenda -->
+            <div class="legend">
+                <div class="legend-item"><span class="dot dot-blue" style="width:14px;height:14px;"></span> Caries/Obturación (Azul = Existente)</div>
+                <div class="legend-item"><span class="dot dot-red" style="width:14px;height:14px;"></span> Caries/Obturación (Rojo = A tratar)</div>
+                <div class="legend-item"><span style="font-weight:900;color:#3498db;font-size:14px;">✕</span> Extracción</div>
+                <div class="legend-item"><span style="font-weight:900;color:#e74c3c;font-size:14px;">✕</span> Ausente</div>
+                <div class="legend-item"><span style="font-size:10px;font-weight:900;color:#3498db;">TC</span> Conducto (Azul)</div>
+                <div class="legend-item"><span style="font-size:10px;font-weight:900;color:#e74c3c;">TC</span> Conducto (Rojo)</div>
+                <div class="legend-item"><span class="sq sq-blue" style="width:14px;height:14px;"></span> Corona (Azul)</div>
+                <div class="legend-item"><span class="sq sq-red" style="width:14px;height:14px;"></span> Corona (Rojo)</div>
+                <div class="legend-item"><span style="font-weight:900;color:#27ae60;">IM</span> Implante</div>
+                <div class="legend-item"><span style="font-weight:900;color:#8e44ad;">=</span> Ortodoncia</div>
+            </div>
+        </div>
+
+        <!-- Dentición Temporal -->
+        <div class="glass-card mt-4" id="childSection" style="display:none;">
+            <div class="glass-card-header">
+                <h4 class="glass-card-title">Dentición Temporal (Niños)</h4>
+            </div>
+            
+            <div style="text-align:center;">
+                <!-- Superior Niños -->
+                <div class="arch-row-5s upper" id="childUpperRow"></div>
+                
+                <!-- Separador -->
+                <div style="height:25px;width:100%;border-top:2px dashed #bdc3c7;margin:10px 0;"></div>
+                
+                <!-- Inferior Niños -->
+                <div class="arch-row-5s lower" id="childLowerRow"></div>
+            </div>
         </div>
     </div>
 
@@ -427,11 +434,13 @@
         let currentTool = null;
         let odontogramData = {};
 
-        // Quadrants
+        // Quadrants - Dentición Permanente
         const UPPER_Q1 = [18,17,16,15,14,13,12,11];
         const UPPER_Q2 = [21,22,23,24,25,26,27,28];
         const LOWER_Q4 = [48,47,46,45,44,43,42,41];
         const LOWER_Q3 = [31,32,33,34,35,36,37,38];
+        
+        // Dentición Temporal
         const CHILD_UPPER_Q5 = [55,54,53,52,51];
         const CHILD_UPPER_Q6 = [61,62,63,64,65];
         const CHILD_LOWER_Q8 = [85,84,83,82,81];
@@ -446,50 +455,86 @@
         });
 
         function renderAllArches() {
-            renderArch('upperRow', UPPER_Q1, UPPER_Q2, 'upper');
-            renderArch('lowerRow', LOWER_Q4, LOWER_Q3, 'lower');
-            renderArch('childUpperRow', CHILD_UPPER_Q5, CHILD_UPPER_Q6, 'upper');
-            renderArch('childLowerRow', CHILD_LOWER_Q8, CHILD_LOWER_Q7, 'lower');
+            renderArch5s('upperRow', UPPER_Q1, UPPER_Q2, 'upper');
+            renderArch5s('lowerRow', LOWER_Q4, LOWER_Q3, 'lower');
+            renderArch5s('childUpperRow', CHILD_UPPER_Q5, CHILD_UPPER_Q6, 'upper');
+            renderArch5s('childLowerRow', CHILD_LOWER_Q8, CHILD_LOWER_Q7, 'lower');
         }
 
-        function renderArch(containerId, leftQuadrant, rightQuadrant, arcType) {
+        function renderArch5s(containerId, leftQuadrant, rightQuadrant, arcType) {
             const container = document.getElementById(containerId);
             if (!container) return;
             let html = '';
-            leftQuadrant.forEach(num => { html += toothHTML(num, arcType); });
+            
+            // Left quadrant (cuadrante 1 o 4 - derecha del paciente, izquierda de la pantalla)
+            leftQuadrant.forEach(num => {
+                html += tooth5sHTML(num, arcType);
+            });
+            
+            // Midline
             html += `<div class="midline"></div>`;
-            rightQuadrant.forEach(num => { html += toothHTML(num, arcType); });
+            
+            // Right quadrant (cuadrante 2 o 3 - izquierda del paciente, derecha de la pantalla)
+            rightQuadrant.forEach(num => {
+                html += tooth5sHTML(num, arcType);
+            });
+            
             container.innerHTML = html;
         }
 
-        function toothHTML(num, arcType) {
+        function tooth5sHTML(num, arcType) {
             const isUpper = arcType === 'upper';
-            const S = (name, posClass, title) => `<div class="surf ${posClass}" id="surf-${num}-${name}" onclick="handleSurfaceClick(event,${num},'${name}')" title="${num}·${title}"></div>`;
+            const S = (name, posClass, title) => 
+                `<div class="tooth-surface ${posClass}" id="surf-${num}-${name}" onclick="handleSurfaceClick(event,${num},'${name}')" title="Diente ${num} - ${title}"></div>`;
+            
             const gridDiv = `
-                <div class="tooth-grid" id="tooth-grid-${num}">
-                    <div></div>${S('top','surf-top','V')}<div></div>
-                    ${S('left','surf-left','M')}${S('center','surf-center','O')}${S('right','surf-right','D')}
-                    <div></div>${S('bottom','surf-bottom','L')}<div></div>
-                    <div class="tooth-overlay" id="overlay-${num}"></div>
+                <div class="tooth-5s ${isUpper ? 'tooth-upper' : 'tooth-lower'}" id="tooth-grid-${num}">
+                    <div></div>
+                    ${S('top', 'surf-top', isUpper ? 'Vestibular' : 'Lingual')}
+                    <div></div>
+                    ${S('left', 'surf-left', 'Mesial')}
+                    ${S('center', 'surf-center', 'Oclusal')}
+                    ${S('right', 'surf-right', 'Distal')}
+                    <div></div>
+                    ${S('bottom', 'surf-bottom', isUpper ? 'Palatino' : 'Vestibular')}
+                    <div></div>
+                    <div class="tooth-overlay-5s" id="overlay-${num}"></div>
                 </div>`;
-            const numDiv = `<div class="tooth-num">${num}</div>`;
-            return isUpper ? `<div class="tooth-wrap" id="twrap-${num}" style="margin:0 2px;">${numDiv}${gridDiv}</div>` : `<div class="tooth-wrap" id="twrap-${num}" style="margin:0 2px;">${gridDiv}${numDiv}</div>`;
+            
+            const numDiv = `<div class="tooth-num-5s">${num}</div>`;
+            
+            return isUpper 
+                ? `<div class="tooth-wrap-5s" id="twrap-${num}">${numDiv}${gridDiv}</div>`
+                : `<div class="tooth-wrap-5s" id="twrap-${num}">${gridDiv}${numDiv}</div>`;
         }
 
         function handleSurfaceClick(e, toothNum, surface) {
             e.stopPropagation();
-            if (!currentTool) { alert('Seleccioná una herramienta primero'); return; }
-            if (WHOLE_TOOTH_TOOLS.includes(currentTool)) { applyWholeTooth(toothNum, currentTool); }
-            else { applySurface(toothNum, surface, currentTool); }
+            if (!currentTool) {
+                alert('Seleccione una herramienta primero');
+                return;
+            }
+            
+            if (WHOLE_TOOTH_TOOLS.includes(currentTool)) {
+                applyWholeTooth(toothNum, currentTool);
+            } else {
+                applySurface(toothNum, surface, currentTool);
+            }
         }
 
         function applySurface(toothNum, surface, tool) {
             if (!odontogramData[toothNum]) odontogramData[toothNum] = {};
+            
+            // Toggle: si ya tiene ese estado, lo limpia
             if (odontogramData[toothNum][surface] === tool) {
                 delete odontogramData[toothNum][surface];
                 updateSurfaceDOM(toothNum, surface, null);
             } else {
-                if (odontogramData[toothNum]._whole) { clearWholeTooth(toothNum); }
+                // Limpiar estado whole si había
+                if (odontogramData[toothNum]._whole) {
+                    clearWholeTooth(toothNum);
+                    delete odontogramData[toothNum]._whole;
+                }
                 odontogramData[toothNum][surface] = tool;
                 updateSurfaceDOM(toothNum, surface, tool);
             }
@@ -497,11 +542,15 @@
 
         function applyWholeTooth(toothNum, tool) {
             if (!odontogramData[toothNum]) odontogramData[toothNum] = {};
+            
+            // Toggle
             if (odontogramData[toothNum]._whole === tool) {
                 clearWholeTooth(toothNum);
                 delete odontogramData[toothNum]._whole;
                 return;
             }
+            
+            // Limpiar superficies previas
             clearToothDOM(toothNum);
             odontogramData[toothNum] = { _whole: tool };
             applyWholeTooth_DOM(toothNum, tool);
@@ -510,23 +559,39 @@
         function updateSurfaceDOM(toothNum, surface, tool) {
             const el = document.getElementById(`surf-${toothNum}-${surface}`);
             if (!el) return;
+            
+            // Remove all state classes
             el.className = el.className.replace(/\bs-[\w-]+\b/g, '').trim();
-            if (tool) { el.classList.add(`s-${tool}`); }
+            
+            if (tool) {
+                el.classList.add(`s-${tool}`);
+            }
         }
 
         function applyWholeTooth_DOM(toothNum, tool) {
             const grid = document.getElementById(`tooth-grid-${toothNum}`);
             const overlay = document.getElementById(`overlay-${toothNum}`);
             if (!grid || !overlay) return;
+            
+            // Remove previous whole classes
             grid.className = grid.className.replace(/\bt-[\w-]+\b/g, '').trim();
             overlay.innerHTML = '';
+            
             grid.classList.add(`t-${tool}`);
-            if (tool === 'extraccion') { overlay.innerHTML = `<svg class="x-mark" viewBox="0 0 48 48"><line x1="6" y1="6" x2="42" y2="42" stroke="#3498db" stroke-width="3.5" stroke-linecap="round"/><line x1="42" y1="6" x2="6" y2="42" stroke="#3498db" stroke-width="3.5" stroke-linecap="round"/></svg>`; }
-            else if (tool === 'ausente') { overlay.innerHTML = `<svg class="x-mark" viewBox="0 0 48 48"><line x1="6" y1="6" x2="42" y2="42" stroke="#e74c3c" stroke-width="3.5" stroke-linecap="round"/><line x1="42" y1="6" x2="6" y2="42" stroke="#e74c3c" stroke-width="3.5" stroke-linecap="round"/></svg>`; }
-            else if (tool === 'conducto-azul') { overlay.innerHTML = `<span class="full-label" style="color:#3498db;">TC</span>`; }
-            else if (tool === 'conducto-rojo') { overlay.innerHTML = `<span class="full-label" style="color:#e74c3c;">TC</span>`; }
-            else if (tool === 'implante') { overlay.innerHTML = `<span class="full-label" style="color:#27ae60;">IM</span>`; }
-            else if (tool === 'ortodoncia') { overlay.innerHTML = `<span class="full-label" style="color:#8e44ad;">=</span>`; }
+            
+            if (tool === 'extraccion') {
+                overlay.innerHTML = `<svg class="x-mark" viewBox="0 0 48 48"><line x1="6" y1="6" x2="42" y2="42" stroke="#3498db" stroke-width="3.5" stroke-linecap="round"/><line x1="42" y1="6" x2="6" y2="42" stroke="#3498db" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+            } else if (tool === 'ausente') {
+                overlay.innerHTML = `<svg class="x-mark" viewBox="0 0 48 48"><line x1="6" y1="6" x2="42" y2="42" stroke="#e74c3c" stroke-width="3.5" stroke-linecap="round"/><line x1="42" y1="6" x2="6" y2="42" stroke="#e74c3c" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+            } else if (tool === 'conducto-azul') {
+                overlay.innerHTML = `<span class="full-label" style="color:#3498db;">TC</span>`;
+            } else if (tool === 'conducto-rojo') {
+                overlay.innerHTML = `<span class="full-label" style="color:#e74c3c;">TC</span>`;
+            } else if (tool === 'implante') {
+                overlay.innerHTML = `<span class="full-label" style="color:#27ae60;">IM</span>`;
+            } else if (tool === 'ortodoncia') {
+                overlay.innerHTML = `<span class="full-label" style="color:#8e44ad;">=</span>`;
+            }
         }
 
         function clearWholeTooth(toothNum) {
@@ -551,7 +616,8 @@
         function clearAll() {
             if (!confirm('¿Limpiar todo el odontograma?')) return;
             odontogramData = {};
-            const allNums = [...UPPER_Q1, ...UPPER_Q2, ...LOWER_Q4, ...LOWER_Q3, ...CHILD_UPPER_Q5, ...CHILD_UPPER_Q6, ...CHILD_LOWER_Q8, ...CHILD_LOWER_Q7];
+            const allNums = [...UPPER_Q1, ...UPPER_Q2, ...LOWER_Q4, ...LOWER_Q3, 
+                           ...CHILD_UPPER_Q5, ...CHILD_UPPER_Q6, ...CHILD_LOWER_Q8, ...CHILD_LOWER_Q7];
             allNums.forEach(n => clearToothDOM(n));
         }
 
@@ -559,21 +625,24 @@
             try {
                 const r = await fetch('/api/patients', API_CONFIG);
                 if (!r.ok) throw new Error();
-                displayPatients(await r.json());
+                const patients = await r.json();
+                displayPatients(patients);
             } catch {
-                document.getElementById('patientsList').innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom:8px;"></i><p>Error al cargar pacientes</p></div>`;
+                document.getElementById('patientsList').innerHTML = 
+                    `<div class="text-center py-4 text-danger"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><p>Error al cargar pacientes</p></div>`;
             }
         }
 
         function displayPatients(patients) {
             const c = document.getElementById('patientsList');
             if (!patients.length) {
-                c.innerHTML = `<div class="loading"><i class="fas fa-users fa-2x" style="margin-bottom:8px;color:#95a5a6;"></i><p>No hay pacientes</p></div>`;
+                c.innerHTML = `<div class="text-center py-4 text-muted"><i class="fas fa-users fa-2x mb-2"></i><p>No hay pacientes registrados</p></div>`;
                 return;
             }
+            
             c.innerHTML = patients.map(p => {
-                const initials = ((p.first_name||'?')[0] + (p.last_name||'?')[0]).toUpperCase();
-                return `<div class="patient-item" onclick="selectPatient(${p.id},'${esc(p.first_name)}','${esc(p.last_name)}','${esc(p.dni||'')}', '${esc(p.obra_social||'Particular')}','${esc(p.phone||'')}')" data-patient="${p.id}">
+                const initials = ((p.first_name || '')[0] + (p.last_name || '')[0]).toUpperCase();
+                return `<div class="patient-item" onclick="selectPatient(${p.id}, '${p.first_name.replace(/'/g, "\\'")}', '${p.last_name.replace(/'/g, "\\'")}', '${(p.dni || '').replace(/'/g, "\\'")}', '${(p.obra_social || 'Particular').replace(/'/g, "\\'")}')" data-patient="${p.id}">
                     <div class="patient-avatar">${initials}</div>
                     <div class="patient-info">
                         <h4>${p.first_name} ${p.last_name}</h4>
@@ -583,33 +652,37 @@
             }).join('');
         }
 
-        function esc(s) { return String(s).replace(/'/g,"\\'"); }
-
-        function filterPatients() {
-            const q = document.getElementById('patientSearch').value.toLowerCase();
-            document.querySelectorAll('.patient-item').forEach(item => { item.style.display = item.textContent.toLowerCase().includes(q) ? 'flex' : 'none'; });
+        function searchPatients(query) {
+            const items = document.querySelectorAll('.patient-item');
+            items.forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query.toLowerCase()) ? 'flex' : 'none';
+            });
         }
 
-        function selectPatient(id, fn, ln, dni, os, phone) {
+        function selectPatient(id, firstName, lastName, dni, obraSocial) {
             currentPatient = id;
             document.querySelectorAll('.patient-item').forEach(i => i.classList.remove('selected'));
             const el = document.querySelector(`[data-patient="${id}"]`);
             if (el) el.classList.add('selected');
-            document.getElementById('patientName').textContent = `${fn} ${ln}`;
+            
+            document.getElementById('patientName').textContent = `${firstName} ${lastName}`;
             document.getElementById('patientDni').textContent = dni || 'Sin DNI';
-            document.getElementById('patientOs').textContent = os;
-            document.getElementById('patientPhone').textContent = phone || 'Sin teléfono';
-            document.getElementById('patientInfo').classList.add('show');
+            document.getElementById('patientOs').textContent = obraSocial || 'Particular';
+            
+            document.getElementById('patientInfo').style.display = 'block';
             document.getElementById('toolbar').style.display = 'flex';
             document.getElementById('adultSection').style.display = 'block';
             document.getElementById('childSection').style.display = 'block';
+            
+            // Clear and load
             clearAll_silent();
             loadOdontogram(id);
         }
 
         function clearAll_silent() {
             odontogramData = {};
-            const allNums = [...UPPER_Q1, ...UPPER_Q2, ...LOWER_Q4, ...LOWER_Q3, ...CHILD_UPPER_Q5, ...CHILD_UPPER_Q6, ...CHILD_LOWER_Q8, ...CHILD_LOWER_Q7];
+            const allNums = [...UPPER_Q1, ...UPPER_Q2, ...LOWER_Q4, ...LOWER_Q3, 
+                           ...CHILD_UPPER_Q5, ...CHILD_UPPER_Q6, ...CHILD_LOWER_Q8, ...CHILD_LOWER_Q7];
             allNums.forEach(n => clearToothDOM(n));
         }
 
@@ -618,30 +691,54 @@
                 const r = await fetch(`/api/patients/${patientId}/odontogram`, API_CONFIG);
                 if (!r.ok) return;
                 const data = await r.json();
-                if (data && data.teeth) { odontogramData = data.teeth; applyLoadedData(); }
-            } catch(e) { console.error(e); }
+                if (data && data.teeth) {
+                    odontogramData = data.teeth;
+                    applyLoadedData();
+                }
+            } catch(e) {
+                console.error('Error loading odontogram:', e);
+            }
         }
 
         function applyLoadedData() {
             Object.keys(odontogramData).forEach(toothNum => {
                 const td = odontogramData[toothNum];
                 if (!td) return;
-                if (td._whole) { applyWholeTooth_DOM(parseInt(toothNum), td._whole); }
-                else { ['top','left','center','right','bottom'].forEach(s => { if (td[s]) updateSurfaceDOM(parseInt(toothNum), s, td[s]); }); }
+                
+                if (td._whole) {
+                    applyWholeTooth_DOM(parseInt(toothNum), td._whole);
+                } else {
+                    ['top','left','center','right','bottom'].forEach(s => {
+                        if (td[s]) updateSurfaceDOM(parseInt(toothNum), s, td[s]);
+                    });
+                }
             });
         }
 
         async function saveOdontogram() {
-            if (!currentPatient) { alert('Seleccioná un paciente primero'); return; }
+            if (!currentPatient) {
+                alert('Seleccione un paciente primero');
+                return;
+            }
+            
             try {
                 const r = await fetch(`/api/patients/${currentPatient}/odontogram`, {
                     ...API_CONFIG,
                     method: 'POST',
                     body: JSON.stringify({ teeth: odontogramData })
                 });
-                if (r.ok) { alert('Odontograma guardado ✓'); }
-                else { alert('Error al guardar'); }
-            } catch { alert('Error de conexión'); }
+                
+                if (r.ok) {
+                    alert('Odontograma guardado exitosamente');
+                } else {
+                    const error = await r.text();
+                    console.error('Error saving:', error);
+                    alert('Error al guardar: ' + error);
+                }
+            } catch(e) {
+                console.error('Error:', e);
+                alert('Error de conexión al guardar');
+            }
         }
     </script>
 </body>

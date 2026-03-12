@@ -537,10 +537,35 @@ async def get_odontogram(
     current_user: AdminUser = Depends(get_current_active_user),
 ):
     records = db.query(DentalRecord).filter(DentalRecord.patient_id == patient_id).all()
-    treatments = (
-        db.query(DentalTreatment).filter(DentalTreatment.patient_id == patient_id).all()
-    )
+
+    # Convert records to the format expected by frontend
+    teeth = {}
+
+    # Reverse surface mapping (from DB to frontend)
+    surface_reverse_map = {
+        "M": "left",  # Mesial
+        "D": "right",  # Distal
+        "O": "center",  # Oclusal
+        "V": "top",  # Vestibular (will be mapped based on tooth)
+        "P": "bottom",  # Palatino (will be mapped based on tooth)
+        "L": "bottom",  # Lingual
+    }
+
+    for r in records:
+        tooth_num = str(r.tooth)
+        if tooth_num not in teeth:
+            teeth[tooth_num] = {}
+
+        # Check if it's a whole-tooth treatment (no face specified)
+        if not r.face:
+            teeth[tooth_num]["_whole"] = r.procedure_name
+        else:
+            # Map face to surface name
+            surface = surface_reverse_map.get(r.face, r.face.lower())
+            teeth[tooth_num][surface] = r.procedure_name
+
     return {
+        "teeth": teeth,
         "records": [
             {
                 "id": r.id,
@@ -551,19 +576,6 @@ async def get_odontogram(
                 "record_date": r.record_date.isoformat() if r.record_date else None,
             }
             for r in records
-        ],
-        "treatments": [
-            {
-                "id": t.id,
-                "tooth": t.tooth,
-                "face": t.face,
-                "treatment_name": t.treatment_name,
-                "status": t.status,
-                "treatment_date": t.treatment_date.isoformat()
-                if t.treatment_date
-                else None,
-            }
-            for t in treatments
         ],
     }
 
@@ -577,16 +589,55 @@ async def save_patient_odontogram(
 ):
     teeth = data.get("teeth", {})
     try:
+        # Delete existing records for this patient
         db.query(DentalRecord).filter(DentalRecord.patient_id == patient_id).delete()
-        for tooth_number, treatment_type in teeth.items():
-            record = DentalRecord(
-                patient_id=patient_id,
-                tooth=int(tooth_number),
-                procedure_name=treatment_type,
-                record_status="completed",
-                record_date=date.today(),
-            )
-            db.add(record)
+
+        for tooth_number_str, tooth_data in teeth.items():
+            tooth_num = int(tooth_number_str)
+
+            # Check if it's a whole-tooth treatment (_whole property)
+            if isinstance(tooth_data, dict) and tooth_data.get("_whole"):
+                record = DentalRecord(
+                    patient_id=patient_id,
+                    tooth=str(tooth_num),
+                    procedure_name=tooth_data["_whole"],
+                    record_status="completed",
+                    record_date=date.today(),
+                )
+                db.add(record)
+            # Check if it's surface-level treatments
+            elif isinstance(tooth_data, dict):
+                for surface, treatment in tooth_data.items():
+                    if surface.startswith("_"):
+                        continue
+                    # Map surface names to single letters
+                    surface_map = {
+                        "top": "V" if tooth_num < 40 else "L",  # Vestibular/Lingual
+                        "bottom": "P" if tooth_num < 40 else "V",  # Palatino/Vestibular
+                        "left": "M",  # Mesial
+                        "right": "D",  # Distal
+                        "center": "O",  # Oclusal
+                    }
+                    record = DentalRecord(
+                        patient_id=patient_id,
+                        tooth=str(tooth_num),
+                        face=surface_map.get(surface, surface),
+                        procedure_name=treatment,
+                        record_status="completed",
+                        record_date=date.today(),
+                    )
+                    db.add(record)
+            # Legacy format: simple string
+            elif isinstance(tooth_data, str):
+                record = DentalRecord(
+                    patient_id=patient_id,
+                    tooth=str(tooth_num),
+                    procedure_name=tooth_data,
+                    record_status="completed",
+                    record_date=date.today(),
+                )
+                db.add(record)
+
         db.commit()
         return {"status": "ok"}
     except Exception as e:
