@@ -1,0 +1,344 @@
+/*
+ * Odontograma estilo Ficha OSPESYM
+ * Réplica exacta de ficha odontológica estándar
+ */
+
+.odontogram-ficha {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Panel izquierdo - Tabla de tratamientos */
+.ficha-tratamientos {
+    width: 450px;
+    flex-shrink: 0;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ficha-header {
+    background: var(--primary);
+    color: white;
+    padding: 10px 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    border-bottom: 2px solid var(--primary);
+}
+
+.ficha-table-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.ficha-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+.ficha-table th {
+    background: #e8f4f8;
+    color: var(--primary);
+    font-weight: 600;
+    padding: 8px 4px;
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: 0.7rem;
+}
+
+.ficha-table td {
+    border: 1px solid #ddd;
+    padding: 6px 4px;
+    text-align: center;
+    height: 35px;
+}
+
+.ficha-table td.editable {
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.ficha-table td.editable:hover {
+    background: #e3f2fd;
+}
+
+.ficha-table td.diente-num {
+    font-weight: 600;
+    color: var(--primary);
+    width: 50px;
+}
+
+.ficha-table td.cara-col {
+    width: 40px;
+    font-weight: 600;
+}
+
+.ficha-table td.codigo-col {
+    width: 70px;
+}
+
+.ficha-table td.fecha-col {
+    width: 90px;
+}
+
+/* Panel derecho - Odontograma */
+.odontogram-panel {
+    flex: 1;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.odontogram-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+/* Arcadas */
+.arcada-container {
+    margin-bottom: 30px;
+}
+
+.arcada-label {
+    text-align: center;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+/* Cuadrantes */
+.cuadrantes-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 10px;
+}
+
+.cuadrante {
+    display: flex;
+    gap: 4px;
+}
+
+.cuadrante-der {
+    flex-direction: row-reverse;
+}
+
+/* Dientes individuales */
+.diente-ficha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.diente-numero {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+}
+
+/* Representación del diente con caras */
+.diente-cuerpo {
+    width: 36px;
+    height: 44px;
+    border: 2px solid #333;
+    background: white;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+        "mesial oclusal distal"
+        "mesial centro distal"
+        "vestibular centro palatino";
+}
+
+/* Caras del diente */
+.cara-diente {
+    border: 1px solid #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.cara-diente:hover {
+    background: #e3f2fd;
+}
+
+.cara-diente.selected {
+    background: var(--accent);
+    color: white;
+}
+
+.cara-diente.has-treatment {
+    position: relative;
+}
+
+.cara-diente.has-treatment::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--danger);
+}
+
+.cara-mesial {
+    grid-area: mesial;
+}
+
+.cara-oclusal {
+    grid-area: oclusal;
+}
+
+.cara-distal {
+    grid-area: distal;
+}
+
+.cara-vestibular {
+    grid-area: vestibular;
+}
+
+.cara-palatino {
+    grid-area: palatino;
+}
+
+.cara-centro {
+    grid-area: centro;
+    background: repeating-linear-gradient(
+        45deg,
+        #f0f0f0,
+        #f0f0f0 2px,
+        white 2px,
+        white 4px
+    );
+}
+
+/* Dientes inferiores - invertir caras V y P */
+.arcada-inferior .diente-cuerpo {
+    grid-template-areas:
+        "palatino centro vestibular"
+        "mesial centro distal"
+        "mesial oclusal distal";
+}
+
+/* Panel de pacientes desplegado */
+.pacientes-panel {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.pacientes-header {
+    background: var(--primary);
+    color: white;
+    padding: 12px 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.paciente-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+
+.paciente-item:hover {
+    background: #f5f5f5;
+}
+
+.paciente-item.active {
+    background: #e3f2fd;
+    border-left: 3px solid var(--accent);
+}
+
+.paciente-avatar-small {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.paciente-info-small h6 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.paciente-info-small small {
+    color: var(--gray-600);
+    font-size: 0.8rem;
+}
+
+/* Botón de agregar tratamiento */
+.btn-agregar-tratamiento {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.btn-agregar-tratamiento:hover {
+    background: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .odontogram-ficha {
+        flex-direction: column;
+    }
+    
+    .ficha-tratamientos {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .diente-cuerpo {
+        width: 32px;
+        height: 40px;
+    }
+    
+    .cara-diente {
+        font-size: 7px;
+    }
+}
