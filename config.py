@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         if hasattr(self, "_database_url") and self._database_url:
             return self._database_url
-        return "sqlite:///./clinic.db"
+        return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     # Cal.com
     calcom_url: str = "https://odontologia.aiporvos.com"

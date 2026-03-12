@@ -15,8 +15,7 @@ from config import settings
 from app.database import engine, init_db, SessionLocal, get_db
 from app.admin import setup_admin
 
-# from app.handlers.conversation import handle_whatsapp_message
-handle_whatsapp_message = None
+from app.handlers.conversation import handle_whatsapp_message
 from app.models import (
     Patient,
     Appointment,
@@ -81,11 +80,11 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
 
-    # Telegram bot disabled for testing
-    # from app.bot import start_bot
+    # Iniciar Bot de Telegram en Segundo Plano (Polling)
+    from app.bot import start_bot
 
     if settings.telegram_bot_token:
-        pass  # asyncio.create_task(start_bot())
+        asyncio.create_task(start_bot())
         print("🤖 Telegram Bot Polling task created")
 
     print("🚀 Dental Studio Pro iniciado")
