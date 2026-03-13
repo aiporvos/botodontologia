@@ -392,28 +392,55 @@ async def today_appointments(
     db: Session = Depends(get_db),
     current_user: AdminUser = Depends(get_current_active_user),
 ):
-    today = datetime.now().date()
-    today_start = datetime.combine(today, datetime.min.time())
-    today_end = datetime.combine(today, datetime.max.time())
-    appts = (
-        db.query(Appointment)
-        .filter(Appointment.start_at >= today_start, Appointment.start_at <= today_end)
-        .order_by(Appointment.start_at)
-        .all()
-    )
-    return [
-        {
-            "id": a.id,
-            "time": a.start_at.strftime("%H:%M") if a.start_at else "",
-            "patient_name": f"{a.patient.first_name} {a.patient.last_name}"
-            if a.patient
-            else "N/A",
-            "reason": a.reason,
-            "status": a.status,
-            "category": a.category,
-        }
-        for a in appts
-    ]
+    try:
+        from sqlalchemy.orm import joinedload
+
+        today = datetime.now().date()
+        today_start = datetime.combine(today, datetime.min.time())
+        today_end = datetime.combine(today, datetime.max.time())
+
+        # Usar joinedload para evitar queries N+1
+        appts = (
+            db.query(Appointment)
+            .options(joinedload(Appointment.patient))
+            .filter(
+                Appointment.start_at >= today_start, Appointment.start_at <= today_end
+            )
+            .order_by(Appointment.start_at)
+            .all()
+        )
+
+        result = []
+        for a in appts:
+            try:
+                patient_name = "N/A"
+                if a.patient:
+                    first = a.patient.first_name or ""
+                    last = a.patient.last_name or ""
+                    patient_name = f"{first} {last}".strip() or "N/A"
+
+                result.append(
+                    {
+                        "id": a.id,
+                        "time": a.start_at.strftime("%H:%M") if a.start_at else "",
+                        "patient_name": patient_name,
+                        "patient_phone": a.patient.phone if a.patient else None,
+                        "reason": a.reason or "Consulta",
+                        "status": a.status or "pending",
+                        "category": a.category or "consulta",
+                    }
+                )
+            except Exception as e:
+                print(f"Error procesando appointment {a.id}: {e}")
+                continue
+
+        return result
+    except Exception as e:
+        print(f"Error en today_appointments: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error al cargar turnos: {str(e)}")
 
 
 @app.post("/api/appointments")

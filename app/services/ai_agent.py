@@ -36,10 +36,10 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 
 # Instructivo Crítico para Agendar Turnos (¡Sigue ESTE ORDEN siempre!)
 1. **Identificar Necesidad:** Si el paciente quiere un turno pero NO te dice para qué, pregúntale el motivo (¿Limpieza? ¿Dolor? ¿Brackets?). Si dice que es su primera vez recomiéndale una consulta general.
-2. **Consultar Agenda Temprana:** Una vez que sepas el motivo, USA LA HERRAMIENTA `ConsultarDisponibilidad` enviándole el motivo. Esta herramienta te dirá las opciones de fecha, doctor y duración.
+2. **Consultar Agenda Temprana:** Una vez que sepas el motivo, USA LA HERRAMIENTA `check_availability` enviándole el motivo. Esta herramienta te dirá las opciones de fecha, doctor y duración.
 3. **Ofrecer Opciones:** Dile al paciente los horarios que arrojó la herramienta para su tratamiento y pregúntale cuál prefiere.
 4. **Recolección de Datos (Obligatorios):** Cuando el paciente elija el horario, dile: "Para agendar tu turno necesito registrarte en el sistema. Por favor, pásame estos 4 datos: Nombre y Apellido, DNI, Obra Social (o Particular si no tienes) y Teléfono."
-5. **Llamado a Agendar:** Una vez tengas su DNI, Nombre y Teléfono, USA LA HERRAMIENTA `AgendarTurno` para guardarlo en la base de datos.
+5. **Llamado a Agendar:** Una vez tengas su DNI, Nombre y Teléfono, USA LA HERRAMIENTA `book_appointment` para guardarlo en la base de datos. Los parámetros son: phone, name, dni, obra_social, date_iso (formato: YYYY-MM-DDTHH:MM:SS), reason.
 
 # Asignaciones Internas (Para tu contexto)
 - **Dr. Silvestro:** Extracciones, Implantes, Prótesis (30 min), Limpiezas (15 min).
@@ -47,10 +47,11 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 - **Cualquiera:** Consulta inicial 1ra/2da vez (15 min).
 
 # Reglas de ORO
-1. NO INVENTES HORARIOS. Solo ofrece los que devuelva la herramienta `ConsultarDisponibilidad`.
+1. NO INVENTES HORARIOS. Solo ofrece los que devuelva la herramienta `check_availability`.
 2. Ocasionalmente, recuérdale al paciente que el sistema es un bot y que los mensajes de texto son preferibles.
 3. Sé profesional y resolutivo. Si un paciente sufre dolor o pide extracción, asócialo directo a Silvestro o Murad según corresponda en la búsqueda.
 4. La fecha y hora actual del servidor es: {now}
+5. IMPORTANTE: Cuando el usuario elija un horario de la lista que mostraste, debes llamar a book_appointment con la fecha EXACTA en formato ISO (YYYY-MM-DDTHH:MM:SS).
 """
 
 
@@ -169,39 +170,70 @@ def check_availability(reason: str) -> str:
 def book_appointment(
     phone: str, name: str, dni: str, obra_social: str, date_iso: str, reason: str
 ) -> str:
-    """Crea o actualiza al paciente y agenda su turno final en la base de datos."""
+    """Crea o actualiza al paciente y agenda su turno final en la base de datos.
+
+    Args:
+        phone: Número de teléfono del paciente
+        name: Nombre completo del paciente
+        dni: DNI del paciente
+        obra_social: Obra social o "Particular" si no tiene
+        date_iso: Fecha y hora en formato ISO (YYYY-MM-DDTHH:MM:SS)
+        reason: Motivo de la consulta
+
+    Returns:
+        Mensaje de confirmación o error
+    """
     db = SessionLocal()
     try:
+        # Validar parámetros
+        if not phone or not name or not date_iso:
+            return "Error: Faltan datos obligatorios (teléfono, nombre o fecha)."
+
+        # Limpiar y validar teléfono
+        phone_clean = phone.replace(" ", "").replace("-", "").replace("+", "")
+        if not phone_clean:
+            return "Error: Teléfono inválido."
+
         # Buscar o crear paciente
-        p = db.query(Patient).filter(Patient.phone.contains(phone)).first()
-        first = name.split()[0] if name else "Paciente"
-        last = " ".join(name.split()[1:]) if name and " " in name else "..."
+        p = db.query(Patient).filter(Patient.phone.contains(phone_clean)).first()
+
+        # Separar nombre y apellido
+        name_parts = name.strip().split()
+        first = name_parts[0] if name_parts else "Paciente"
+        last = " ".join(name_parts[1:]) if len(name_parts) > 1 else "Nuevo"
+
+        obra_social_clean = obra_social if obra_social else "Particular"
+        dni_clean = dni if dni else None
 
         if not p:
             p = Patient(
                 first_name=first,
                 last_name=last,
-                phone=phone,
-                dni=dni,
-                obra_social=obra_social,
+                phone=phone_clean,
+                dni=dni_clean,
+                obra_social=obra_social_clean,
             )
             db.add(p)
             db.commit()
             db.refresh(p)
+            print(f"✅ Nuevo paciente creado: {first} {last}")
         else:
             # Actualizamos datos faltantes
-            if dni and not p.dni:
-                p.dni = dni
-            if obra_social and not p.obra_social:
-                p.obra_social = obra_social
+            if dni_clean and not p.dni:
+                p.dni = dni_clean
+            if obra_social_clean and not p.obra_social:
+                p.obra_social = obra_social_clean
             db.commit()
             db.refresh(p)
+            print(f"✅ Paciente existente actualizado: {p.first_name} {p.last_name}")
 
+        # Clasificar el motivo y obtener detalles
         cat = classify_reason(reason)
         details = get_treatment_details(cat)
         duration = details.get("duration", 30)
         doc_name = details.get("doctor_name", "Cualquiera")
 
+        # Buscar profesional
         prof = None
         if doc_name != "Cualquiera":
             prof = (
@@ -212,11 +244,16 @@ def book_appointment(
         if not prof:
             prof = db.query(Professional).first()
 
+        # Parsear fecha
         try:
-            dt = datetime.fromisoformat(date_iso)
-        except ValueError:
-            return "Error: Formato de fecha inválido."
+            # Intentar parsear la fecha ISO
+            dt = datetime.fromisoformat(
+                date_iso.replace("Z", "+00:00").replace("+00:00", "")
+            )
+        except ValueError as e:
+            return f"Error: Formato de fecha inválido. Usa el formato: YYYY-MM-DDTHH:MM:SS. Error: {str(e)}"
 
+        # Crear el turno
         appt = Appointment(
             patient_id=p.id,
             professional_id=prof.id if prof else 1,
@@ -225,14 +262,20 @@ def book_appointment(
             reason=reason,
             category=cat,
             status="confirmed",
-            channel="whatsapp",
+            channel="telegram",
         )
         db.add(appt)
         db.commit()
 
-        return f"✅ Turno agendado exitosamente!\n\n📅 Fecha: {dt.strftime('%d/%m/%Y')}\n🕐 Hora: {dt.strftime('%H:%M')}\n👨‍⚕️ Profesional: {prof.full_name if prof else 'General'}\n📝 Motivo: {reason}\n\nTe esperamos en Dental Studio Pro. ¡Gracias por confiar en nosotros!"
+        print(f"✅ Turno creado: {dt.strftime('%d/%m/%Y %H:%M')} - {first} {last}")
+
+        return f"✅ ¡Turno agendado exitosamente!\n\n📅 Fecha: {dt.strftime('%d/%m/%Y')}\n🕐 Hora: {dt.strftime('%H:%M')}\n👤 Paciente: {first} {last}\n👨‍⚕️ Profesional: {prof.full_name if prof else 'General'}\n📝 Motivo: {reason}\n\nTe esperamos en Dental Studio Pro. ¡Gracias por confiar en nosotros!"
     except Exception as e:
-        return f"Error al agendar: {str(e)}"
+        import traceback
+
+        error_msg = f"Error al agendar: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        return f"Error al agendar el turno. Por favor, intenta nuevamente o contacta al consultorio. Error: {str(e)}"
     finally:
         db.close()
 
