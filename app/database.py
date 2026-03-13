@@ -18,21 +18,43 @@ def get_db():
 def run_migrations():
     """Aplica migraciones simples para columnas faltantes en tablas existentes"""
     inspector = inspect(engine)
-    
+
     migrations = [
         {
             "table": "admin_users",
             "column": "role",
-            "sql": "ALTER TABLE admin_users ADD COLUMN role VARCHAR(20) DEFAULT 'admin'"
+            "sql": "ALTER TABLE admin_users ADD COLUMN role VARCHAR(20) DEFAULT 'admin'",
+        },
+        {
+            "table": "appointments",
+            "column": "reminder_sent",
+            "sql": "ALTER TABLE appointments ADD COLUMN reminder_sent BOOLEAN DEFAULT FALSE",
+        },
+        {
+            "table": "appointments",
+            "column": "reminder_sent_at",
+            "sql": "ALTER TABLE appointments ADD COLUMN reminder_sent_at TIMESTAMP WITH TIME ZONE",
+        },
+        {
+            "table": "appointments",
+            "column": "reminder_channel",
+            "sql": "ALTER TABLE appointments ADD COLUMN reminder_channel VARCHAR(20)",
+        },
+        {
+            "table": "appointments",
+            "column": "confirmation_status",
+            "sql": "ALTER TABLE appointments ADD COLUMN confirmation_status VARCHAR(20) DEFAULT 'pending'",
         },
     ]
-    
+
     with engine.connect() as conn:
         for m in migrations:
             if inspector.has_table(m["table"]):
                 columns = [c["name"] for c in inspector.get_columns(m["table"])]
                 if m["column"] not in columns:
-                    print(f"🔧 Migrando: agregando columna '{m['column']}' a '{m['table']}'")
+                    print(
+                        f"🔧 Migrando: agregando columna '{m['column']}' a '{m['table']}'"
+                    )
                     conn.execute(text(m["sql"]))
                     conn.commit()
 
@@ -55,7 +77,7 @@ def init_db():
 
     Base.metadata.create_all(bind=engine)
     print("✅ Tablas creadas/verificadas")
-    
+
     # Aplicar migraciones para columnas nuevas en tablas existentes
     run_migrations()
     print("✅ Migraciones aplicadas")
