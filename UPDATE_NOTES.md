@@ -2,6 +2,29 @@
 
 ## Cambios Realizados (13/03/2026)
 
+### ⚠️ IMPORTANTE: Ejecutar Migraciones SQL
+
+Antes de desplegar, ejecuta manualmente estas queries en la base de datos PostgreSQL de Dokploy:
+
+```sql
+-- Agregar columnas faltantes a la tabla appointments
+ALTER TABLE appointments 
+ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE appointments 
+ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE appointments 
+ADD COLUMN IF NOT EXISTS reminder_channel VARCHAR(20);
+
+ALTER TABLE appointments 
+ADD COLUMN IF NOT EXISTS confirmation_status VARCHAR(20) DEFAULT 'pending';
+
+-- Agregar columna role a admin_users si no existe
+ALTER TABLE admin_users 
+ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin';
+```
+
 ### 1. Corrección de Error en Base de Datos
 
 Se agregó migración automática para las columnas faltantes en la tabla `appointments`:

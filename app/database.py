@@ -47,16 +47,24 @@ def run_migrations():
         },
     ]
 
-    with engine.connect() as conn:
+    with (
+        engine.begin() as conn
+    ):  # Usar begin() para manejar transacciones automáticamente
         for m in migrations:
-            if inspector.has_table(m["table"]):
-                columns = [c["name"] for c in inspector.get_columns(m["table"])]
-                if m["column"] not in columns:
-                    print(
-                        f"🔧 Migrando: agregando columna '{m['column']}' a '{m['table']}'"
-                    )
-                    conn.execute(text(m["sql"]))
-                    conn.commit()
+            try:
+                if inspector.has_table(m["table"]):
+                    columns = [c["name"] for c in inspector.get_columns(m["table"])]
+                    if m["column"] not in columns:
+                        print(
+                            f"🔧 Migrando: agregando columna '{m['column']}' a '{m['table']}'"
+                        )
+                        conn.execute(text(m["sql"]))
+                        print(f"✅ Columna '{m['column']}' agregada exitosamente")
+            except Exception as e:
+                print(
+                    f"⚠️ Error al migrar columna '{m['column']}' en '{m['table']}': {e}"
+                )
+                # Continuar con las siguientes migraciones
 
 
 def init_db():
