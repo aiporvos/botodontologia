@@ -123,6 +123,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 setup_admin(app, engine)
 
+# TEMPORAL: Router para ejecutar migraciones (ELIMINAR DESPUÉS DE USAR)
+from app.run_migrations_endpoint import router as migrations_router
+
+app.include_router(migrations_router)
+
 
 # ==================== PÁGINAS ====================
 
