@@ -17,54 +17,41 @@ def get_db():
 
 def run_migrations():
     """Aplica migraciones simples para columnas faltantes en tablas existentes"""
-    inspector = inspect(engine)
 
-    migrations = [
-        {
-            "table": "admin_users",
-            "column": "role",
-            "sql": "ALTER TABLE admin_users ADD COLUMN role VARCHAR(20) DEFAULT 'admin'",
-        },
-        {
-            "table": "appointments",
-            "column": "reminder_sent",
-            "sql": "ALTER TABLE appointments ADD COLUMN reminder_sent BOOLEAN DEFAULT FALSE",
-        },
-        {
-            "table": "appointments",
-            "column": "reminder_sent_at",
-            "sql": "ALTER TABLE appointments ADD COLUMN reminder_sent_at TIMESTAMP WITH TIME ZONE",
-        },
-        {
-            "table": "appointments",
-            "column": "reminder_channel",
-            "sql": "ALTER TABLE appointments ADD COLUMN reminder_channel VARCHAR(20)",
-        },
-        {
-            "table": "appointments",
-            "column": "confirmation_status",
-            "sql": "ALTER TABLE appointments ADD COLUMN confirmation_status VARCHAR(20) DEFAULT 'pending'",
-        },
+    # Definir migraciones SQL directas
+    migrations_sql = [
+        "ALTER TABLE IF EXISTS appointments ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE IF EXISTS appointments ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE IF EXISTS appointments ADD COLUMN IF NOT EXISTS reminder_channel VARCHAR(20)",
+        "ALTER TABLE IF EXISTS appointments ADD COLUMN IF NOT EXISTS confirmation_status VARCHAR(20) DEFAULT 'pending'",
+        "ALTER TABLE IF EXISTS admin_users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'",
     ]
 
-    with (
-        engine.begin() as conn
-    ):  # Usar begin() para manejar transacciones automáticamente
-        for m in migrations:
-            try:
-                if inspector.has_table(m["table"]):
-                    columns = [c["name"] for c in inspector.get_columns(m["table"])]
-                    if m["column"] not in columns:
-                        print(
-                            f"🔧 Migrando: agregando columna '{m['column']}' a '{m['table']}'"
-                        )
-                        conn.execute(text(m["sql"]))
-                        print(f"✅ Columna '{m['column']}' agregada exitosamente")
-            except Exception as e:
-                print(
-                    f"⚠️ Error al migrar columna '{m['column']}' en '{m['table']}': {e}"
-                )
-                # Continuar con las siguientes migraciones
+    print("🔧 Ejecutando migraciones de base de datos...")
+
+    try:
+        with engine.begin() as conn:
+            for sql in migrations_sql:
+                try:
+                    conn.execute(text(sql))
+                    print(f"✅ Migración ejecutada: {sql[:60]}...")
+                except Exception as e:
+                    # Si la columna ya existe, el error es esperado
+                    if (
+                        "already exists" in str(e).lower()
+                        or "duplicate column" in str(e).lower()
+                    ):
+                        print(f"ℹ️ Columna ya existe (skipping): {sql[:60]}...")
+                    else:
+                        print(f"⚠️ Error en migración: {sql[:60]}... - {e}")
+
+        print("✅ Todas las migraciones procesadas")
+
+    except Exception as e:
+        print(f"❌ Error general en migraciones: {e}")
+        import traceback
+
+        print(traceback.format_exc())
 
 
 def init_db():
@@ -83,9 +70,18 @@ def init_db():
         DentalTreatment,
     )
 
-    Base.metadata.create_all(bind=engine)
-    print("✅ Tablas creadas/verificadas")
+    print("🗄️ Inicializando base de datos...")
 
-    # Aplicar migraciones para columnas nuevas en tablas existentes
+    # Crear todas las tablas
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Tablas creadas/verificadas")
+    except Exception as e:
+        print(f"⚠️ Error creando tablas: {e}")
+
+    # Aplicar migraciones para columnas nuevas
     run_migrations()
-    print("✅ Migraciones aplicadas")
+
+
+# Ejecutar migraciones al importar el módulo
+print("🚀 Cargando módulo de base de datos...")

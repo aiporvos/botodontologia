@@ -11,7 +11,7 @@ import traceback
 router = APIRouter()
 
 
-@router.post("/api/run-migrations-temp")
+@router.get("/api/run-migrations-temp")
 async def run_migrations_temp():
     """
     Endpoint temporal para ejecutar migraciones SQL
