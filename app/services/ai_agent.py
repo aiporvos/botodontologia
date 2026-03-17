@@ -34,12 +34,26 @@ SYSTEM_PROMPT = """# Rol e Identidad
 Eres **DentiBot**, el asistente inteligente de **Dental Studio Pro**.
 Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 
-# Instructivo Crítico para Agendar Turnos (¡Sigue ESTE ORDEN siempre!)
-1. **Identificar Necesidad:** Si el paciente quiere un turno pero NO te dice para qué, pregúntale el motivo (¿Limpieza? ¿Dolor? ¿Brackets?). Si dice que es su primera vez recomiéndale una consulta general.
-2. **Consultar Agenda Temprana:** Una vez que sepas el motivo, USA LA HERRAMIENTA `check_availability` enviándole el motivo. Esta herramienta te dirá las opciones de fecha, doctor y duración.
-3. **Ofrecer Opciones:** Dile al paciente los horarios que arrojó la herramienta para su tratamiento y pregúntale cuál prefiere.
-4. **Recolección de Datos (Obligatorios):** Cuando el paciente elija el horario, dile: "Para agendar tu turno necesito registrarte en el sistema. Por favor, pásame estos 4 datos: Nombre y Apellido, DNI, Obra Social (o Particular si no tienes) y Teléfono."
-5. **Llamado a Agendar:** Una vez tengas su DNI, Nombre y Teléfono, USA LA HERRAMIENTA `book_appointment` para guardarlo en la base de datos. Los parámetros son: phone, name, dni, obra_social, date_iso (formato: YYYY-MM-DDTHH:MM:SS), reason.
+# Instructivo Crítico para Agendar, Consultar, Cancelar o Reprogramar Turnos
+
+## 1. Agendar un turno nuevo:
+1. **Identificar Necesidad:** Pregunta el motivo (¿Limpieza? ¿Dolor? ¿Brackets?).
+2. **Consultar Agenda Temprana:** Usa `check_availability` enviándole el motivo.
+3. **Ofrecer Opciones:** Dale las opciones al paciente.
+4. **Recolección de Datos:** Pide Nombre, DNI, OS y Teléfono.
+5. **Agendar:** Usa `book_appointment` con la fecha en formato ISO (YYYY-MM-DDTHH:MM:SS).
+
+## 2. Consultar mis turnos:
+Si el paciente te pide ver sus turnos, pídele su número de teléfono y usa la herramienta `get_my_appointments`. Esta te devolverá los IDs de sus próximos turnos.
+
+## 3. Cancelar un turno:
+1. Usa `get_my_appointments` para buscar el ID del turno si el paciente no lo brindó.
+2. Usa `cancel_appointment(appt_id)` para cancelarlo. Confírmaselo al paciente.
+
+## 4. Reprogramar un turno:
+1. Usa `get_my_appointments` para obtener el ID si es necesario.
+2. Usa `check_availability` para ver los nuevos horarios disponibles.
+3. Usa la herramienta `reschedule_appointment` con el ID del turno y la nueva fecha en formato ISO (YYYY-MM-DDTHH:MM:SS).
 
 # Asignaciones Internas (Para tu contexto)
 - **Dr. Silvestro:** Extracciones, Implantes, Prótesis (30 min), Limpiezas (15 min).
@@ -47,11 +61,11 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 - **Cualquiera:** Consulta inicial 1ra/2da vez (15 min).
 
 # Reglas de ORO
-1. NO INVENTES HORARIOS. Solo ofrece los que devuelva la herramienta `check_availability`.
+1. NO INVENTES HORARIOS. Solo ofrece los que devuelva `check_availability`.
 2. Ocasionalmente, recuérdale al paciente que el sistema es un bot y que los mensajes de texto son preferibles.
-3. Sé profesional y resolutivo. Si un paciente sufre dolor o pide extracción, asócialo directo a Silvestro o Murad según corresponda en la búsqueda.
+3. Sé profesional y resolutivo. Si hay urgencia, derívalo de inmediato.
 4. La fecha y hora actual del servidor es: {now}
-5. IMPORTANTE: Cuando el usuario elija un horario de la lista que mostraste, debes llamar a book_appointment con la fecha EXACTA en formato ISO (YYYY-MM-DDTHH:MM:SS).
+5. IMPORTANTE: En `book_appointment` y `reschedule_appointment`, debes usar la fecha EXACTA en formato ISO (YYYY-MM-DDTHH:MM:SS).
 """
 
 
@@ -287,6 +301,75 @@ async def send_mail_tool(to: str, subject: str, body: str) -> str:
     return "Correo enviado con éxito." if success else "Error al enviar el correo."
 
 
+@tool
+def get_my_appointments(phone: str) -> str:
+    """Obtiene los turnos futuros de un paciente dado su número de teléfono."""
+    db = SessionLocal()
+    try:
+        phone_clean = phone.replace(" ", "").replace("-", "").replace("+", "")
+        p = db.query(Patient).filter(Patient.phone.contains(phone_clean)).first()
+        if not p:
+            return "No encontré un paciente con ese número de teléfono."
+        
+        now = datetime.now()
+        appts = db.query(Appointment).filter(
+            Appointment.patient_id == p.id,
+            Appointment.start_at >= now,
+            Appointment.status.in_(["confirmed", "pending"])
+        ).order_by(Appointment.start_at).all()
+        
+        if not appts:
+            return f"El paciente {p.first_name} {p.last_name} no tiene turnos próximos agendados."
+            
+        res = f"Turnos próximos para {p.first_name} {p.last_name}:\n"
+        for a in appts:
+            doc = a.professional.full_name if a.professional else "General"
+            res += f"- ID {a.id}: {a.start_at.strftime('%d/%m/%Y %H:%M')} con {doc} ({a.reason})\n"
+        return res
+    finally:
+        db.close()
+
+
+@tool
+def cancel_appointment(appt_id: int) -> str:
+    """Cancela un turno existente dado su ID."""
+    db = SessionLocal()
+    try:
+        a = db.query(Appointment).filter(Appointment.id == appt_id).first()
+        if not a:
+            return f"No encontré un turno con el ID {appt_id}."
+            
+        a.status = "cancelled"
+        db.commit()
+        return f"El turno ID {appt_id} para {a.start_at.strftime('%d/%m/%Y %H:%M')} ha sido CANCELADO exitosamente."
+    finally:
+        db.close()
+
+@tool
+def reschedule_appointment(appt_id: int, new_date_iso: str) -> str:
+    """Reprograma un turno existente a una nueva fecha y hora. Usa check_availability primero para ver opciones!"""
+    db = SessionLocal()
+    try:
+        a = db.query(Appointment).filter(Appointment.id == appt_id).first()
+        if not a:
+            return f"No encontré un turno con el ID {appt_id}."
+            
+        try:
+            dt = datetime.fromisoformat(new_date_iso.replace("Z", "+00:00").replace("+00:00", ""))
+        except ValueError as e:
+            return f"Error: Formato de fecha inválido. Usa: YYYY-MM-DDTHH:MM:SS."
+            
+        # Asumiendo misma duración anterior
+        duration = int((a.end_at - a.start_at).total_seconds() / 60) if a.end_at and a.start_at else 30
+        
+        a.start_at = dt
+        a.end_at = dt + timedelta(minutes=duration)
+        db.commit()
+        return f"El turno ID {appt_id} ha sido REPROGRAMADO exitosamente para el {dt.strftime('%d/%m/%Y %H:%M')}."
+    finally:
+        db.close()
+
+
 # Lista de herramientas disponibles
 TOOLS = [
     search_prices,
@@ -294,6 +377,9 @@ TOOLS = [
     check_availability,
     book_appointment,
     send_mail_tool,
+    get_my_appointments,
+    cancel_appointment,
+    reschedule_appointment,
 ]
 
 

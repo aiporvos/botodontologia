@@ -11,18 +11,31 @@ router = APIRouter(prefix="/api/appointments", tags=["appointments"])
 
 @router.get("/")
 async def list_appointments(
+    start: str = None,
+    end: str = None,
     db: Session = Depends(get_db),
     current_user: AdminUser = Depends(get_current_active_user),
 ):
-    appts = db.query(Appointment).order_by(Appointment.start_at.desc()).limit(100).all()
+    query = db.query(Appointment).options(joinedload(Appointment.patient), joinedload(Appointment.professional))
+    
+    if start and end:
+        try:
+            start_dt = datetime.fromisoformat(start.replace("Z", "+00:00"))
+            end_dt = datetime.fromisoformat(end.replace("Z", "+00:00"))
+            query = query.filter(Appointment.start_at >= start_dt, Appointment.start_at <= end_dt)
+        except ValueError:
+            pass
+            
+    appts = query.order_by(Appointment.start_at.desc()).limit(500).all()
+    
     return [
         {
             "id": a.id,
-            "patient_name": f"{a.patient.first_name} {a.patient.last_name}"
-            if a.patient
-            else "N/A",
+            "patient_name": f"{a.patient.first_name} {a.patient.last_name}" if a.patient else "N/A",
             "patient_id": a.patient_id,
+            "patient_phone": a.patient.phone if a.patient else None,
             "professional_name": a.professional.full_name if a.professional else "N/A",
+            "professional_id": a.professional_id,
             "reason": a.reason,
             "category": a.category,
             "start_at": a.start_at.isoformat() if a.start_at else None,

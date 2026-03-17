@@ -270,6 +270,82 @@
         <div class="loading-spinner"></div>
     </div>
 
+    <!-- Event Details / Edit Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Detalles del Turno
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editApptId">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-0">Paciente</label>
+                        <div id="viewPatientName" class="fw-bold fs-5 text-primary"></div>
+                        <div id="viewPatientPhone" class="small text-muted"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-0">Profesional</label>
+                        <select class="form-select" id="editProfessionalSelect">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label text-muted small mb-0">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" id="editAppointmentDateTime">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label text-muted small mb-0">Estado</label>
+                            <select class="form-select" id="editStatusSelect">
+                                <option value="pending">Pendiente</option>
+                                <option value="confirmed">Confirmado</option>
+                                <option value="cancelled">Cancelado</option>
+                                <option value="done">Completado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-0">Tipo de Consulta</label>
+                        <select class="form-select" id="editAppointmentType">
+                            <option value="consulta">Consulta General</option>
+                            <option value="limpieza">Limpieza Dental</option>
+                            <option value="extraccion">Extracción</option>
+                            <option value="endodoncia">Endodoncia (Conducto)</option>
+                            <option value="ortodoncia">Ortodoncia</option>
+                            <option value="corona">Corona</option>
+                            <option value="implante">Implante</option>
+                            <option value="protesis">Prótesis</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-0">Notas</label>
+                        <textarea class="form-control" id="editAppointmentNotes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-danger" onclick="cancelExistingAppointment()">
+                        <i class="fas fa-ban me-1"></i> Cancelar Turno
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="updateAppointment()">
+                            <i class="fas fa-save me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- New Appointment Modal -->
     <div class="modal fade" id="appointmentModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -436,12 +512,13 @@
                     end: apt.end_at,
                     className: apt.category || 'consulta',
                     extendedProps: {
+                        professional_id: apt.professional_id || 1,
                         type: apt.category || 'consulta',
                         status: apt.status,
                         patient: apt.patient_name,
                         professional: apt.professional_name,
                         phone: apt.patient_phone,
-                        notes: apt.notes
+                        notes: apt.reason // Mapping reason to notes for the edit modal
                     }
                 }));
 
@@ -495,12 +572,16 @@
                 const response = await fetch('/api/professionals', API_CONFIG);
                 const professionals = await response.json();
                 const select = document.getElementById('professionalSelect');
+                const editSelect = document.getElementById('editProfessionalSelect');
 
                 professionals.forEach(prof => {
                     const option = document.createElement('option');
                     option.value = prof.id;
                     option.textContent = `${prof.full_name} (${prof.specialty})`;
                     select.appendChild(option);
+                    
+                    const editOption = option.cloneNode(true);
+                    editSelect.appendChild(editOption);
                 });
             } catch (error) {
                 console.error('Error loading professionals:', error);
@@ -568,21 +649,105 @@
 
         function showEventDetails(event) {
             const props = event.extendedProps;
-            const start = new Date(event.start).toLocaleString('es-AR');
-            const end = event.end ? new Date(event.end).toLocaleString('es-AR') : 'N/A';
+            
+            // Populate modal
+            document.getElementById('editApptId').value = event.id;
+            document.getElementById('viewPatientName').textContent = props.patient || 'N/A';
+            document.getElementById('viewPatientPhone').textContent = props.phone || 'Sin número';
+            
+            // Convert to local datetime string for input (YYYY-MM-DDThh:mm)
+            const d = new Date(event.start);
+            const offset = d.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
+            
+            document.getElementById('editAppointmentDateTime').value = localISOTime;
+            
+            // Set selects
+            if (props.professional_id) {
+                document.getElementById('editProfessionalSelect').value = props.professional_id;
+            }
+            if (props.status) {
+                document.getElementById('editStatusSelect').value = props.status;
+            }
+            if (props.type) {
+                const typeSelect = document.getElementById('editAppointmentType');
+                const options = Array.from(typeSelect.options).map(o => o.value);
+                if (options.includes(props.type)) {
+                    typeSelect.value = props.type;
+                } else {
+                    typeSelect.value = 'consulta';
+                }
+            }
+            
+            document.getElementById('editAppointmentNotes').value = props.notes || '';
 
-            alert(`
-Turno: ${event.title}
+            // Show modal
+            new bootstrap.Modal(document.getElementById('eventDetailsModal')).show();
+        }
 
-Paciente: ${props.patient || 'N/A'}
-Teléfono: ${props.phone || 'N/A'}
-Profesional: ${props.professional || 'N/A'}
+        async function updateAppointment() {
+            const id = document.getElementById('editApptId').value;
+            const data = {
+                start_at: document.getElementById('editAppointmentDateTime').value,
+                professional_id: document.getElementById('editProfessionalSelect').value,
+                status: document.getElementById('editStatusSelect').value,
+                category: document.getElementById('editAppointmentType').value,
+                reason: document.getElementById('editAppointmentNotes').value || document.getElementById('editAppointmentType').options[document.getElementById('editAppointmentType').selectedIndex].text
+            };
 
-Inicio: ${start}
-Fin: ${end}
+            try {
+                showLoading();
+                const response = await fetch(`/api/appointments/${id}`, {
+                    ...API_CONFIG,
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
 
-Notas: ${props.notes || 'Sin notas'}
-            `);
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal')).hide();
+                    calendar.refetchEvents();
+                    loadStats();
+                    // Opcional: mostrar toast en lugar de alert
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.detail || 'No se pudo actualizar el turno'));
+                }
+            } catch (error) {
+                console.error('Error updating appointment:', error);
+                alert('Error al actualizar el turno');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function cancelExistingAppointment() {
+            if (!confirm('¿Estás seguro que deseas cancelar este turno? El paciente será notificado (si la función está activa).')) {
+                return;
+            }
+
+            const id = document.getElementById('editApptId').value;
+
+            try {
+                showLoading();
+                const response = await fetch(`/api/appointments/${id}/cancel`, {
+                    ...API_CONFIG,
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal')).hide();
+                    calendar.refetchEvents();
+                    loadStats();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.detail || 'No se pudo cancelar el turno'));
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error al cancelar el turno');
+            } finally {
+                hideLoading();
+            }
         }
 
         function showLoading() {
