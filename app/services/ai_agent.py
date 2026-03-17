@@ -309,17 +309,42 @@ class AIAgent:
         self._memories = {}
 
     def get_memory(self, chat_id: str) -> List:
-        """Obtiene el historial de conversación para un chat"""
-        if chat_id not in self._memories:
-            self._memories[chat_id] = []
-        # Mantener solo últimos 10 mensajes
-        return self._memories[chat_id][-10:]
+        """Obtiene el historial de conversación desde la base de datos"""
+        db = SessionLocal()
+        try:
+            session = db.query(ChatSession).filter(ChatSession.chat_id == chat_id).first()
+            if session and session.payload:
+                memory = json.loads(session.payload)
+                return memory[-10:] # Últimos 10 mensajes
+            return []
+        finally:
+            db.close()
 
     def save_to_memory(self, chat_id: str, role: str, content: str):
-        """Guarda un mensaje en la memoria"""
-        if chat_id not in self._memories:
-            self._memories[chat_id] = []
-        self._memories[chat_id].append({"role": role, "content": content})
+        """Guarda un mensaje en la base de datos"""
+        db = SessionLocal()
+        try:
+            session = db.query(ChatSession).filter(ChatSession.chat_id == chat_id).first()
+            if not session:
+                session = ChatSession(
+                    chat_id=chat_id,
+                    channel="whatsapp" if "@c.us" in chat_id else "telegram",
+                    step="conversation",
+                    payload="[]"
+                )
+                db.add(session)
+            
+            memory = json.loads(session.payload)
+            memory.append({"role": role, "content": content})
+            # Mantener límite razonable
+            session.payload = json.dumps(memory[-20:])
+            session.updated_at = datetime.now()
+            db.commit()
+        except Exception as e:
+            print(f"Error saving to memory: {e}")
+            db.rollback()
+        finally:
+            db.close()
 
     async def ask(self, chat_id: str, text: str) -> str:
         """Procesa un mensaje y retorna la respuesta"""
