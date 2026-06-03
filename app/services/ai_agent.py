@@ -389,7 +389,7 @@ TOOLS = [
 class AIAgent:
     def __init__(self):
         self.llm = ChatOpenAI(
-            model="gpt-4o-mini", temperature=0.3, api_key=settings.openai_api_key
+            model="gpt-4o-mini", temperature=0.3, api_key=settings.openai_api_key, max_tokens=1000
         )
         self.llm_with_tools = self.llm.bind_tools(TOOLS)
         self._memories = {}
