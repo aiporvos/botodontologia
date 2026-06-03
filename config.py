@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from pydantic_settings import BaseSettings
+from pydantic import model_validator, ConfigDict
 
 
 class Settings(BaseSettings):
@@ -15,12 +16,7 @@ class Settings(BaseSettings):
     db_user: str = "clinic"
     db_password: str = "clinicpass"
     db_name: str = "clinic"
-
-    @property
-    def database_url(self) -> str:
-        if hasattr(self, "_database_url") and self._database_url:
-            return self._database_url
-        return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+    database_url: Optional[str] = None
 
     # Cal.com
     calcom_url: str = "https://odontologia.aiporvos.com"
@@ -41,9 +37,38 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = "admin123"
 
-    class Config:
-        env_file = ".env"
-        extra = "allow"
+    @model_validator(mode='before')
+    @classmethod
+    def check_legacy_env_vars(cls, data: any) -> any:
+        if not isinstance(data, dict):
+            try:
+                data = dict(data)
+            except:
+                data = {}
+
+        # Mapeo de variables de entorno alternativas
+        db_url = data.get("database_url") or os.environ.get("DATABASE_URL")
+        if db_url:
+            data["database_url"] = db_url
+
+        evo_url = data.get("evolution_url") or os.environ.get("EVOLUTION_URL") or os.environ.get("EVOLUTION_API_URL")
+        if evo_url:
+            data["evolution_url"] = evo_url
+
+        evo_inst = data.get("evolution_instance_name") or os.environ.get("EVOLUTION_INSTANCE_NAME") or os.environ.get("EVOLUTION_INSTANCE_ID")
+        if evo_inst:
+            data["evolution_instance_name"] = evo_inst
+
+        return data
+
+    @model_validator(mode='after')
+    def set_default_database_url(self) -> 'Settings':
+        if not self.database_url:
+            self.database_url = f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        return self
+
+    model_config = ConfigDict(env_file=".env", extra="allow")
 
 
 settings = Settings()
+
