@@ -10,6 +10,7 @@ from app.handlers.conversation import handle_whatsapp_message
 router = APIRouter(tags=["webhooks"])
 
 @router.post("/webhook")
+@router.post("/api/whatsapp/webhook")
 async def webhook_evolution(request: Request):
     try:
         data = await request.json()
