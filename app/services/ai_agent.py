@@ -37,9 +37,9 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 # Instructivo Crítico para Agendar, Consultar, Cancelar o Reprogramar Turnos
 
 ## 1. Agendar un turno nuevo:
-1. **Identificar Necesidad:** Pregunta el motivo (¿Limpieza? ¿Dolor? ¿Brackets?).
-2. **Consultar Agenda Temprana:** Usa `check_availability` enviándole el motivo.
-3. **Ofrecer Opciones:** Dale las opciones al paciente.
+1. **Identificar Cobertura:** Pregunta: "¿Tu consulta es particular o por obra social?". Si responde obra social, pregúntale cuál es y el motivo de su consulta.
+2. **Consultar Agenda Temprana:** Usa `check_availability` enviándole el motivo y la obra social (usa "Particular" si no tiene).
+3. **Ofrecer Opciones:** Dale las opciones al paciente. (Atención: Si es PAMI, solo habrá turnos los días viernes).
 4. **Recolección de Datos:** Pide Nombre, DNI, OS y Teléfono.
 5. **Agendar:** Usa `book_appointment` con la fecha en formato ISO (YYYY-MM-DDTHH:MM:SS).
 
@@ -141,15 +141,15 @@ def manage_contacts(
 
 
 @tool
-def check_availability(reason: str) -> str:
-    """Busca días y horarios disponibles según el motivo de consulta ingresado usando el sistema real."""
+def check_availability(reason: str, obra_social: str = "Particular") -> str:
+    """Busca días y horarios disponibles según el motivo de consulta y la obra social."""
     db = SessionLocal()
     try:
         from app.services.availability import AvailabilityService
 
         availability_service = AvailabilityService(db)
         result = availability_service.find_available_slots(
-            reason, days_ahead=14, max_options=6
+            reason, obra_social=obra_social, days_ahead=14, max_options=6
         )
 
         if not result["success"]:
@@ -160,6 +160,8 @@ def check_availability(reason: str) -> str:
         slots = result["slots"]
 
         if not slots:
+            if obra_social.lower() == "pami":
+                return f"Lo siento, para PAMI solo atendemos los días viernes y actualmente no hay horarios disponibles en los próximos días. Te sugiero llamar al consultorio."
             return (
                 f"Lo siento, no hay horarios disponibles para {reason} en los próximos días. "
                 f"Te sugiero llamar al consultorio para coordinar."

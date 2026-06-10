@@ -118,12 +118,14 @@ class AvailabilityService:
         treatment_duration: int,
         days_ahead: int = 14,
         start_from: Optional[datetime] = None,
+        obra_social: str = "Particular",
     ) -> List[Dict[str, Any]]:
         """
         Obtiene slots disponibles para un profesional considerando:
         - Sus horarios de disponibilidad
         - Turnos existentes
         - Duración del tratamiento
+        - Restricciones por obra social (Ej: PAMI solo viernes)
         """
         if start_from is None:
             start_from = datetime.now()
@@ -165,8 +167,14 @@ class AvailabilityService:
         current_date = start_from.date()
 
         while current_date <= end_date.date():
-            # Obtener disponibilidad para este día de la semana
             day_of_week = current_date.isoweekday()  # 1=Lunes, 7=Domingo
+            
+            # Regla de Negocio: PAMI solo atiende los viernes (5)
+            if obra_social and obra_social.lower() == "pami" and day_of_week != 5:
+                current_date += timedelta(days=1)
+                continue
+
+            # Obtener disponibilidad para este día de la semana
             day_availability = [
                 a for a in availabilities if a.day_of_week == day_of_week
             ]
@@ -230,7 +238,7 @@ class AvailabilityService:
         return slots
 
     def find_available_slots(
-        self, reason: str, days_ahead: int = 14, max_options: int = 6
+        self, reason: str, obra_social: str = "Particular", days_ahead: int = 14, max_options: int = 6
     ) -> Dict[str, Any]:
         """
         Busca slots disponibles para un motivo de consulta
@@ -255,6 +263,7 @@ class AvailabilityService:
             professional_id=professional.id,
             treatment_duration=duration,
             days_ahead=days_ahead,
+            obra_social=obra_social,
         )
 
         # Limitar opciones

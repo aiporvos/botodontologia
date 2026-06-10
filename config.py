@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     app_port: int = 8000
     debug: bool = True
 
+    # Recordatorios
+    reminder_hours: int = 24
+    admin_notification_numbers: str = ""  # Ejemplo: "549111234567,549111234568"
+    public_url: str = "http://localhost:8000"
+
     # Admin
     admin_username: str = "admin"
     admin_password: str = "admin123"

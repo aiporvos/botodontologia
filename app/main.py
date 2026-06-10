@@ -88,6 +88,10 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(start_bot())
         print("🤖 Telegram Bot Polling task created")
 
+    # Iniciar Loop de Recordatorios
+    from app.services.reminders_loop import check_and_send_reminders
+    asyncio.create_task(check_and_send_reminders())
+
     print("🚀 Dental Studio Pro iniciado")
     yield
 
