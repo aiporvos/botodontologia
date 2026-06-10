@@ -68,6 +68,8 @@ def init_db():
         Payment,
         Debt,
         DentalTreatment,
+        HealthInsurance,
+        SystemConfig,
     )
 
     print("🗄️ Inicializando base de datos...")

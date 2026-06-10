@@ -15,7 +15,10 @@ from app.models import (
     AdminUser,
     TreatmentPrice,
     Payment,
+    Payment,
     Debt,
+    HealthInsurance,
+    SystemConfig,
 )
 
 
@@ -262,6 +265,41 @@ class DebtAdmin(ModelView, model=Debt):
     name_plural = "Deudas"
 
 
+class HealthInsuranceAdmin(ModelView, model=HealthInsurance):
+    """Administración de Obras Sociales"""
+
+    column_list = ["id", "name", "is_active", "created_at"]
+    column_searchable = ["name"]
+    column_labels = {
+        "id": "ID",
+        "name": "Nombre de Obra Social",
+        "is_active": "Activa",
+        "created_at": "Creada el"
+    }
+    can_delete = True
+    can_edit = True
+    can_create = True
+    name = "Obra Social"
+    name_plural = "Obras Sociales"
+
+
+class SystemConfigAdmin(ModelView, model=SystemConfig):
+    """Administración de Configuraciones del Sistema"""
+
+    column_list = ["id", "reminder_hours", "notification_numbers", "updated_at"]
+    column_labels = {
+        "id": "ID",
+        "reminder_hours": "Horas de Anticipación (Recordatorios)",
+        "notification_numbers": "Teléfonos Notificaciones (Admin)",
+        "updated_at": "Última actualización"
+    }
+    can_delete = False
+    can_edit = True
+    can_create = True
+    name = "Configuración"
+    name_plural = "Configuraciones"
+
+
 class AdminUserAdmin(ModelView, model=AdminUser):
     """Administración de Usuarios del Panel"""
 
@@ -355,6 +393,8 @@ def setup_admin(app, engine):
     admin.add_view(TreatmentPriceAdmin)
     admin.add_view(PaymentAdmin)
     admin.add_view(DebtAdmin)
+    admin.add_view(HealthInsuranceAdmin)
+    admin.add_view(SystemConfigAdmin)
 
     return admin
 

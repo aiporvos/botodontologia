@@ -353,3 +353,28 @@ class Debt(Base):
     )
 
     patient = relationship("Patient", back_populates="debts")
+
+class HealthInsurance(Base):
+    """Obras Sociales Aceptadas"""
+    __tablename__ = "health_insurances"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def __str__(self):
+        return f"{self.name} ({'Activa' if self.is_active else 'Inactiva'})"
+
+class SystemConfig(Base):
+    """Configuraciones del Sistema (Singletón en BD)"""
+    __tablename__ = "system_configs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    reminder_hours = Column(Integer, default=24)
+    notification_numbers = Column(String(255), default="")  # Comma separated
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    def __str__(self):
+        return "Configuración del Sistema"

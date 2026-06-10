@@ -37,7 +37,7 @@ Tu objetivo es ayudar a los pacientes de forma profesional, cálida y eficiente.
 # Instructivo Crítico para Agendar, Consultar, Cancelar o Reprogramar Turnos
 
 ## 1. Agendar un turno nuevo:
-1. **Identificar Cobertura:** Pregunta: "¿Tu consulta es particular o por obra social?". Si responde obra social, pregúntale cuál es y el motivo de su consulta.
+1. **Identificar Cobertura:** Pregunta: "¿Tu consulta es particular o por obra social?". Si responde obra social, pregúntale cuál es y el motivo de su consulta. (NOTA: Las obras sociales válidas son: {obras_sociales}. Si dice otra, indícale que por ahora no trabajan con esa).
 2. **Consultar Agenda Temprana:** Usa `check_availability` enviándole el motivo y la obra social (usa "Particular" si no tiene).
 3. **Ofrecer Opciones:** Dale las opciones al paciente. (Atención: Si es PAMI, solo habrá turnos los días viernes).
 4. **Recolección de Datos:** Pide Nombre, DNI, OS y Teléfono.
@@ -440,11 +440,23 @@ class AIAgent:
             # Obtener historial
             memory = self.get_memory(chat_id)
 
+            # Obtener obras sociales activas
+            db = SessionLocal()
+            try:
+                from app.models import HealthInsurance
+                obras = db.query(HealthInsurance).filter(HealthInsurance.is_active == True).all()
+                obras_str = ", ".join([o.name for o in obras]) if obras else "Solo particulares"
+            except Exception as e:
+                obras_str = "PAMI" # Fallback
+            finally:
+                db.close()
+
             # Construir mensajes
             messages = [
                 SystemMessage(
                     content=SYSTEM_PROMPT.format(
-                        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        obras_sociales=obras_str
                     )
                 )
             ]

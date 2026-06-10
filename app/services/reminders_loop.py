@@ -12,8 +12,14 @@ async def check_and_send_reminders():
         try:
             db = SessionLocal()
             now = datetime.now()
+            
+            # Obtener configuración del sistema
+            from app.models import SystemConfig
+            config = db.query(SystemConfig).first()
+            reminder_hours = config.reminder_hours if config else settings.reminder_hours
+            
             # Buscar turnos que sucedan en las próximas `reminder_hours` horas
-            target_time = now + timedelta(hours=settings.reminder_hours)
+            target_time = now + timedelta(hours=reminder_hours)
             
             # Margen de 1 hora para no enviar muy anticipadamente si el bot se reinicia
             start_window = target_time - timedelta(minutes=30)
